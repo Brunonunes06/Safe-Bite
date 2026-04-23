@@ -1,22 +1,26 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
-// Importar rotas
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const scanRoutes = require('./routes/scans');
-const productRoutes = require('./routes/products');
-const subscriptionRoutes = require('./routes/subscriptions');
+// Importar banco de dados simplificado
+const SimpleDatabase = require('./database');
+
+// Importar rotas simplificadas
+const authRoutes = require('./routes/auth-simple');
+const scanRoutes = require('./routes/scans-simple');
+const paymentRoutes = require('./routes/payment-brazil');
+const googleAuthRoutes = require('./routes/auth-google');
 
 // Importar middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
 const app = express();
+
+// Inicializar banco de dados
+const db = new SimpleDatabase();
 
 // Middleware de segurança
 app.use(helmet());
@@ -27,11 +31,9 @@ app.use(cors({
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutos
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limite de 100 requisições
-  message: {
-    error: 'Muitas requisições deste IP, tente novamente mais tarde.'
-  }
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // limite de 100 requisições por IP
+  message: 'Muitas requisições. Tente novamente mais tarde.'
 });
 app.use('/api/', limiter);
 
@@ -39,20 +41,22 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Conexão com MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/nutri-scan', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB conectado com sucesso'))
-.catch(err => console.error('Erro ao conectar MongoDB:', err));
+// Disponibilizar banco de dados globalmente
+app.use((req, res, next) => {
+  req.db = db;
+  next();
+});
+
+// Inicializar banco de dados e criar dados de teste
+db.seedTestData().then(() => {
+  console.log('Banco de dados de teste inicializado com sucesso!');
+}).catch(err => console.error('Erro ao inicializar banco:', err));
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/auth', googleAuthRoutes);
 app.use('/api/scans', scanRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Rota de health check
 app.get('/api/health', (req, res) => {

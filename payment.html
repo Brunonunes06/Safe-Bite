@@ -6,6 +6,8 @@
   <title>Assinatura - Nutri-Scan</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="payment-brazil.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://js.stripe.com/v3/"></script>
   <style>
@@ -537,18 +539,21 @@
           <!-- Payment Methods -->
           <div class="payment-methods">
             <h3 class="payment-methods-title">Métodos de Pagamento</h3>
-            <div class="payment-methods-grid">
-              <div class="payment-method" data-method="card">
-                <i class="fas fa-credit-card"></i>
-                <span>Cartão</span>
-              </div>
+            <div class="payment-methods">
               <div class="payment-method" data-method="pix">
                 <i class="fas fa-qrcode"></i>
                 <span>PIX</span>
+                <small>Imediato</small>
               </div>
               <div class="payment-method" data-method="boleto">
                 <i class="fas fa-barcode"></i>
                 <span>Boleto</span>
+                <small>3 dias úteis</small>
+              </div>
+              <div class="payment-method" data-method="card">
+                <i class="fas fa-credit-card"></i>
+                <span>Cartão</span>
+                <small>Stripe</small>
               </div>
             </div>
           </div>
@@ -596,8 +601,8 @@
 
   <!-- Scripts -->
   <script src="api-config.js"></script>
+  <script src="payment-brazil.js"></script>
   <script>
-    // Payment JavaScript
     class NutriScanPayment {
       constructor() {
         this.token = localStorage.getItem('nutriScanToken');

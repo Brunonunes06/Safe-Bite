@@ -793,7 +793,7 @@ body {
 }
 
 .contact-form {
-  background: var(--white);
+  background: #dfdfdf;
   padding: 2.5rem;
   border-radius: 20px;
   box-shadow: var(--shadow-md);

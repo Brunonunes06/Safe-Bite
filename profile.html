@@ -8,20 +8,117 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* Estilos do Sidebar */
     .profile-container {
+      display: flex;
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #f8f9fa;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+      color: white;
+      padding: 2rem 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 0 2rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .sidebar-nav {
+      list-style: none;
+    }
+
+    .sidebar-nav li {
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 2rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-nav .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .sidebar-nav .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border-left-color: white;
+    }
+
+    .sidebar-nav .nav-link i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
       display: flex;
       flex-direction: column;
     }
 
-    .profile-header {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+    .dashboard-header {
+      background: white;
       padding: 1rem 2rem;
+      border-bottom: 1px solid #e9ecef;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    .user-details h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .user-details p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #666;
     }
 
     .profile-main {
@@ -284,23 +381,77 @@
 </head>
 <body>
   <div class="profile-container">
-    <!-- Header -->
-    <header class="profile-header">
-      <div class="profile-logo">
-        <i class="fas fa-leaf"></i>
-        <span>Nutri-Scan</span>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <i class="fas fa-leaf"></i>
+          <span>Nutri-Scan</span>
+        </div>
       </div>
-      <div class="user-info">
-        <div class="user-avatar" id="userAvatar">JD</div>
-        <span id="userName">Bruno Test</span>
-        <button class="btn-secondary" onclick="goToDashboard()" style="padding: 0.5rem 1rem;">
-          <i class="fas fa-home"></i>
-        </button>
-      </div>
-    </header>
+      
+      <nav>
+        <ul class="sidebar-nav">
+          <li>
+            <a href="dashboard.html" class="nav-link">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="scanner.html" class="nav-link">
+              <i class="fas fa-camera"></i>
+              <span>Scanner</span>
+            </a>
+          </li>
+          <li>
+            <a href="history.html" class="nav-link">
+              <i class="fas fa-history"></i>
+              <span>Histórico</span>
+            </a>
+          </li>
+          <li>
+            <a href="profile.html" class="nav-link active">
+              <i class="fas fa-user"></i>
+              <span>Perfil</span>
+            </a>
+          </li>
+          <li>
+            <a href="settings.html" class="nav-link">
+              <i class="fas fa-cog"></i>
+              <span>Configurações</span>
+            </a>
+          </li>
+          <li>
+            <a href="payment.html" class="nav-link">
+              <i class="fas fa-crown"></i>
+              <span>Assinatura</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" id="logoutBtn">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Sair</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
 
     <!-- Main Content -->
-    <main class="profile-main">
+    <main class="main-content">
+      <!-- Header -->
+      <header class="dashboard-header">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">JD</div>
+          <div class="user-details">
+            <h3 id="userName">Bruno Teste</h3>
+            <p id="userEmail">bruno@exemplo.com</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="profile-main">
       <!-- Loading State -->
       <div class="loading" id="loadingState">
         <div class="spinner"></div>
@@ -312,13 +463,14 @@
         <div class="profile-header-card">
           <div class="profile-avatar" id="profileAvatar">
             JD
-            <div class="avatar-upload">
+            <div class="avatar-upload" onclick="document.getElementById('profileImageInput').click()">
               <i class="fas fa-camera"></i>
             </div>
+            <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
           </div>
           <div class="profile-info">
-            <h2 id="profileName">João da Silva</h2>
-            <p id="profileEmail">joao@exemplo.com</p>
+            <h2 id="profileName">Bruno Teste</h2>
+            <p id="profileEmail">bruno@exemplo.com</p>
             <span class="profile-badge" id="profileBadge">Free</span>
           </div>
         </div>
@@ -464,22 +616,54 @@
             item.classList.toggle('selected', checkbox.checked);
           });
         });
+
+        // Profile image upload
+        const profileImageInput = document.getElementById('profileImageInput');
+        if (profileImageInput) {
+          profileImageInput.addEventListener('change', (e) => {
+            this.handleProfileImageUpload(e);
+          });
+        }
       }
 
       async loadProfile() {
         try {
           this.showLoading(true);
           
-          const response = await api.getProfile();
-          this.user = response.user;
-          this.originalData = JSON.parse(JSON.stringify(response.user));
+          // Load user from localStorage first
+          const savedUser = localStorage.getItem('nutriScanUser');
+          if (savedUser) {
+            this.user = JSON.parse(savedUser);
+            this.originalData = JSON.parse(JSON.stringify(this.user));
+            
+            // Load profile image if exists
+            if (this.user.profileImage) {
+              this.updateProfileImage(this.user.profileImage);
+            }
+          }
+          
+          // Try to load from API
+          try {
+            const response = await api.getProfile();
+            this.user = response.user;
+            this.originalData = JSON.parse(JSON.stringify(response.user));
+            
+            // Load profile image from API if exists
+            if (this.user.profileImage) {
+              this.updateProfileImage(this.user.profileImage);
+              // Save to localStorage
+              localStorage.setItem('nutriScanUser', JSON.stringify(this.user));
+            }
+          } catch (apiError) {
+            console.log('Using localStorage data as fallback');
+          }
           
           this.populateForm();
-          this.showLoading(false);
+          this.hideLoading();
         } catch (error) {
-          console.error('Erro ao carregar perfil:', error);
-          this.showError(APIUtils.handleError(error));
-          this.showLoading(false);
+          console.error('Error loading profile:', error);
+          this.showError('Erro ao carregar perfil. Tente novamente.');
+          this.hideLoading();
         }
       }
 
@@ -596,6 +780,56 @@
         document.getElementById('errorMessage').style.display = 'none';
       }
 
+      handleProfileImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          alert('Por favor, selecione uma imagem válida.');
+          return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          alert('A imagem deve ter no máximo 5MB.');
+          return;
+        }
+
+        // Read and display the image
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageData = e.target.result;
+          this.updateProfileImage(imageData);
+          
+          // Save to localStorage
+          if (this.user) {
+            this.user.profileImage = imageData;
+            localStorage.setItem('nutriScanUser', JSON.stringify(this.user));
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+
+      updateProfileImage(imageData) {
+        const profileAvatar = document.getElementById('profileAvatar');
+        const userAvatar = document.getElementById('userAvatar');
+        
+        if (profileAvatar) {
+          profileAvatar.style.backgroundImage = `url(${imageData})`;
+          profileAvatar.style.backgroundSize = 'cover';
+          profileAvatar.style.backgroundPosition = 'center';
+          profileAvatar.textContent = '';
+        }
+        
+        if (userAvatar) {
+          userAvatar.style.backgroundImage = `url(${imageData})`;
+          userAvatar.style.backgroundSize = 'cover';
+          userAvatar.style.backgroundPosition = 'center';
+          userAvatar.textContent = '';
+        }
+      }
+
       goToDashboard() {
         APIUtils.redirectToDashboard();
       }
@@ -617,6 +851,17 @@
     // Initialize profile when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
       window.profileInstance = new NutriScanProfile();
+      
+      // Setup logout button
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.removeItem('nutriScanToken');
+          localStorage.removeItem('nutriScanUser');
+          window.location.href = 'index.html';
+        });
+      }
     });
   </script>
   

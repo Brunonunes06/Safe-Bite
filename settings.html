@@ -932,6 +932,11 @@
 
     // Initialize settings manager
     const settingsManager = new SettingsManager();
+    
+    // Call populateSettings after initialization
+    if (settingsManager.user) {
+      settingsManager.populateSettings();
+    }
 
     // Add ripple effect to buttons
     function addRippleEffect() {
@@ -1106,15 +1111,12 @@
         // Simulação - em um app real, isso chamaria uma API
         setTimeout(() => {
           localStorage.clear();
-          window.location.href = 'index.html';
         }, 3000);
       } else if (confirmation !== null) {
         alert('Texto de confirmação incorreto. Ação cancelada.');
       }
-    }
-    }
 
-    populateSettings() {
+      populateSettings() {
         if (!this.user || !this.user.preferences) return;
 
         // Update user info

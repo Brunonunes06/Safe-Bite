@@ -548,8 +548,8 @@
         <div class="user-info">
           <div class="user-avatar" id="userAvatar">JD</div>
           <div class="user-details">
-            <h3 id="userName">João da Silva</h3>
-            <p id="userEmail">joao@exemplo.com</p>
+            <h3 id="userName">Bruno Teste</h3>
+            <p id="userEmail">bruno@exemplo.com</p>
           </div>
         </div>
         <div class="plan-badge" id="planBadge">Free</div>
@@ -672,8 +672,31 @@
           return;
         }
 
+        // Carregar dados do usuário do localStorage primeiro
+        this.loadUserFromStorage();
         this.setupEventListeners();
         await this.loadDashboard();
+      }
+
+      loadUserFromStorage() {
+        try {
+          const userData = localStorage.getItem('nutriScanUser');
+          if (userData) {
+            this.user = JSON.parse(userData);
+            this.updateUserInfo();
+            console.log('Dados do usuário carregados do localStorage:', this.user);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar usuário do localStorage:', error);
+          // Se houver erro, define usuário não identificado
+          this.user = {
+            name: 'Usuário Não Identificado',
+            email: 'usuario@exemplo.com',
+            isPremium: false,
+            scansRemaining: 0
+          };
+          this.updateUserInfo();
+        }
       }
 
       setupEventListeners() {
@@ -764,36 +787,78 @@
           this.updateUserInfo();
         } catch (error) {
           console.error('Erro ao carregar usuário:', error);
-          this.redirectToLogin();
+          // Não redirecionar para login se já há token
+          // Usuário já está logado, apenas logar o erro
         }
       }
 
       updateUserInfo() {
-        if (!this.user) return;
+        if (!this.user) {
+          // Define usuário não identificado se não houver dados
+          this.user = {
+            name: 'Usuário Não Identificado',
+            email: 'usuario@exemplo.com',
+            isPremium: false,
+            scansRemaining: 0
+          };
+        }
 
         // Update avatar
-        const initials = this.user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        document.getElementById('userAvatar').textContent = initials;
+        const initials = this.user.name ? this.user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'UN';
+        const avatarElement = document.getElementById('userAvatar');
+        if (avatarElement) {
+          avatarElement.textContent = initials;
+        }
 
         // Update user info
-        document.getElementById('userName').textContent = this.user.name;
-        document.getElementById('userEmail').textContent = this.user.email;
+        const userNameElement = document.getElementById('userName');
+        const userEmailElement = document.getElementById('userEmail');
+        
+        if (userNameElement) {
+          userNameElement.textContent = this.user.name || 'Usuário Não Identificado';
+        }
+        
+        if (userEmailElement) {
+          userEmailElement.textContent = this.user.email || 'usuario@exemplo.com';
+        }
 
         // Update plan badge
         const planBadge = document.getElementById('planBadge');
-        planBadge.textContent = this.user.isPremium ? 'Premium' : 'Free';
-        planBadge.style.background = this.user.isPremium 
-          ? 'linear-gradient(135deg, #f39c12, #e67e22)' 
-          : 'var(--gradient-primary)';
+        if (planBadge) {
+          const isPremium = this.user.subscription?.plan === 'premium' || this.user.isPremium;
+          planBadge.textContent = isPremium ? 'Premium' : 'Free';
+          planBadge.style.background = isPremium 
+            ? 'linear-gradient(135deg, #f39c12, #e67e22)' 
+            : 'var(--gradient-primary)';
+        }
       }
 
       renderDashboard(data) {
+        // Atualizar dados do usuário se vierem da API
+        if (data.user) {
+          this.user = data.user;
+          this.updateUserInfo();
+        }
+
         // Update stats
-        document.getElementById('totalScans').textContent = data.stats.totalScans || 0;
-        document.getElementById('highRiskScans').textContent = data.stats.highRiskScans || 0;
-        document.getElementById('avgTime').textContent = `${(data.stats.avgProcessingTime || 0).toFixed(1)}s`;
-        document.getElementById('scansRemaining').textContent = 
-          this.user.isPremium ? 'Ilimitados' : data.user.scansRemaining;
+        const totalScansElement = document.getElementById('totalScans');
+        const highRiskScansElement = document.getElementById('highRiskScans');
+        const avgTimeElement = document.getElementById('avgTime');
+        const scansRemainingElement = document.getElementById('scansRemaining');
+
+        if (totalScansElement) {
+          totalScansElement.textContent = data.stats.totalScans || 0;
+        }
+        if (highRiskScansElement) {
+          highRiskScansElement.textContent = data.stats.highRiskScans || 0;
+        }
+        if (avgTimeElement) {
+          avgTimeElement.textContent = `${(data.stats.avgProcessingTime || 0).toFixed(1)}s`;
+        }
+        if (scansRemainingElement) {
+          const isPremium = this.user.subscription?.plan === 'premium' || this.user.isPremium;
+          scansRemainingElement.textContent = isPremium ? 'Ilimitados' : (data.user?.scansRemaining || 0);
+        }
 
         // Render recent scans
         this.renderRecentScans(data.recentScans);
@@ -916,11 +981,24 @@
       renderSimulatedDashboard() {
         console.log('Renderizando dashboard com dados simulados');
         
+        // Verificar se há dados do usuário no localStorage
+        const userData = localStorage.getItem('nutriScanUser');
+        let userFromStorage = null;
+        
+        if (userData) {
+          try {
+            userFromStorage = JSON.parse(userData);
+            console.log('Usando dados do usuário logado:', userFromStorage);
+          } catch (error) {
+            console.error('Erro ao parsear dados do usuário:', error);
+          }
+        }
+        
         // Dados simulados para demonstração
         const simulatedData = {
-          user: {
-            name: 'Bruno Test',
-            email: 'Bruno@exemplo.com',
+          user: userFromStorage || {
+            name: 'Usuário Não Identificado',
+            email: 'usuario@exemplo.com',
             subscription: {
               plan: 'free',
               status: 'active',

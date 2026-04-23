@@ -66,8 +66,8 @@ function setupDashboardButtons() {
 function loadDashboardData() {
     // Simular dados de usuário
     const userData = {
-        name: 'João da Silva',
-        email: 'joao@exemplo.com',
+        name: 'Bruno Teste',
+        email: 'bruno@exemplo.com',
         isPremium: false,
         stats: {
             totalScans: 12,

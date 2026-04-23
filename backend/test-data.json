@@ -2,8 +2,8 @@
   "users": [
     {
       "_id": "mobvo0fkb1yjaecxz6d",
-      "name": "João da Silva",
-      "email": "joao@exemplo.com",
+      "name": "Bruno Teste",
+      "email": "bruno@exemplo.com",
       "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.",
       "isPremium": false,
       "dietaryRestrictions": [

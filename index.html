@@ -50,7 +50,7 @@
         <p class="hero-subtitle">
           Proteja sua saúde e evite alimentos perigosos com tecnologia inteligente
         </p>
-        <button class="btn-hero" onclick="scrollToSection('como-funciona')">
+        <button class="btn-hero" onclick="handleHeroStartFree()">
           Começar grátis
           <i class="fas fa-arrow-right"></i>
         </button>
@@ -331,7 +331,7 @@
               <li><i class="fas fa-times"></i> Alertas personalizados</li>
             </ul>
           </div>
-          <button class="btn-pricing">Começar grátis</button>
+          <button class="btn-pricing" onclick="handleHeroStartFree()">Começar grátis</button>
         </div>
         
         <div class="pricing-card featured">
@@ -356,7 +356,7 @@
               <li><i class="fas fa-check"></i> Relatórios mensais</li>
             </ul>
           </div>
-          <button class="btn-pricing btn-primary">Assinar Agora</button>
+          <button class="btn-pricing btn-primary" onclick="showUpgradePopup()">Assinar Agora</button>
         </div>
       </div>
     </div>
@@ -416,7 +416,7 @@
         </div>
         
         <div class="contact-form">
-          <form id="contactForm">
+          <form id="contactForm" action="https://formsubmit.co/bruno.nunes.santos06@escola.pr.gov.br" method="POST">
             <div class="form-group">
               <label for="nome">Nome</label>
               <input type="text" id="nome" name="nome" required>
@@ -498,7 +498,8 @@
   <!-- Scripts -->
   <script src="api-config.js"></script>
   <script src="script.js"></script>
-  <script src="script-corrections.js"></script>
+  <script src="script-corrections-fixed.js"></script>
   <script src="upgrade-popup.js"></script>
+  <script src="contact-system.js"></script>
 </body>
 </html>

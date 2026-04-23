@@ -100,7 +100,7 @@ router.post('/google-login', async (req, res) => {
 router.post('/link-google', async (req, res) => {
   try {
     const { googleId, email, name, picture } = req.body;
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({
@@ -157,7 +157,7 @@ router.post('/link-google', async (req, res) => {
 // @access  Private
 router.delete('/unlink-google', async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({

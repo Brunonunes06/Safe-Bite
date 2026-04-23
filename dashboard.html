@@ -910,23 +910,30 @@
         // Implement navigation logic here
         console.log('Navegando para:', target);
         
-        // For now, just show a message
+        // Navigate to actual pages
         if (target === 'scanner') {
-          alert('Funcionalidade de scanner em desenvolvimento!');
+          window.location.href = 'scanner.html';
         } else if (target === 'history') {
-          alert('Histórico completo em desenvolvimento!');
+          window.location.href = 'history.html';
         } else if (target === 'profile') {
-          alert('Perfil em desenvolvimento!');
+          window.location.href = 'profile.html';
         } else if (target === 'settings') {
-          alert('Configurações em desenvolvimento!');
+          window.location.href = 'settings.html';
         } else if (target === 'subscription') {
           this.handleUpgrade();
+        } else if (target === 'help') {
+          window.location.href = 'help.html';
         }
       }
 
       handleUpgrade() {
-        alert('Redirecionando para página de assinatura...');
-        // Implement upgrade logic here
+        // Check if upgrade popup function exists
+        if (typeof showUpgradePopup === 'function') {
+          showUpgradePopup();
+        } else {
+          // Fallback to payment page
+          window.location.href = 'payment.html';
+        }
       }
 
       logout() {
@@ -935,7 +942,7 @@
       }
 
       redirectToLogin() {
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
       }
 
       showLoading(show) {
@@ -954,5 +961,10 @@
       new NutriScanDashboard();
     });
   </script>
+  
+  <!-- Scripts necessários -->
+  <script src="api-config.js"></script>
+  <script src="login-system.js"></script>
+  <script src="upgrade-popup.js"></script>
 </body>
 </html>

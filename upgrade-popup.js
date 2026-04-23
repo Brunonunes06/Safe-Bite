@@ -45,7 +45,7 @@ class UpgradePopupManager {
             </div>
           </div>
           
-          <div class="popup-actions">
+          <div class="popup-actions" id="popupActions">
             <button class="btn-cancel" onclick="upgradePopup.closePopup()">
               <i class="fas fa-times"></i>
               Cancelar
@@ -54,7 +54,7 @@ class UpgradePopupManager {
               <i class="fas fa-crown"></i>
               Ver Planos
             </button>
-            <button class="btn-free" onclick="upgradePopup.startFreeTrial()">
+            <button class="btn-free" onclick="upgradePopup.startFreeTrial()" id="btnFreeTrial">
               <i class="fas fa-gift"></i>
               Começar Grátis
             </button>
@@ -87,6 +87,36 @@ class UpgradePopupManager {
   showPopup() {
     this.popup.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Prevenir scroll
+    
+    // Verificar plano do usuário e ajustar botões
+    this.adjustButtonsForUserPlan();
+  }
+
+  adjustButtonsForUserPlan() {
+    const user = loginSystem?.getCurrentUser();
+    const btnFreeTrial = document.getElementById('btnFreeTrial');
+    const popupActions = document.getElementById('popupActions');
+    
+    if (!user) {
+      // Usuário não logado - mostrar botão "Começar Grátis" com login Google
+      if (btnFreeTrial) {
+        btnFreeTrial.style.display = 'block';
+        btnFreeTrial.innerHTML = '<i class="fas fa-google"></i> Entrar com Google';
+        btnFreeTrial.onclick = () => this.startFreeTrialWithGoogle();
+      }
+    } else if (user.subscription?.plan === 'premium') {
+      // Usuário premium - REMOVER completamente o botão "Começar Grátis"
+      if (btnFreeTrial) {
+        btnFreeTrial.remove(); // Remove completamente do DOM
+      }
+    } else {
+      // Usuário free - mostrar botão "Começar Grátis"
+      if (btnFreeTrial) {
+        btnFreeTrial.style.display = 'block';
+        btnFreeTrial.innerHTML = '<i class="fas fa-gift"></i> Começar Grátis';
+        btnFreeTrial.onclick = () => this.startFreeTrial();
+      }
+    }
   }
 
   closePopup() {
@@ -110,6 +140,17 @@ class UpgradePopupManager {
     } else {
       // Usuário não logado, mostrar tela de login
       this.showLoginModal();
+    }
+  }
+
+  startFreeTrialWithGoogle() {
+    this.closePopup();
+    // Fazer login direto com Google
+    if (loginSystem) {
+      loginSystem.handleGoogleLogin();
+    } else {
+      // Fallback - redirecionar para página de login
+      window.location.href = 'login.html';
     }
   }
 

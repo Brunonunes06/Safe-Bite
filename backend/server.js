@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 // Importar banco de dados simplificado
@@ -13,6 +14,7 @@ const authRoutes = require('./routes/auth-simple');
 const scanRoutes = require('./routes/scans-simple');
 const paymentRoutes = require('./routes/payment-brazil');
 const googleAuthRoutes = require('./routes/auth-google');
+const contactRoutes = require('./routes/contact');
 
 // Importar middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
@@ -57,6 +59,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auth', googleAuthRoutes);
 app.use('/api/scans', scanRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Rota de health check
 app.get('/api/health', (req, res) => {
@@ -68,14 +71,45 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Servir arquivos estáticos (para produção)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+// Servir arquivos estáticos (para desenvolvimento e produção)
+const staticPath = path.join(__dirname, '..');
+app.use(express.static(staticPath));
+
+// Rota principal para servir index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(staticPath, 'index.html'));
+});
+
+// Rota para index.html específico
+app.get('/index.html', (req, res) => {
+  res.sendFile(path.join(staticPath, 'index.html'));
+});
+
+// Rota para loading.html
+app.get('/loading.html', (req, res) => {
+  res.sendFile(path.join(staticPath, 'loading.html'));
+});
+
+// Catch-all para outras rotas (SPA)
+app.get('*', (req, res, next) => {
+  // Se for uma requisição para API, deixar passar
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
   
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-  });
-}
+  // Se for um arquivo existente, servir
+  const filePath = path.join(staticPath, req.path);
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    return res.sendFile(filePath);
+  }
+  
+  // Para rotas não encontradas que não são API, servir index.html
+  if (!req.path.startsWith('/api')) {
+    return res.sendFile(path.join(staticPath, 'index.html'));
+  }
+  
+  next();
+});
 
 // Middleware de erro
 app.use(notFound);
@@ -98,10 +132,15 @@ process.on('SIGTERM', () => {
   console.log('SIGTERM recebido. Fechando servidor...');
   server.close(() => {
     console.log('Servidor fechado');
-    mongoose.connection.close(false, () => {
-      console.log('MongoDB desconectado');
-      process.exit(0);
-    });
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT recebido. Fechando servidor...');
+  server.close(() => {
+    console.log('Servidor fechado');
+    process.exit(0);
   });
 });
 

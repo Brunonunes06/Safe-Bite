@@ -154,6 +154,43 @@
       transform: none;
     }
 
+    .upload-options {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .camera-button {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+    }
+
+    .gallery-button {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+    }
+
+    .drag-drop-area {
+      border: 2px dashed var(--medium-gray);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .drag-drop-area:hover,
+    .drag-drop-area.dragover {
+      border-color: var(--primary-green);
+      background: rgba(46, 204, 113, 0.1);
+    }
+
+    .drag-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
     .file-input {
       display: none;
     }
@@ -493,12 +530,26 @@
         padding: 1.5rem;
       }
 
+      .upload-icon {
+        font-size: 3rem;
+      }
+
       .upload-area {
         padding: 2rem 1rem;
       }
 
-      .upload-icon {
-        font-size: 3rem;
+      .upload-options {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+
+      .upload-button {
+        width: 100%;
+        padding: 1rem;
+      }
+
+      .drag-drop-area {
+        padding: 1rem;
       }
 
       .action-buttons {
@@ -544,13 +595,26 @@
             <div class="upload-icon">
               <i class="fas fa-camera"></i>
             </div>
-            <h3 class="upload-title">Tire uma foto do rótulo</h3>
-            <p class="upload-text">Ou arraste uma imagem para cá</p>
-            <button class="upload-button" id="uploadButton">
-              <i class="fas fa-camera"></i>
-              Tirar Foto
-            </button>
-            <input type="file" id="fileInput" class="file-input" accept="image/*" capture="environment">
+            <h3 class="upload-title">Escolha como adicionar a foto</h3>
+            <p class="upload-text">Selecione uma das opções abaixo</p>
+            
+            <div class="upload-options">
+              <button class="upload-button camera-button" id="cameraButton">
+                <i class="fas fa-camera"></i>
+                Tirar Foto
+              </button>
+              <button class="upload-button gallery-button" id="galleryButton">
+                <i class="fas fa-image"></i>
+                Selecionar do Dispositivo
+              </button>
+            </div>
+            
+            <input type="file" id="cameraInput" class="file-input" accept="image/*" capture="environment">
+            <input type="file" id="galleryInput" class="file-input" accept="image/*">
+            
+            <div class="drag-drop-area" id="dragDropArea">
+              <p class="drag-text">Ou arraste uma imagem para cá</p>
+            </div>
           </div>
 
           <!-- Processing Steps -->
@@ -676,43 +740,61 @@
 
       setupEventListeners() {
         const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const uploadButton = document.getElementById('uploadButton');
+        const cameraInput = document.getElementById('cameraInput');
+        const galleryInput = document.getElementById('galleryInput');
+        const cameraButton = document.getElementById('cameraButton');
+        const galleryButton = document.getElementById('galleryButton');
+        const dragDropArea = document.getElementById('dragDropArea');
 
-        // Click to upload
-        uploadButton.addEventListener('click', () => {
-          fileInput.click();
+        // Camera button click
+        cameraButton.addEventListener('click', () => {
+          cameraInput.click();
         });
 
-        uploadArea.addEventListener('click', () => {
-          fileInput.click();
+        // Gallery button click
+        galleryButton.addEventListener('click', () => {
+          galleryInput.click();
         });
 
-        // File input change
-        fileInput.addEventListener('change', (e) => {
-          if (e.target.files.length > 0) {
-            this.handleFileSelect(e.target.files[0]);
+        // Camera input change
+        cameraInput.addEventListener('change', (e) => {
+          const files = e.target.files;
+          if (files.length > 0) {
+            this.handleFileSelect(files[0]);
           }
         });
 
-        // Drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          uploadArea.classList.add('dragover');
+        // Gallery input change
+        galleryInput.addEventListener('change', (e) => {
+          const files = e.target.files;
+          if (files.length > 0) {
+            this.handleFileSelect(files[0]);
+          }
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-          uploadArea.classList.remove('dragover');
+        // Drag and drop area
+        dragDropArea.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dragDropArea.classList.add('dragover');
         });
 
-        uploadArea.addEventListener('drop', (e) => {
+        dragDropArea.addEventListener('dragleave', () => {
+          dragDropArea.classList.remove('dragover');
+        });
+
+        dragDropArea.addEventListener('drop', (e) => {
           e.preventDefault();
-          uploadArea.classList.remove('dragover');
+          dragDropArea.classList.remove('dragover');
           
           const files = e.dataTransfer.files;
           if (files.length > 0) {
             this.handleFileSelect(files[0]);
           }
+        });
+
+        // Make drag drop area clickable
+        dragDropArea.addEventListener('click', () => {
+          galleryInput.click();
         });
       }
 
@@ -941,7 +1023,8 @@
         const uploadArea = document.getElementById('uploadArea');
         const processingSteps = document.getElementById('processingSteps');
         const resultContainer = document.getElementById('resultContainer');
-        const fileInput = document.getElementById('fileInput');
+        const cameraInput = document.getElementById('cameraInput');
+        const galleryInput = document.getElementById('galleryInput');
 
         // Reset all states
         uploadArea.style.display = 'block';
@@ -956,8 +1039,9 @@
           icon.classList.add('waiting');
         });
 
-        // Clear file input
-        fileInput.value = '';
+        // Clear file inputs
+        cameraInput.value = '';
+        galleryInput.value = '';
         this.currentFile = null;
         this.currentResult = null;
         this.hideMessages();
@@ -982,18 +1066,18 @@
         document.getElementById('successMessage').style.display = 'none';
       }
 
-      goToDashboard() {
-        window.location.href = '/dashboard.html';
+      goToHome() {
+        window.location.href = 'index.html';
       }
 
-      redirectToLogin() {
-        window.location.href = '/index.html';
+      goToDashboard() {
+        window.location.href = 'dashboard.html';
       }
     }
 
     // Global functions
     function goToDashboard() {
-      window.location.href = '/dashboard.html';
+      window.location.href = 'dashboard.html';
     }
 
     function newScan() {

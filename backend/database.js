@@ -285,12 +285,26 @@ class SimpleDatabase {
     }
   }
 
+  // Salvar mensagem de contato
+  async saveContactMessage(message) {
+    this.data.contactMessages = this.data.contactMessages || [];
+    this.data.contactMessages.push(message);
+    this.saveData();
+    return message;
+  }
+
+  // Buscar mensagens de contato
+  async getContactMessages() {
+    return this.data.contactMessages || [];
+  }
+
   // Limpar dados de teste
   clearData() {
     this.data = {
       users: [],
       scans: [],
-      products: []
+      products: [],
+      contactMessages: []
     };
     this.saveData();
     console.log('Banco de dados limpo!');

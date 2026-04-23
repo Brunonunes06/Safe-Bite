@@ -1,0 +1,181 @@
+# GitHub Actions - Deploy Safe-Bite para GitHub Pages
+name: Deploy Safe-Bite
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+
+    - name: 🚀 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: 📦 Install dependencies
+      run: |
+        npm install
+
+    - name: 🔧 Build and Prepare for Deploy
+      run: |
+        echo "🚀 Preparando Safe-Bite para GitHub Pages..."
+        
+        # Criar pasta de build
+        mkdir build
+        
+        # Copiar arquivos necessários
+        cp *.html build/
+        cp *.css build/
+        cp *.js build/
+        cp *.md build/
+        cp .nojekyll build/
+        
+        # Copiar imagens se existirem
+        if [ -d "images" ]; then
+          cp -r images build/
+        fi
+        
+        # Remover arquivos desnecessários
+        rm -rf build/backend/
+        rm -rf build/node_modules/
+        rm -f build/package.json
+        rm -f build/package-lock.json
+        rm -f build/deploy.js
+        
+        # Ajustar arquivos para GitHub Pages
+        echo "🔧 Ajustando arquivos para produção..."
+        
+        # Ajustar base path se necessário
+        if [ "${{ github.repository }}" != "Brunonunes06/Nutri-Scan" ]; then
+          REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
+          sed -i "s|href=\"|href=\"/$REPO_NAME/|g" build/*.html
+          sed -i "s|src=\"|src=\"/$REPO_NAME/|g" build/*.html
+          sed -i "s|href=\"|href=\"/$REPO_NAME/|g" build/*.css
+          sed -i "s|url(|url(/$REPO_NAME/|g" build/*.css
+        fi
+        
+        # Criar service worker para GitHub Pages
+        cat > build/sw.js << 'EOF'
+// Service Worker - Safe-Bite GitHub Pages
+const CACHE_NAME = 'safe-bite-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/dashboard.html',
+  '/profile.html',
+  '/settings.html',
+  '/scanner.html',
+  '/history.html',
+  '/help.html',
+  '/payment.html',
+  '/login.html',
+  '/signup.html',
+  '/privacy.html',
+  '/style.css',
+  '/upgrade-popup.css',
+  '/payment-brazil.css',
+  '/api-config.js',
+  '/script.js',
+  '/user-sync.js',
+  '/user-sync-integration.js',
+  '/login-system.js',
+  '/contact-system.js'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+EOF
+        
+        # Criar manifest.json para PWA
+        cat > build/manifest.json << EOF
+{
+  "name": "Safe-Bite - Scanner de Alimentos",
+  "short_name": "SafeBite",
+  "description": "Scanner inteligente de alimentos para segurança alimentar",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#4CAF50",
+  "theme_color": "#2E7D32",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM0Q0FGNTAiLz4KPHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI0OCIgeT0iNDgiPgo8cGF0aCBkPSJNMjQgNjhIMjhWMjRIMjRWNjhaTTMyIDY4SDM2VjI4SDMyVjY4Wk00MCA2OEg0NFYzMkg0MFY2OFpNNDggNjhINTJWMzZINDhWNjhaTTU2IDY4SDYwVjQwSDU2VjY4Wk02NCA2OEg2OFY0NEg2NFY2OFpNNzIgNjhINzZWNDhINzJWNjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
+EOF
+        
+        echo "✅ Build concluído!"
+        echo "📊 Arquivos criados:"
+        ls -la build/
+
+    - name: 📄 Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: 🚀 Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: build
+
+    - name: 🌐 Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    - name: 🎉 Success
+      run: |
+        echo "🎉 Safe-Bite deployed successfully!"
+        echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "📱 PWA functionality enabled"
+        echo "🔒 HTTPS automatic"
+        echo "🌍 CDN global"

@@ -1,0 +1,72 @@
+{
+  "name": "safe-bite",
+  "version": "1.0.0",
+  "description": "🌿 Safe-Bite - Scanner de Alimentos Inteligente",
+  "main": "index.html",
+  "scripts": {
+    "deploy": "node deploy.js",
+    "serve": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "build": "node deploy.js",
+    "start": "python -m http.server 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "scanner",
+    "alimentos",
+    "segurança",
+    "nutrição",
+    "saúde",
+    "web-app",
+    "pwa",
+    "responsive"
+  ],
+  "author": {
+    "name": "Bruno Nunes",
+    "email": "bruno.nunes.santos06@escola.pr.gov.br",
+    "url": "https://github.com/brunonunes06"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brunonunes06/safe-bite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brunonunes06/safe-bite/issues"
+  },
+  "homepage": "https://brunonunes06.github.io/safe-bite",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "serve": "^14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "manifest": {
+    "name": "Safe-Bite",
+    "short_name": "SafeBite",
+    "description": "Scanner inteligente de alimentos para segurança alimentar",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#4CAF50",
+    "theme_color": "#2E7D32",
+    "orientation": "portrait",
+    "icons": [
+      {
+        "src": "icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+}

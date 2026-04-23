@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nutri-Scan - O Assistente de Segurança Alimentar</title>
+  <title>Safe-Bite - O Assistente de Segurança Alimentar</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="upgrade-popup.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
       <div class="header-content">
         <div class="logo">
           <i class="fas fa-leaf"></i>
-          <span>Nutri-Scan</span>
+          <span>Safe-Bite</span>
         </div>
         
         <nav class="nav-menu">
@@ -27,7 +27,7 @@
             <li><a href="#como-funciona" class="nav-link">Como Funciona</a></li>
             <li><a href="#planos" class="nav-link">Planos</a></li>
             <li><a href="#contato" class="nav-link">Contato</a></li>
-            <li><a href="./dashboard.html" class="nav-link">Dashboard</a></li>
+            <li><a href="dashboard.html" class="nav-link" id="dashboardLink">Dashboard</a></li>
           </ul>
         </nav>
         
@@ -73,7 +73,7 @@
   <section id="sobre" class="section">
     <div class="container">
       <div class="section-header">
-        <h2>Sobre a Nutri-Scan</h2>
+        <h2>Sobre a Safe-Bite</h2>
         <p class="section-subtitle">
           Promovemos saúde pública e inclusão através da tecnologia
         </p>
@@ -82,7 +82,7 @@
       <div class="about-content">
         <div class="about-text">
           <p>
-            A Nutri-Scan é uma startup tecnológica dedicada a revolucionar a segurança alimentar 
+            A Safe-Bite é uma startup tecnológica dedicada a revolucionar a segurança alimentar 
             através da inteligência artificial. Nossa missão é ajudar pessoas com restrições 
             alimentares a tomar decisões mais seguras e informadas sobre o que consomem.
           </p>
@@ -448,7 +448,7 @@
         <div class="footer-section">
           <div class="footer-logo">
             <i class="fas fa-leaf"></i>
-            <span>Nutri-Scan</span>
+            <span>Safe-Bite</span>
           </div>
           <p>
             Sua segurança alimentar com inteligência artificial. 
@@ -489,7 +489,7 @@
       </div>
       
       <div class="footer-bottom">
-        <p>&copy; 2026 Nutri-Scan. Todos os direitos reservados.</p>
+        <p>&copy; 2026 Safe-Bite. Todos os direitos reservados.</p>
       </div>
     </div>
   </footer>
@@ -500,5 +500,153 @@
   <script src="script-corrections-fixed.js"></script>
   <script src="upgrade-popup.js"></script>
   <script src="contact-system.js"></script>
+  
+  <script>
+    // Verificar se usuário está logado antes de permitir acesso ao Dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      const dashboardLink = document.getElementById('dashboardLink');
+      
+      if (dashboardLink) {
+        dashboardLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Verificar se há token de autenticação
+          const token = localStorage.getItem('nutriScanToken');
+          const user = localStorage.getItem('nutriScanUser');
+          
+          if (token && user) {
+            // Usuário está logado, redirecionar para dashboard
+            window.location.href = 'dashboard.html';
+          } else {
+            // Usuário não está logado, mostrar popup de login
+            showLoginPopup();
+          }
+        });
+      }
+      
+      // Função para mostrar popup de login
+      function showLoginPopup() {
+        // Verificar se o popup de upgrade já existe
+        let loginPopup = document.getElementById('loginPopup');
+        
+        if (!loginPopup) {
+          // Criar popup de login
+          loginPopup = document.createElement('div');
+          loginPopup.id = 'loginPopup';
+          loginPopup.innerHTML = `
+            <div class="popup-overlay">
+              <div class="popup-content">
+                <div class="popup-header">
+                  <h3>Acesso ao Dashboard</h3>
+                  <button class="popup-close" onclick="closeLoginPopup()">&times;</button>
+                </div>
+                <div class="popup-body">
+                  <p>Para acessar o Dashboard, você precisa estar logado.</p>
+                  <div class="popup-buttons">
+                    <button class="btn-secondary" onclick="closeLoginPopup()">Cancelar</button>
+                    <button class="btn-primary" onclick="goToLogin()">Fazer Login</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Adicionar estilos
+          const style = document.createElement('style');
+          style.textContent = `
+            #loginPopup {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              z-index: 10000;
+              display: block;
+            }
+            
+            #loginPopup .popup-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            
+            #loginPopup .popup-content {
+              background: white;
+              border-radius: 15px;
+              padding: 2rem;
+              max-width: 400px;
+              width: 90%;
+              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+              animation: popupSlideIn 0.3s ease;
+            }
+            
+            #loginPopup .popup-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 1.5rem;
+            }
+            
+            #loginPopup .popup-header h3 {
+              margin: 0;
+              color: #333;
+            }
+            
+            #loginPopup .popup-close {
+              background: none;
+              border: none;
+              font-size: 1.5rem;
+              cursor: pointer;
+              color: #666;
+            }
+            
+            #loginPopup .popup-body p {
+              margin-bottom: 1.5rem;
+              color: #666;
+            }
+            
+            #loginPopup .popup-buttons {
+              display: flex;
+              gap: 1rem;
+              justify-content: flex-end;
+            }
+            
+            @keyframes popupSlideIn {
+              from {
+                opacity: 0;
+                transform: translateY(-20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `;
+          
+          document.head.appendChild(style);
+          document.body.appendChild(loginPopup);
+        }
+      }
+      
+      // Função para fechar popup de login
+      window.closeLoginPopup = function() {
+        const loginPopup = document.getElementById('loginPopup');
+        if (loginPopup) {
+          loginPopup.remove();
+        }
+      };
+      
+      // Função para ir para página de login
+      window.goToLogin = function() {
+        window.location.href = 'login.html';
+      };
+    });
+  </script>
 </body>
 </html>

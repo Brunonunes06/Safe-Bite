@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Histórico - Nutri-Scan</title>
+  <title>Histórico - Safe-Bite</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -402,7 +402,7 @@
     <header class="history-header">
       <div class="history-logo">
         <i class="fas fa-leaf"></i>
-        <span>Nutri-Scan</span>
+        <span>Safe-Bite</span>
       </div>
       <div class="user-info">
         <div class="user-avatar" id="userAvatar">JD</div>
@@ -516,7 +516,7 @@
         </div>
         <h2 class="empty-title">Nenhum scan encontrado</h2>
         <p class="empty-text">
-          Comece a usar o Nutri-Scan para analisar produtos e proteger sua saúde!
+          Comece a usar o Safe-Bite para analisar produtos e proteger sua saúde!
         </p>
         <button class="btn-primary" onclick="goToScanner()">
           <i class="fas fa-camera"></i>
@@ -810,7 +810,7 @@
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `nutri-scan-history-${new Date().toISOString().split('T')[0]}.json`;
+          a.download = `Safe-Bite-history-${new Date().toISOString().split('T')[0]}.json`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);

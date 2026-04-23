@@ -1,4 +1,4 @@
-// Diagnóstico do Sistema de Email Nutri-Scan
+// Diagnóstico do Sistema de Email Safe-Bite
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
@@ -150,18 +150,18 @@ class EmailDiagnostic {
       
       // Tentar enviar email de teste
       const testEmail = {
-        from: `"Teste Nutri-Scan" <${process.env.GMAIL_EMAIL || 'bruno.nunes.santos06@escola.pr.gov.br'}>`,
+        from: `"Teste Safe-Bite" <${process.env.GMAIL_EMAIL || 'bruno.nunes.santos06@escola.pr.gov.br'}>`,
         to: process.env.GMAIL_EMAIL || 'bruno.nunes.santos06@escola.pr.gov.br',
-        subject: '🧪 TESTE - Nutri-Scan Email Diagnostic',
+        subject: '🧪 TESTE - Safe-Bite Email Diagnostic',
         html: `
           <div style="font-family: Arial, sans-serif; padding: 20px;">
-            <h2 style="color: #2ecc71;">✅ Email de Teste - Nutri-Scan</h2>
+            <h2 style="color: #2ecc71;">✅ Email de Teste - Safe-Bite</h2>
             <p>Este é um email de teste para verificar se o sistema de envio está funcionando.</p>
             <p><strong>Data do teste:</strong> ${new Date().toLocaleString('pt-BR')}</p>
             <p><strong>Status:</strong> Sistema funcionando perfeitamente!</p>
             <hr style="margin: 20px 0;">
             <p style="color: #666; font-size: 12px;">
-              Este email foi gerado automaticamente pelo sistema de diagnóstico do Nutri-Scan.
+              Este email foi gerado automaticamente pelo sistema de diagnóstico do Safe-Bite.
             </p>
           </div>
         `

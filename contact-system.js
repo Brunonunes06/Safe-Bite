@@ -1,4 +1,4 @@
-// Sistema de Contato Nutri-Scan
+// Sistema de Contato Safe-Bite
 class ContactSystem {
   constructor() {
     this.api = new NutriScanAPI();

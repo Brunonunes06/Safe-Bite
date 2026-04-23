@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histórico - Nutri-Scan</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .history-container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .history-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .history-header-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .history-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .filters {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-group label {
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+
+    .filter-group select,
+    .filter-group input {
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: var(--primary-green);
+    }
+
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--light-gray);
+      padding: 1.5rem;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .scan-item {
+      background: white;
+      border: 1px solid var(--medium-gray);
+      border-radius: 15px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .scan-item:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .scan-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      background: var(--light-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--primary-green);
+    }
+
+    .scan-details {
+      flex: 1;
+    }
+
+    .scan-product {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+      color: var(--text-dark);
+    }
+
+    .scan-brand {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .scan-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .scan-date {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .scan-risk {
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .scan-risk.safe {
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--primary-green);
+    }
+
+    .scan-risk.caution {
+      background: rgba(241, 196, 15, 0.1);
+      color: #f39c12;
+    }
+
+    .scan-risk.avoid {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+
+    .scan-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-small {
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-view {
+      background: var(--primary-green);
+      color: white;
+    }
+
+    .btn-view:hover {
+      background: #27ae60;
+    }
+
+    .btn-delete {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #c0392b;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .pagination button {
+      padding: 0.8rem 1.2rem;
+      border: 2px solid var(--medium-gray);
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      border-color: var(--primary-green);
+      color: var(--primary-green);
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination .current {
+      background: var(--primary-green);
+      color: white;
+      border-color: var(--primary-green);
+    }
+
+    .export-section {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .btn-export {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .btn-export:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Loading and Messages */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--medium-gray);
+      border-top: 4px solid var(--primary-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    .empty-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .empty-text {
+      color: var(--text-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .success-message,
+    .error-message {
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .success-message {
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--primary-green);
+    }
+
+    .error-message {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+
+    @media (max-width: 768px) {
+      .history-main {
+        padding: 1rem;
+      }
+
+      .history-card {
+        padding: 1.5rem;
+      }
+
+      .history-header-card {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group {
+        justify-content: space-between;
+      }
+
+      .stats-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .scan-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .scan-image {
+        width: 60px;
+        height: 60px;
+      }
+
+      .scan-actions {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="history-container">
+    <!-- Header -->
+    <header class="history-header">
+      <div class="history-logo">
+        <i class="fas fa-leaf"></i>
+        <span>Nutri-Scan</span>
+      </div>
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">JD</div>
+        <span id="userName">João Silva</span>
+        <button class="btn-secondary" onclick="goToDashboard()" style="padding: 0.5rem 1rem;">
+          <i class="fas fa-home"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="history-main">
+      <!-- Loading State -->
+      <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- History Card -->
+      <div class="history-card" id="historyCard" style="display: none;">
+        <!-- Header with Filters -->
+        <div class="history-header-card">
+          <h1 class="history-title">
+            <i class="fas fa-history"></i>
+            Histórico de Scans
+          </h1>
+          <div class="filters">
+            <div class="filter-group">
+              <label for="categoryFilter">Categoria:</label>
+              <select id="categoryFilter" onchange="filterHistory()">
+                <option value="">Todas</option>
+                <option value="biscoitos">Biscoitos</option>
+                <option value="chocolates">Chocolates</option>
+                <option value="doces">Doces</option>
+                <option value="salgados">Salgados</option>
+                <option value="bebidas">Bebidas</option>
+                <option value="laticinios">Laticínios</option>
+                <option value="carnes">Carnes</option>
+                <option value="frutas">Frutas</option>
+                <option value="vegetais">Vegetais</option>
+                <option value="graos">Grãos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="riskFilter">Risco:</label>
+              <select id="riskFilter" onchange="filterHistory()">
+                <option value="">Todos</option>
+                <option value="safe">Seguro</option>
+                <option value="caution">Cuidado</option>
+                <option value="avoid">Evitar</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="dateFilter">Período:</label>
+              <select id="dateFilter" onchange="filterHistory()">
+                <option value="">Todos</option>
+                <option value="7">Últimos 7 dias</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="90">Últimos 90 dias</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview" id="statsOverview">
+          <div class="stat-card">
+            <div class="stat-value" id="totalScans">0</div>
+            <div class="stat-label">Total de Scans</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="safeScans">0</div>
+            <div class="stat-label">Seguros</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="warningScans">0</div>
+            <div class="stat-label">Com Cuidado</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="dangerScans">0</div>
+            <div class="stat-label">Evitar</div>
+          </div>
+        </div>
+
+        <!-- History List -->
+        <div class="history-list" id="historyList">
+          <!-- Scan items will be populated here -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination">
+          <!-- Pagination will be populated here -->
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+          <button class="btn-export" onclick="exportHistory()">
+            <i class="fas fa-download"></i>
+            Exportar Histórico
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon">
+          <i class="fas fa-history"></i>
+        </div>
+        <h2 class="empty-title">Nenhum scan encontrado</h2>
+        <p class="empty-text">
+          Comece a usar o Nutri-Scan para analisar produtos e proteger sua saúde!
+        </p>
+        <button class="btn-primary" onclick="goToScanner()">
+          <i class="fas fa-camera"></i>
+          Fazer Primeiro Scan
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="api-config.js"></script>
+  <script>
+    // History JavaScript
+    class NutriScanHistory {
+      constructor() {
+        this.token = localStorage.getItem('nutriScanToken');
+        this.user = null;
+        this.scans = [];
+        this.filteredScans = [];
+        this.currentPage = 1;
+        this.pageSize = 10;
+        this.totalPages = 1;
+        this.filters = {
+          category: '',
+          risk: '',
+          date: ''
+        };
+        this.init();
+      }
+
+      async init() {
+        if (!this.token) {
+          APIUtils.redirectToLogin();
+          return;
+        }
+
+        await this.loadUserData();
+        await this.loadHistory();
+      }
+
+      async loadUserData() {
+        try {
+          const response = await api.getCurrentUser();
+          this.user = response.user;
+          this.updateUserInfo();
+        } catch (error) {
+          console.error('Erro ao carregar usuário:', error);
+          APIUtils.redirectToLogin();
+        }
+      }
+
+      updateUserInfo() {
+        if (!this.user) return;
+
+        const initials = this.user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        document.getElementById('userAvatar').textContent = initials;
+        document.getElementById('userName').textContent = this.user.name;
+      }
+
+      async loadHistory() {
+        try {
+          this.showLoading(true);
+          
+          const response = await api.getScans(this.currentPage, this.pageSize);
+          this.scans = response.scans || [];
+          this.filteredScans = [...this.scans];
+          this.totalPages = response.pages || 1;
+          
+          this.applyFilters();
+          this.renderHistory();
+          this.renderPagination();
+          this.updateStats();
+          
+          this.showLoading(false);
+        } catch (error) {
+          console.error('Erro ao carregar histórico:', error);
+          this.showError(APIUtils.handleError(error));
+          this.showLoading(false);
+        }
+      }
+
+      filterHistory() {
+        this.filters.category = document.getElementById('categoryFilter').value;
+        this.filters.risk = document.getElementById('riskFilter').value;
+        this.filters.date = document.getElementById('dateFilter').value;
+        
+        this.applyFilters();
+        this.currentPage = 1;
+        this.renderHistory();
+        this.renderPagination();
+      }
+
+      applyFilters() {
+        this.filteredScans = this.scans.filter(scan => {
+          // Category filter
+          if (this.filters.category && scan.product.category !== this.filters.category) {
+            return false;
+          }
+          
+          // Risk filter
+          if (this.filters.risk && scan.analysis.overallRisk !== this.filters.risk) {
+            return false;
+          }
+          
+          // Date filter
+          if (this.filters.date) {
+            const scanDate = new Date(scan.createdAt);
+            const daysAgo = Math.floor((Date.now() - scanDate.getTime()) / (1000 * 60 * 60 * 24));
+            
+            if (daysAgo > parseInt(this.filters.date)) {
+              return false;
+            }
+          }
+          
+          return true;
+        });
+      }
+
+      renderHistory() {
+        const container = document.getElementById('historyList');
+        const emptyState = document.getElementById('emptyState');
+        const historyCard = document.getElementById('historyCard');
+        
+        if (this.filteredScans.length === 0) {
+          container.style.display = 'none';
+          emptyState.style.display = 'block';
+          historyCard.style.display = 'none';
+          return;
+        }
+        
+        container.style.display = 'flex';
+        emptyState.style.display = 'none';
+        historyCard.style.display = 'block';
+        
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        const pageScans = this.filteredScans.slice(startIndex, endIndex);
+        
+        container.innerHTML = pageScans.map(scan => this.renderScanItem(scan)).join('');
+      }
+
+      renderScanItem(scan) {
+        const riskClass = scan.analysis.overallRisk;
+        const riskIcon = riskClass === 'safe' ? 'check' : 
+                        riskClass === 'caution' ? 'exclamation' : 'times';
+        
+        return `
+          <div class="scan-item" onclick="viewScan('${scan._id}')">
+            <div class="scan-image">
+              <i class="fas fa-${riskIcon}"></i>
+            </div>
+            <div class="scan-details">
+              <div class="scan-product">${scan.product.name}</div>
+              <div class="scan-brand">${scan.product.brand}</div>
+              <div class="scan-meta">
+                <div class="scan-date">
+                  <i class="fas fa-calendar"></i>
+                  ${APIUtils.formatDate(scan.createdAt)}
+                </div>
+                <div class="scan-date">
+                  <i class="fas fa-clock"></i>
+                  ${APIUtils.formatTime(scan.createdAt)}
+                </div>
+              </div>
+            </div>
+            <div class="scan-actions">
+              <span class="scan-risk ${riskClass}">
+                ${riskClass === 'safe' ? 'Seguro' : 
+                  riskClass === 'caution' ? 'Cuidado' : 'Evitar'}
+              </span>
+              <button class="btn-small btn-view" onclick="event.stopPropagation(); viewScan('${scan._id}')">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn-small btn-delete" onclick="event.stopPropagation(); deleteScan('${scan._id}')">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      renderPagination() {
+        const container = document.getElementById('pagination');
+        
+        let paginationHTML = '';
+        
+        // Previous button
+        paginationHTML += `
+          <button ${this.currentPage === 1 ? 'disabled' : ''} onclick="changePage(${this.currentPage - 1})">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+        `;
+        
+        // Page numbers
+        for (let i = 1; i <= this.totalPages; i++) {
+          if (i === this.currentPage) {
+            paginationHTML += `<button class="current">${i}</button>`;
+          } else if (Math.abs(i - this.currentPage) <= 2) {
+            paginationHTML += `<button onclick="changePage(${i})">${i}</button>`;
+          }
+        }
+        
+        // Next button
+        paginationHTML += `
+          <button ${this.currentPage === this.totalPages ? 'disabled' : ''} onclick="changePage(${this.currentPage + 1})">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        `;
+        
+        container.innerHTML = paginationHTML;
+      }
+
+      updateStats() {
+        const totalScans = this.filteredScans.length;
+        const safeScans = this.filteredScans.filter(s => s.analysis.overallRisk === 'safe').length;
+        const warningScans = this.filteredScans.filter(s => s.analysis.overallRisk === 'caution').length;
+        const dangerScans = this.filteredScans.filter(s => s.analysis.overallRisk === 'avoid').length;
+        
+        document.getElementById('totalScans').textContent = totalScans;
+        document.getElementById('safeScans').textContent = safeScans;
+        document.getElementById('warningScans').textContent = warningScans;
+        document.getElementById('dangerScans').textContent = dangerScans;
+      }
+
+      async viewScan(scanId) {
+        try {
+          const scan = await api.getScan(scanId);
+          
+          // In a real app, this would open a modal or navigate to scan details
+          console.log('Scan details:', scan);
+          alert(`Detalhes do scan:\n\nProduto: ${scan.product.name}\nMarca: ${scan.product.brand}\nRisco: ${scan.analysis.overallRisk}`);
+        } catch (error) {
+          console.error('Erro ao carregar scan:', error);
+          this.showError('Erro ao carregar detalhes do scan.');
+        }
+      }
+
+      async deleteScan(scanId) {
+        if (!confirm('Tem certeza que deseja excluir este scan?')) {
+          return;
+        }
+
+        try {
+          await api.delete(`/scans/${scanId}`);
+          this.showSuccess('Scan excluído com sucesso!');
+          await this.loadHistory();
+        } catch (error) {
+          console.error('Erro ao excluir scan:', error);
+          this.showError('Erro ao excluir scan. Tente novamente.');
+        }
+      }
+
+      changePage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        
+        this.currentPage = page;
+        this.renderHistory();
+        this.renderPagination();
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      async exportHistory() {
+        try {
+          const allScans = [];
+          let page = 1;
+          let hasMore = true;
+          
+          // Get all scans
+          while (hasMore) {
+            const response = await api.getScans(page, 100);
+            allScans.push(...response.scans);
+            hasMore = page < response.pages;
+            page++;
+          }
+          
+          const exportData = {
+            user: this.user,
+            scans: allScans,
+            exportDate: new Date().toISOString(),
+            stats: {
+              total: allScans.length,
+              safe: allScans.filter(s => s.analysis.overallRisk === 'safe').length,
+              caution: allScans.filter(s => s.analysis.overallRisk === 'caution').length,
+              avoid: allScans.filter(s => s.analysis.overallRisk === 'avoid').length
+            }
+          };
+          
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `nutri-scan-history-${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          this.showSuccess('Histórico exportado com sucesso!');
+        } catch (error) {
+          console.error('Erro ao exportar histórico:', error);
+          this.showError('Erro ao exportar histórico. Tente novamente.');
+        }
+      }
+
+      showLoading(show) {
+        document.getElementById('loadingState').style.display = show ? 'flex' : 'none';
+        document.getElementById('historyCard').style.display = show ? 'none' : 'block';
+        document.getElementById('emptyState').style.display = 'none';
+      }
+
+      showSuccess(message) {
+        const element = document.getElementById('successMessage');
+        element.textContent = message;
+        element.style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        
+        setTimeout(() => {
+          element.style.display = 'none';
+        }, 5000);
+      }
+
+      showError(message) {
+        const element = document.getElementById('errorMessage');
+        element.textContent = message;
+        element.style.display = 'block';
+        document.getElementById('successMessage').style.display = 'none';
+        
+        setTimeout(() => {
+          element.style.display = 'none';
+        }, 5000);
+      }
+
+      goToDashboard() {
+        APIUtils.redirectToDashboard();
+      }
+
+      goToScanner() {
+        window.location.href = 'scanner.html';
+      }
+    }
+
+    // Global functions
+    function goToDashboard() {
+      APIUtils.redirectToDashboard();
+    }
+
+    function goToScanner() {
+      window.location.href = 'scanner.html';
+    }
+
+    function filterHistory() {
+      window.historyInstance.filterHistory();
+    }
+
+    function changePage(page) {
+      window.historyInstance.changePage(page);
+    }
+
+    function viewScan(scanId) {
+      window.historyInstance.viewScan(scanId);
+    }
+
+    function deleteScan(scanId) {
+      window.historyInstance.deleteScan(scanId);
+    }
+
+    function exportHistory() {
+      window.historyInstance.exportHistory();
+    }
+
+    // Initialize history when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      window.historyInstance = new NutriScanHistory();
+    });
+  </script>
+</body>
+</html>

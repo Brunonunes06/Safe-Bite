@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutri-Scan - O Assistente de Segurança Alimentar</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <i class="fas fa-leaf"></i>
+          <span>Nutri-Scan</span>
+        </div>
+        
+        <nav class="nav-menu">
+          <ul>
+            <li><a href="#inicio" class="nav-link">Início</a></li>
+            <li><a href="#sobre" class="nav-link">Sobre</a></li>
+            <li><a href="#como-funciona" class="nav-link">Como Funciona</a></li>
+            <li><a href="#planos" class="nav-link">Planos</a></li>
+            <li><a href="#contato" class="nav-link">Contato</a></li>
+          </ul>
+        </nav>
+        
+        <button class="btn-primary">Testar Agora</button>
+        
+        <!-- Menu Mobile -->
+        <div class="mobile-menu-toggle">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="inicio" class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Sua segurança alimentar com <span>inteligência artificial</span>
+        </h1>
+        <p class="hero-subtitle">
+          Proteja sua saúde e evite alimentos perigosos com tecnologia inteligente
+        </p>
+        <button class="btn-hero" onclick="scrollToSection('como-funciona')">
+          Começar grátis
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+      <div class="hero-image">
+        <div class="phone-mockup">
+          <div class="screen">
+            <div class="app-interface">
+              <div class="scan-area">
+                <i class="fas fa-camera"></i>
+                <p>Aponte para o rótulo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sobre Section -->
+  <section id="sobre" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Sobre a Nutri-Scan</h2>
+        <p class="section-subtitle">
+          Promovemos saúde pública e inclusão através da tecnologia
+        </p>
+      </div>
+      
+      <div class="about-content">
+        <div class="about-text">
+          <p>
+            A Nutri-Scan é uma startup tecnológica dedicada a revolucionar a segurança alimentar 
+            através da inteligência artificial. Nossa missão é ajudar pessoas com restrições 
+            alimentares a tomar decisões mais seguras e informadas sobre o que consomem.
+          </p>
+          <p>
+            Com tecnologia avançada de reconhecimento de imagem e análise nutricional, 
+            oferecemos uma solução acessível que coloca o poder da informação nas mãos dos consumidores.
+          </p>
+          <div class="stats">
+            <div class="stat">
+              <h3>95%</h3>
+              <p>Precisão na análise</p>
+            </div>
+            <div class="stat">
+              <h3>10k+</h3>
+              <p>Produtos analisados</p>
+            </div>
+            <div class="stat">
+              <h3>24/7</h3>
+              <p>Disponibilidade</p>
+            </div>
+          </div>
+        </div>
+        <div class="about-image">
+          <div class="illustration">
+            <i class="fas fa-shield-alt"></i>
+            <div class="pulse-ring"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Como Funciona Section -->
+  <section id="como-funciona" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2>Como Funciona</h2>
+        <p class="section-subtitle">
+          Análise inteligente em 3 passos simples
+        </p>
+      </div>
+      
+      <div class="steps">
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-camera"></i>
+          </div>
+          <h3>1. Escaneie o rótulo</h3>
+          <p>
+            Use seu celular para capturar a imagem do rótulo do produto. 
+            Nossa tecnologia reconhece automaticamente as informações.
+          </p>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h3>2. IA analisa ingredientes</h3>
+          <p>
+            Nossa inteligência artificial processa os ingredientes, 
+            identificando potenciais riscos e alérgenos.
+          </p>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <h3>3. Receba alertas de risco</h3>
+          <p>
+            Obtenha recomendações personalizadas e alertas sobre 
+            componentes que podem afetar sua saúde.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modelo de Negócio Section -->
+  <section id="modelo-negocio" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Modelo de Negócio</h2>
+        <p class="section-subtitle">
+          Soluções para consumidores e empresas
+        </p>
+      </div>
+      
+      <div class="business-model">
+        <div class="business-card">
+          <div class="business-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <h3>B2C - Para Consumidores</h3>
+          <div class="business-plans">
+            <div class="mini-plan">
+              <h4>Plano Gratuito</h4>
+              <ul>
+                <li>Uso básico com limitações</li>
+                <li>Até 10 scans por mês</li>
+                <li>Análises simples</li>
+              </ul>
+            </div>
+            <div class="mini-plan featured">
+              <h4>Premium</h4>
+              <div class="price">R$ 9,90/mês</div>
+              <ul>
+                <li>Scans ilimitados</li>
+                <li>Múltiplos perfis familiares</li>
+                <li>Histórico de compras</li>
+                <li>Análises avançadas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="business-card">
+          <div class="business-icon">
+            <i class="fas fa-building"></i>
+          </div>
+          <h3>B2B - Para Empresas</h3>
+          <div class="business-features">
+            <ul>
+              <li>
+                <i class="fas fa-chart-line"></i>
+                <span>Relatórios anônimos de consumo</span>
+              </li>
+              <li>
+                <i class="fas fa-users"></i>
+                <span>Insights sobre comportamento</span>
+              </li>
+              <li>
+                <i class="fas fa-allergies"></i>
+                <span>Dados sobre alérgenos</span>
+              </li>
+              <li>
+                <i class="fas fa-chart-pie"></i>
+                <span>Análises de mercado</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Protótipo Section -->
+  <section id="prototipo" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2>Nossa Tecnologia</h2>
+        <p class="section-subtitle">
+          Baseado em Teachable Machine e IA avançada
+        </p>
+      </div>
+      
+      <div class="prototype-content">
+        <div class="prototype-demo">
+          <div class="demo-interface">
+            <div class="demo-header">
+              <h4>Demonstração: Detecção de Açúcar</h4>
+            </div>
+            <div class="demo-area">
+              <div class="upload-area" id="demoUpload">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Clique para fazer upload de um rótulo</p>
+                <small>Funciona com imagens de rótulos de produtos</small>
+              </div>
+              <div class="demo-result" id="demoResult" style="display: none;">
+                <div class="result-header">
+                  <h5>Resultado da Análise</h5>
+                  <span class="confidence">95% confiança</span>
+                </div>
+                <div class="result-content">
+                  <div class="result-item detected">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Açúcar detectado</span>
+                  </div>
+                  <div class="result-item warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Alto teor de carboidratos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="prototype-info">
+          <h3>Como nossa IA funciona</h3>
+          <p>
+            Utilizamos Teachable Machine para treinar nosso modelo com milhares de imagens 
+            de rótulos de produtos alimentícios. Nossa tecnologia é capaz de identificar:
+          </p>
+          <ul class="tech-features">
+            <li>
+              <i class="fas fa-cube"></i>
+              <span>Ingredientes principais</span>
+            </li>
+            <li>
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Alérgenos comuns</span>
+            </li>
+            <li>
+              <i class="fas fa-heartbeat"></i>
+              <span>Informações nutricionais</span>
+            </li>
+            <li>
+              <i class="fas fa-balance-scale"></i>
+              <span>Níveis de açúcar e sódio</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Planos Section -->
+  <section id="planos" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Nossos Planos</h2>
+        <p class="section-subtitle">
+          Escolha o plano ideal para suas necessidades
+        </p>
+      </div>
+      
+      <div class="pricing-cards">
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Free</h3>
+            <div class="price">
+              <span class="currency">R$</span>
+              <span class="amount">0</span>
+              <span class="period">/mês</span>
+            </div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li><i class="fas fa-check"></i> Até 10 scans por mês</li>
+              <li><i class="fas fa-check"></i> Análises básicas</li>
+              <li><i class="fas fa-check"></i> 1 perfil de usuário</li>
+              <li><i class="fas fa-times"></i> Histórico ilimitado</li>
+              <li><i class="fas fa-times"></i> Alertas personalizados</li>
+            </ul>
+          </div>
+          <button class="btn-pricing">Começar grátis</button>
+        </div>
+        
+        <div class="pricing-card featured">
+          <div class="pricing-badge">
+            <span>Mais Popular</span>
+          </div>
+          <div class="pricing-header">
+            <h3>Premium</h3>
+            <div class="price">
+              <span class="currency">R$</span>
+              <span class="amount">9,90</span>
+              <span class="period">/mês</span>
+            </div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li><i class="fas fa-check"></i> Scans ilimitados</li>
+              <li><i class="fas fa-check"></i> Análises avançadas</li>
+              <li><i class="fas fa-check"></i> Múltiplos perfis familiares</li>
+              <li><i class="fas fa-check"></i> Histórico completo</li>
+              <li><i class="fas fa-check"></i> Alertas personalizados</li>
+              <li><i class="fas fa-check"></i> Relatórios mensais</li>
+            </ul>
+          </div>
+          <button class="btn-pricing btn-primary">Assinar Agora</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contato Section -->
+  <section id="contato" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2>Entre em Contato</h2>
+        <p class="section-subtitle">
+          Tem dúvidas? Adoraríamos ouvir de você
+        </p>
+      </div>
+      
+      <div class="contact-content">
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="contact-text">
+              <h4>Email</h4>
+              <p>contato@nutri-scan.com.br</p>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">
+              <i class="fas fa-phone"></i>
+            </div>
+            <div class="contact-text">
+              <h4>Telefone</h4>
+              <p>(11) 9999-9999</p>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="contact-text">
+              <h4>Endereço</h4>
+              <p>São Paulo, SP - Brasil</p>
+            </div>
+          </div>
+          
+          <div class="social-links">
+            <h4>Siga-nos</h4>
+            <div class="social-icons">
+              <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="contact-form">
+          <form id="contactForm">
+            <div class="form-group">
+              <label for="nome">Nome</label>
+              <input type="text" id="nome" name="nome" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="mensagem">Mensagem</label>
+              <textarea id="mensagem" name="mensagem" rows="5" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+              Enviar Mensagem
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="footer-logo">
+            <i class="fas fa-leaf"></i>
+            <span>Nutri-Scan</span>
+          </div>
+          <p>
+            Sua segurança alimentar com inteligência artificial. 
+            Protegendo sua saúde com tecnologia.
+          </p>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Links Rápidos</h4>
+          <ul>
+            <li><a href="#inicio">Início</a></li>
+            <li><a href="#sobre">Sobre</a></li>
+            <li><a href="#como-funciona">Como Funciona</a></li>
+            <li><a href="#planos">Planos</a></li>
+            <li><a href="#contato">Contato</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Política de Privacidade</a></li>
+            <li><a href="#">Termos de Uso</a></li>
+            <li><a href="#">Política de Cookies</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Newsletter</h4>
+          <p>Receba novidades e dicas de nutrição</p>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Seu email">
+            <button type="submit">
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Nutri-Scan. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="api-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

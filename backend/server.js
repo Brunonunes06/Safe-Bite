@@ -15,6 +15,7 @@ const scanRoutes = require('./routes/scans-simple');
 const paymentRoutes = require('./routes/payment-brazil');
 const googleAuthRoutes = require('./routes/auth-google');
 const contactRoutes = require('./routes/contact');
+const usersRoutes = require('./routes/users-simple');
 
 // Importar middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
@@ -60,6 +61,7 @@ app.use('/api/auth', googleAuthRoutes);
 app.use('/api/scans', scanRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/users', usersRoutes);
 
 // Rota de health check
 app.get('/api/health', (req, res) => {

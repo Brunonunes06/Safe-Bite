@@ -54,10 +54,6 @@ class UpgradePopupManager {
               <i class="fas fa-crown"></i>
               Ver Planos
             </button>
-            <button class="btn-free" onclick="upgradePopup.startFreeTrial()" id="btnFreeTrial">
-              <i class="fas fa-gift"></i>
-              Começar Grátis
-            </button>
           </div>
         </div>
       </div>

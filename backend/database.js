@@ -221,8 +221,8 @@ class SimpleDatabase {
     if (this.data.users.length === 0) {
       // Criar usuário de teste
       const testUser = await this.createUser({
-        name: 'João da Silva',
-        email: 'joao@exemplo.com',
+        name: 'Bruno Gabriel',
+        email: 'Bruno@exemplo.com',
         password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', // password123
         isPremium: false,
         dietaryRestrictions: ['gluten', 'lactose'],
@@ -281,7 +281,7 @@ class SimpleDatabase {
       }
 
       console.log('Dados de teste criados com sucesso!');
-      console.log('Usuário de teste: joao@exemplo.com / password123');
+      console.log('Usuário de teste: Bruno@exemplo.com / password123');
     }
   }
 

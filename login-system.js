@@ -78,14 +78,42 @@ class LoginSystem {
         // Se falhar a conexão com o servidor, usar modo simulado
         console.log('Servidor não disponível, usando modo simulado para login');
         
-        // Simular validação de credenciais
-        if (email === 'demo@nutriscan.com' && password === 'demo123') {
+        // Verificar se existe usuário cadastrado no localStorage
+        const registeredUsers = JSON.parse(localStorage.getItem('nutriScanRegisteredUsers') || '[]');
+        const foundUser = registeredUsers.find(u => u.email === email);
+        
+        if (foundUser && foundUser.password === password) {
           result = {
             success: true,
             token: 'simulated_token_' + Date.now(),
             user: {
-              _id: 'user_' + Date.now(),
-              userId: 'user_' + Date.now(),
+              _id: foundUser.id,
+              userId: foundUser.id,
+              email: foundUser.email,
+              name: foundUser.name,
+              subscription: foundUser.subscription || {
+                plan: 'free',
+                status: 'active',
+                startDate: new Date(),
+                scansUsed: 0,
+                scansLimit: 10
+              },
+              preferences: foundUser.preferences || {
+                allergies: [],
+                dietaryRestrictions: [],
+                notifications: true,
+                language: 'pt-BR'
+              }
+            }
+          };
+        } else if (email === 'demo@nutriscan.com' && password === 'demo123') {
+          // Usuário demo para testes
+          result = {
+            success: true,
+            token: 'simulated_token_' + Date.now(),
+            user: {
+              _id: 'demo_user',
+              userId: 'demo_user',
               email: email,
               name: 'Usuário Demo',
               subscription: {
@@ -104,7 +132,7 @@ class LoginSystem {
             }
           };
         } else {
-          throw new Error('Email ou senha inválidos. Use demo@nutriscan.com / demo123 para testar.');
+          throw new Error('Email ou senha inválidos. Verifique seus dados ou crie uma conta.');
         }
       }
       
@@ -341,18 +369,8 @@ class LoginSystem {
       return savedUrl;
     }
 
-    // Verificar plano do usuário
-    const userStr = localStorage.getItem('nutriScanUser');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      if (user.subscription?.plan === 'premium') {
-        return 'dashboard.html';
-      } else {
-        return 'dashboard.html';
-      }
-    }
-
-    return 'dashboard.html';
+    // Sempre redirecionar para index.html após login
+    return 'index.html';
   }
 
   logout() {

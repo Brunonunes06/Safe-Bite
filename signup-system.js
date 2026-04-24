@@ -111,33 +111,51 @@ class SignupSystem {
         // Se falhar a conexão com o servidor, usar modo simulado
         console.log('Servidor não disponível, usando modo simulado para cadastro');
         
-        // Simular verificação de email (aceitar qualquer email exceto demo@nutriscan.com)
-        if (userData.email === 'demo@nutriscan.com') {
+        // Verificar usuários já cadastrados no localStorage
+        const registeredUsers = JSON.parse(localStorage.getItem('nutriScanRegisteredUsers') || '[]');
+        
+        // Verificar se email já existe
+        if (registeredUsers.find(u => u.email === userData.email) || userData.email === 'demo@nutriscan.com') {
           throw new Error('Este email já está cadastrado. Faça login ou use outro email.');
         }
         
-        // Criar usuário simulado
+        // Criar novo usuário
+        const newUser = {
+          id: 'user_' + Date.now(),
+          name: `${userData.firstName} ${userData.lastName}`,
+          email: userData.email,
+          password: userData.password, // Em produção, usar hash
+          subscription: {
+            plan: 'free',
+            status: 'active',
+            startDate: new Date(),
+            scansUsed: 0,
+            scansLimit: 10
+          },
+          preferences: {
+            allergies: [],
+            dietaryRestrictions: [],
+            notifications: userData.newsletter,
+            language: 'pt-BR'
+          },
+          createdAt: new Date()
+        };
+        
+        // Salvar usuário no localStorage
+        registeredUsers.push(newUser);
+        localStorage.setItem('nutriScanRegisteredUsers', JSON.stringify(registeredUsers));
+        
+        // Criar resultado para login automático
         result = {
           success: true,
           token: 'simulated_token_' + Date.now(),
           user: {
-            _id: 'user_' + Date.now(),
-            userId: 'user_' + Date.now(),
-            name: `${userData.firstName} ${userData.lastName}`,
-            email: userData.email,
-            subscription: {
-              plan: 'free',
-              status: 'active',
-              startDate: new Date(),
-              scansUsed: 0,
-              scansLimit: 10
-            },
-            preferences: {
-              allergies: [],
-              dietaryRestrictions: [],
-              notifications: userData.newsletter,
-              language: 'pt-BR'
-            }
+            _id: newUser.id,
+            userId: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            subscription: newUser.subscription,
+            preferences: newUser.preferences
           }
         };
       }
@@ -150,9 +168,9 @@ class SignupSystem {
         // Mostrar sucesso
         this.showSuccess('Conta criada com sucesso! Redirecionando...');
 
-        // Redirecionar para dashboard
+        // Redirecionar para index.html
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          window.location.href = 'index.html';
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro');
@@ -219,7 +237,7 @@ class SignupSystem {
         this.showSuccess('Conta criada com Google! Redirecionando...');
 
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          window.location.href = 'index.html';
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro Google');
@@ -353,11 +371,13 @@ class SignupSystem {
     return emailRegex.test(email);
   }
 
-  showFieldError(fieldId, message) {
-    const errorElement = document.getElementById(fieldId);
+  showFieldError(errorId, message) {
+    const errorElement = document.getElementById(errorId);
     if (errorElement) {
       errorElement.textContent = message;
       errorElement.style.display = 'block';
+    } else {
+      console.warn(`Elemento de erro #${errorId} não encontrado`);
     }
   }
 
@@ -365,6 +385,8 @@ class SignupSystem {
     const errorElement = document.getElementById(fieldId);
     if (errorElement) {
       errorElement.style.display = 'none';
+    } else {
+      console.warn(`Elemento de erro #${fieldId} não encontrado`);
     }
   }
 

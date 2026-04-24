@@ -1,0 +1,18 @@
+{
+  "name": "Safe-Bite - Scanner de Alimentos",
+  "short_name": "SafeBite",
+  "description": "Scanner inteligente de alimentos para segurança alimentar",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#4CAF50",
+  "theme_color": "#2E7D32",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM0Q0FGNTAiLz4KPHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI0OCIgeT0iNDgiPgo8cGF0aCBkPSJNMjQgNjhIMjhWMjRIMjRWNjhaTTMyIDY4SDM2VjI4SDMyVjY4Wk00MCA2OEg0NFYzMkg0MFY2OFpNNDggNjhINTJWMzZINDhWNjhaTTU2IDY4SDYwVjQwSDU2VjY4Wk02NCA2OEg2OFY0NEg2NFY2OFpNNzIgNjhINzZWNDhINzJWNjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

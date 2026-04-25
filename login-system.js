@@ -3,7 +3,13 @@
 
 class LoginSystem {
   constructor() {
-    this.api = new NutriScanAPI();
+    // Verificar se NutriScanAPI está disponível
+    if (typeof NutriScanAPI !== 'undefined') {
+      this.api = new NutriScanAPI();
+    } else {
+      console.warn('NutriScanAPI não encontrada, usando modo simulado');
+      this.api = null;
+    }
     this.init();
   }
 
@@ -47,7 +53,7 @@ class LoginSystem {
       // Usuário já está logado, redirecionar para dashboard
       if (window.location.pathname.includes('login.html') || 
           window.location.pathname.includes('index.html')) {
-        window.location.href = 'dashboard.html';
+        safeRedirect('dashboard.html');
       }
     }
   }
@@ -154,7 +160,7 @@ class LoginSystem {
         // Redirecionar
         setTimeout(() => {
           const redirectUrl = this.getRedirectUrl();
-          window.location.href = redirectUrl;
+          safeRedirect(redirectUrl);
         }, 1500);
       } else {
         throw new Error(result.message || 'Erro no login');
@@ -222,7 +228,7 @@ class LoginSystem {
 
         setTimeout(() => {
           const redirectUrl = this.getRedirectUrl();
-          window.location.href = redirectUrl;
+          safeRedirect(redirectUrl);
         }, 1500);
       } else {
         throw new Error(result.message || 'Erro no login Google');
@@ -380,7 +386,7 @@ class LoginSystem {
     localStorage.removeItem('nutriScanRemember');
 
     // Redirecionar para login
-    window.location.href = 'login.html';
+    safeRedirect('login.html');
   }
 
   // Verificar se usuário está autenticado
@@ -421,7 +427,7 @@ function handleForgotPassword(event) {
 function handleSignup(event) {
   event.preventDefault();
   // Redirecionar para página de cadastro ou mostrar modal
-  window.location.href = 'signup.html';
+  safeRedirect('signup.html');
 }
 
 // Inicializar sistema

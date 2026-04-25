@@ -187,7 +187,13 @@ class NutriScanAPI {
 }
 
 // Instância global da API
-const api = new NutriScanAPI();
+let api;
+if (typeof NutriScanAPI !== 'undefined') {
+  api = new NutriScanAPI();
+} else {
+  console.warn('NutriScanAPI não encontrada para instância global');
+  api = null;
+}
 
 // Funções utilitárias
 const APIUtils = {
@@ -230,12 +236,12 @@ const APIUtils = {
   // Redirecionar para login
   redirectToLogin() {
     localStorage.removeItem('nutriScanToken');
-    window.location.href = 'index.html';
+    safeRedirect('index.html');
   },
 
   // Redirecionar para dashboard
   redirectToDashboard() {
-    window.location.href = 'dashboard.html';
+    safeRedirect('dashboard.html');
   },
 
   // Formatar data

@@ -10,18 +10,84 @@
   <style>
     .history-container {
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--light-gray);
       display: flex;
       flex-direction: column;
+      padding-top: 80px;
     }
 
     .history-header {
-      background: rgba(255, 255, 255, 0.1);
+      background: white;
       backdrop-filter: blur(10px);
       padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .history-nav {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--light-gray);
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .nav-btn:hover {
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--primary-green);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.active {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-btn i {
+      font-size: 0.85rem;
+    }
+
+    .user-details {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
     }
 
     .history-main {
@@ -113,9 +179,116 @@
     }
 
     .history-list {
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid var(--light-gray);
+      border-radius: 10px;
+      background: white;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .export-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .export-card {
+      background: var(--light-gray);
+      padding: 1.5rem;
+      border-radius: 15px;
+    }
+
+    .export-card h3 {
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+
+    .export-card p {
+      margin-bottom: 1.5rem;
+      color: var(--text-light);
+    }
+
+    .export-buttons {
       display: flex;
-      flex-direction: column;
       gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-export {
+      flex: 1;
+      padding: 1rem;
+      background: white;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .btn-export:hover {
+      background: var(--primary-green);
+      color: white;
+      border-color: var(--primary-green);
+      transform: translateY(-2px);
+    }
+
+    .btn-export i {
+      font-size: 1rem;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .setting-card {
+      background: var(--light-gray);
+      padding: 1.5rem;
+      border-radius: 15px;
+    }
+
+    .setting-card h3 {
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+
+    .setting-option {
+      margin-bottom: 1rem;
+    }
+
+    .setting-option label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+
+    .setting-option select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .setting-option input[type="checkbox"] {
+      width: 1.2rem;
+      height: 1.2rem;
+      margin-right: 0.5rem;
     }
 
     .scan-item {
@@ -404,12 +577,37 @@
         <i class="fas fa-leaf"></i>
         <span>Safe-Bite</span>
       </div>
-      <div class="user-info">
-        <div class="user-avatar" id="userAvatar">JD</div>
-        <span id="userName">Bruno Test</span>
-        <button class="btn-secondary" onclick="goToDashboard()" style="padding: 0.5rem 1rem;">
-          <i class="fas fa-home"></i>
+      <nav class="history-nav">
+        <button class="nav-btn active" onclick="showSection('history')" data-section="history">
+          <i class="fas fa-history"></i>
+          <span>Histórico</span>
         </button>
+        <button class="nav-btn" onclick="showSection('stats')" data-section="stats">
+          <i class="fas fa-chart-bar"></i>
+          <span>Estatísticas</span>
+        </button>
+        <button class="nav-btn" onclick="showSection('export')" data-section="export">
+          <i class="fas fa-download"></i>
+          <span>Exportar</span>
+        </button>
+        <button class="nav-btn"  onclick="window.location.href='dashboard.html'">
+          <i class="fas fa-cog"></i>
+          <span>Configurações</span>
+        </button>
+      </nav>
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+          <span id="userName">Carregando...</span>
+          <button class="btn-secondary" onclick="goToDashboard()" title="Ir para Dashboard">
+            <i class="fas fa-home"></i>
+          </button>
+          <button class="btn-secondary" onclick="goToScanner()" title="Novo Scan">
+            <i class="fas fa-camera"></i>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -420,8 +618,8 @@
         <div class="spinner"></div>
       </div>
 
-      <!-- History Card -->
-      <div class="history-card" id="historyCard" style="display: none;">
+      <!-- History Section -->
+      <div class="history-card" id="historySection" style="display: block;">
         <!-- Header with Filters -->
         <div class="history-header-card">
           <h1 class="history-title">
@@ -489,6 +687,144 @@
             <div class="stat-label">Evitar</div>
           </div>
         </div>
+
+        <!-- History List -->
+        <div class="history-list" id="historyList">
+          <!-- Scan items will be populated here -->
+        </div>
+      </div>
+
+      <!-- Stats Section -->
+      <div class="history-card" id="statsSection" style="display: none;">
+        <div class="history-header-card">
+          <h1 class="history-title">
+            <i class="fas fa-chart-bar"></i>
+            Estatísticas Detalhadas
+          </h1>
+        </div>
+        
+        <div class="stats-grid" id="statsGrid">
+          <!-- Detailed stats will be populated here -->
+        </div>
+      </div>
+
+      <!-- Export Section -->
+      <div class="history-card" id="exportSection" style="display: none;">
+        <div class="history-header-card">
+          <h1 class="history-title">
+            <i class="fas fa-download"></i>
+            Exportar Dados
+          </h1>
+        </div>
+        
+        <div class="export-options">
+          <div class="export-card">
+            <h3>Exportar Histórico</h3>
+            <p>Exporte seu histórico de scans em diferentes formatos</p>
+            <div class="export-buttons">
+              <button class="btn-export" onclick="exportToCSV()" data-format="csv">
+                <i class="fas fa-file-csv"></i>
+                CSV
+              </button>
+              <button class="btn-export" onclick="exportToJSON()" data-format="json">
+                <i class="fas fa-file-code"></i>
+                JSON
+              </button>
+              <button class="btn-export" onclick="exportToPDF()" data-format="pdf">
+                <i class="fas fa-file-pdf"></i>
+                PDF
+              </button>
+            </div>
+          </div>
+          
+          <div class="export-card">
+            <h3>Exportar Estatísticas</h3>
+            <p>Exporte suas estatísticas detalhadas</p>
+            <div class="export-buttons">
+              <button class="btn-export" onclick="exportStatsToCSV()" data-format="csv">
+                <i class="fas fa-file-csv"></i>
+                CSV
+              </button>
+              <button class="btn-export" onclick="exportStatsToJSON()" data-format="json">
+                <i class="fas fa-file-code"></i>
+                JSON
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div class="history-card" id="settingsSection" style="display: none;">
+        <div class="history-header-card">
+          <h1 class="history-title">
+            <i class="fas fa-cog"></i>
+            Configurações do Histórico
+          </h1>
+        </div>
+        
+        <div class="settings-grid">
+          <div class="setting-card">
+            <h3>Exibição</h3>
+            <div class="setting-option">
+              <label for="itemsPerPage">Itens por página:</label>
+              <select id="itemsPerPage" onchange="updateSettings()">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="setting-card">
+            <h3>Ordenação</h3>
+            <div class="setting-option">
+              <label for="sortBy">Ordenar por:</label>
+              <select id="sortBy" onchange="updateSettings()">
+                <option value="date">Data</option>
+                <option value="product">Produto</option>
+                <option value="risk">Risco</option>
+                <option value="confidence">Confiança</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="setting-card">
+            <h3>Filtros</h3>
+            <div class="setting-option">
+              <label>
+                <input type="checkbox" id="autoRefresh" onchange="updateSettings()">
+                <span>Atualizar automaticamente</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <!-- Messages -->
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <!-- Stats Overview -->
+        <!-- <div class="stats-overview" id="statsOverview">
+          <div class="stat-card">
+            <div class="stat-value" id="totalScans">0</div>
+            <div class="stat-label">Total de Scans</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="safeScans">0</div>
+            <div class="stat-label">Seguros</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="warningScans">0</div>
+            <div class="stat-label">Com Cuidado</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="dangerScans">0</div>
+            <div class="stat-label">Evitar</div>
+          </div>
+        </div> -->
 
         <!-- History List -->
         <div class="history-list" id="historyList">
@@ -856,7 +1192,7 @@
       }
 
       goToScanner() {
-        window.location.href = 'scanner.html';
+        window.location.href = 'allergy-scanner.html';
       }
     }
 
@@ -866,7 +1202,7 @@
     }
 
     function goToScanner() {
-      window.location.href = 'scanner.html';
+      window.location.href = 'allergy-scanner.html';
     }
 
     function filterHistory() {
@@ -901,5 +1237,556 @@
   
   <!-- Sistema de Sincronização de Usuário -->
   <script src="user-sync.js"></script>
+  <script>
+    // Histórico Controller
+    class HistoryController {
+      constructor() {
+        this.currentSection = 'history';
+        this.scans = [];
+        this.filteredScans = [];
+        this.settings = {
+          itemsPerPage: 10,
+          sortBy: 'date',
+          autoRefresh: false
+        };
+        this.init();
+      }
+
+      init() {
+        this.loadUserData();
+        this.loadScans();
+        this.setupEventListeners();
+        this.updateUI();
+      }
+
+      loadUserData() {
+        const userStr = localStorage.getItem('nutriScanUser');
+        if (userStr) {
+          this.user = JSON.parse(userStr);
+          this.updateUserInfo();
+        }
+
+        // Carregar configurações salvas
+        const settingsStr = localStorage.getItem('historySettings');
+        if (settingsStr) {
+          this.settings = { ...this.settings, ...JSON.parse(settingsStr) };
+        }
+      }
+
+      loadScans() {
+        const scansStr = localStorage.getItem('nutriScanScans');
+        if (scansStr) {
+          this.scans = JSON.parse(scansStr);
+        } else {
+          // Criar dados simulados para demonstração
+          this.scans = [
+            {
+              id: 1,
+              product: 'NutriSafe Cereal Integral',
+              brand: 'NutriBrand',
+              category: 'graos',
+              date: new Date(Date.now() - 86400000).toISOString(),
+              status: 'safe',
+              confidence: 95,
+              analysis: {
+                overallRisk: 'safe',
+                allergens: [],
+                additives: ['B12', 'Ferro'],
+                preservatives: []
+              }
+            },
+            {
+              id: 2,
+              product: 'Barra Proteína Chocolate',
+              brand: 'FitPro',
+              category: 'laticinios',
+              date: new Date(Date.now() - 172800000).toISOString(),
+              status: 'caution',
+              confidence: 87,
+              analysis: {
+                overallRisk: 'caution',
+                allergens: ['Soja', 'Leite'],
+                additives: ['Emulsificante'],
+                preservatives: ['Conservante']
+              }
+            },
+            {
+              id: 3,
+              product: 'Biscoito Recheado',
+              brand: 'DoceBom',
+              category: 'biscoitos',
+              date: new Date(Date.now() - 259200000).toISOString(),
+              status: 'avoid',
+              confidence: 92,
+              analysis: {
+                overallRisk: 'avoid',
+                allergens: ['Glúten', 'Amendoim'],
+                additives: ['Corante Artificial'],
+                preservatives: ['BHA', 'BHT']
+              }
+            }
+          ];
+          localStorage.setItem('nutriScanScans', JSON.stringify(this.scans));
+        }
+        
+        this.filteredScans = [...this.scans];
+      }
+
+      setupEventListeners() {
+        // Configurar event listeners para os filtros
+        const categoryFilter = document.getElementById('categoryFilter');
+        const riskFilter = document.getElementById('riskFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        
+        if (categoryFilter) {
+          categoryFilter.addEventListener('change', () => this.filterHistory());
+        }
+        if (riskFilter) {
+          riskFilter.addEventListener('change', () => this.filterHistory());
+        }
+        if (dateFilter) {
+          dateFilter.addEventListener('change', () => this.filterHistory());
+        }
+      }
+
+      updateUserInfo() {
+        const userNameEl = document.getElementById('userName');
+        const userAvatarEl = document.getElementById('userAvatar');
+        
+        if (userNameEl && this.user) {
+          userNameEl.textContent = this.user.name || 'Usuário';
+        }
+        
+        if (userAvatarEl && this.user) {
+          userAvatarEl.textContent = this.user.name ? this.user.name.charAt(0).toUpperCase() : 'U';
+        }
+      }
+
+      showSection(sectionName) {
+        // Esconder todas as seções
+        document.getElementById('historySection').style.display = 'none';
+        document.getElementById('statsSection').style.display = 'none';
+        document.getElementById('exportSection').style.display = 'none';
+        document.getElementById('settingsSection').style.display = 'none';
+        
+        // Mostrar seção selecionada
+        const targetSection = document.getElementById(sectionName + 'Section');
+        if (targetSection) {
+          targetSection.style.display = 'block';
+        }
+        
+        // Atualizar botões de navegação
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        const activeBtn = document.querySelector(`[data-section="${sectionName}"]`);
+        if (activeBtn) {
+          activeBtn.classList.add('active');
+        }
+        
+        this.currentSection = sectionName;
+        this.updateSectionContent();
+      }
+
+      updateSectionContent() {
+        switch (this.currentSection) {
+          case 'history':
+            this.renderHistoryList();
+            break;
+          case 'stats':
+            this.renderStats();
+            break;
+          case 'export':
+            this.renderExportOptions();
+            break;
+          case 'settings':
+            this.renderSettings();
+            break;
+        }
+      }
+
+      filterHistory() {
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const riskFilter = document.getElementById('riskFilter').value;
+        const dateFilter = document.getElementById('dateFilter').value;
+        
+        this.filteredScans = this.scans.filter(scan => {
+          // Filtro por categoria
+          if (categoryFilter && scan.category !== categoryFilter) {
+            return false;
+          }
+          
+          // Filtro por risco
+          if (riskFilter && scan.status !== riskFilter) {
+            return false;
+          }
+          
+          // Filtro por data
+          if (dateFilter) {
+            const scanDate = new Date(scan.date);
+            const now = new Date();
+            const daysDiff = Math.floor((now - scanDate) / (1000 * 60 * 60 * 24));
+            
+            if (daysDiff > parseInt(dateFilter)) {
+              return false;
+            }
+          }
+          
+          return true;
+        });
+        
+        this.renderHistoryList();
+      }
+
+      renderHistoryList() {
+        const historyList = document.getElementById('historyList');
+        if (!historyList) return;
+        
+        if (this.filteredScans.length === 0) {
+          historyList.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+              <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <p>Nenhum scan encontrado</p>
+              <p style="font-size: 0.9rem; margin-top: 0.5rem;">Tente fazer um novo scan para ver resultados aqui.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        historyList.innerHTML = this.filteredScans.map(scan => `
+          <div class="scan-item" onclick="viewScanDetails(${scan.id})">
+            <div class="scan-info">
+              <div class="scan-product">${scan.product}</div>
+              <div class="scan-details">
+                <span class="scan-category">${this.getCategoryLabel(scan.category)}</span>
+                <span class="scan-date">${new Date(scan.date).toLocaleDateString('pt-BR')}</span>
+              </div>
+            </div>
+            <div class="scan-status status-${scan.status}">
+              ${this.getStatusLabel(scan.status)}
+            </div>
+          </div>
+        `).join('');
+        
+        this.updateStats();
+      }
+
+      renderStats() {
+        const statsGrid = document.getElementById('statsGrid');
+        if (!statsGrid) return;
+        
+        const stats = this.calculateStats();
+        
+        statsGrid.innerHTML = `
+          <div class="stat-card">
+            <h3>Total de Scans</h3>
+            <div class="stat-value">${stats.total}</div>
+            <div class="stat-change">+${stats.newThisMonth} este mês</div>
+          </div>
+          
+          <div class="stat-card">
+            <h3>Produtos Seguros</h3>
+            <div class="stat-value">${stats.safe}</div>
+            <div class="stat-percentage">${((stats.safe / stats.total) * 100).toFixed(1)}%</div>
+          </div>
+          
+          <div class="stat-card">
+            <h3>Com Cuidado</h3>
+            <div class="stat-value">${stats.caution}</div>
+            <div class="stat-percentage">${((stats.caution / stats.total) * 100).toFixed(1)}%</div>
+          </div>
+          
+          <div class="stat-card">
+            <h3>Evitar</h3>
+            <div class="stat-value">${stats.avoid}</div>
+            <div class="stat-percentage">${((stats.avoid / stats.total) * 100).toFixed(1)}%</div>
+          </div>
+          
+          <div class="stat-card">
+            <h3>Confiança Média</h3>
+            <div class="stat-value">${stats.avgConfidence}%</div>
+          </div>
+        `;
+      }
+
+      renderExportOptions() {
+        const exportOptions = document.querySelector('.export-options');
+        if (!exportOptions) return;
+        
+        exportOptions.innerHTML = `
+          <div class="export-card">
+            <h3>Exportar Histórico Completo</h3>
+            <p>Exporte todos os seus dados de scans em diferentes formatos</p>
+            <div class="export-buttons">
+              <button class="btn-export" onclick="historyController.exportToCSV()" data-format="csv">
+                <i class="fas fa-file-csv"></i>
+                CSV
+              </button>
+              <button class="btn-export" onclick="historyController.exportToJSON()" data-format="json">
+                <i class="fas fa-file-code"></i>
+                JSON
+              </button>
+              <button class="btn-export" onclick="historyController.exportToPDF()" data-format="pdf">
+                <i class="fas fa-file-pdf"></i>
+                PDF
+              </button>
+            </div>
+          </div>
+          
+          <div class="export-card">
+            <h3>Exportar Estatísticas</h3>
+            <p>Exporte suas estatísticas detalhadas</p>
+            <div class="export-buttons">
+              <button class="btn-export" onclick="historyController.exportStatsToCSV()" data-format="csv">
+                <i class="fas fa-file-csv"></i>
+                CSV
+              </button>
+              <button class="btn-export" onclick="historyController.exportStatsToJSON()" data-format="json">
+                <i class="fas fa-file-code"></i>
+                JSON
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      renderSettings() {
+        const settingsGrid = document.querySelector('.settings-grid');
+        if (!settingsGrid) return;
+        
+        settingsGrid.innerHTML = `
+          <div class="setting-card">
+            <h3>Exibição</h3>
+            <div class="setting-option">
+              <label for="itemsPerPage">Itens por página:</label>
+              <select id="itemsPerPage" onchange="historyController.updateSettings()">
+                <option value="10" ${this.settings.itemsPerPage === 10 ? 'selected' : ''}>10</option>
+                <option value="25" ${this.settings.itemsPerPage === 25 ? 'selected' : ''}>25</option>
+                <option value="50" ${this.settings.itemsPerPage === 50 ? 'selected' : ''}>50</option>
+                <option value="100" ${this.settings.itemsPerPage === 100 ? 'selected' : ''}>100</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="setting-card">
+            <h3>Ordenação</h3>
+            <div class="setting-option">
+              <label for="sortBy">Ordenar por:</label>
+              <select id="sortBy" onchange="historyController.updateSettings()">
+                <option value="date" ${this.settings.sortBy === 'date' ? 'selected' : ''}>Data</option>
+                <option value="product" ${this.settings.sortBy === 'product' ? 'selected' : ''}>Produto</option>
+                <option value="risk" ${this.settings.sortBy === 'risk' ? 'selected' : ''}>Risco</option>
+                <option value="confidence" ${this.settings.sortBy === 'confidence' ? 'selected' : ''}>Confiança</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="setting-card">
+            <h3>Preferências</h3>
+            <div class="setting-option">
+              <label>
+                <input type="checkbox" id="autoRefresh" onchange="historyController.updateSettings()" ${this.settings.autoRefresh ? 'checked' : ''}>
+                <span>Atualizar automaticamente</span>
+              </label>
+            </div>
+          </div>
+        `;
+      }
+
+      calculateStats() {
+        const total = this.filteredScans.length;
+        const safe = this.filteredScans.filter(s => s.status === 'safe').length;
+        const caution = this.filteredScans.filter(s => s.status === 'caution').length;
+        const avoid = this.filteredScans.filter(s => s.status === 'avoid').length;
+        const avgConfidence = this.filteredScans.reduce((sum, s) => sum + s.confidence, 0) / total;
+        
+        const now = new Date();
+        const thisMonth = this.filteredScans.filter(s => {
+          const scanDate = new Date(s.date);
+          return scanDate.getMonth() === now.getMonth() && scanDate.getFullYear() === now.getFullYear();
+        }).length;
+        
+        return {
+          total,
+          safe,
+          caution,
+          avoid,
+          avgConfidence: avgConfidence.toFixed(1),
+          newThisMonth: thisMonth
+        };
+      }
+
+      getCategoryLabel(category) {
+        const labels = {
+          'graos': 'Grãos',
+          'laticinios': 'Laticínios',
+          'biscoitos': 'Biscoitos',
+          'chocolates': 'Chocolates',
+          'doces': 'Doces',
+          'salgados': 'Salgados',
+          'bebidas': 'Bebidas',
+          'laticinios': 'Laticínios',
+          'carnes': 'Carnes',
+          'frutas': 'Frutas',
+          'vegetais': 'Vegetais'
+        };
+        return labels[category] || category;
+      }
+
+      getStatusLabel(status) {
+        const labels = {
+          'safe': '✅ Seguro',
+          'caution': '⚠️ Cuidado',
+          'avoid': '❌ Evitar'
+        };
+        return labels[status] || status;
+      }
+
+      updateSettings() {
+        const itemsPerPage = document.getElementById('itemsPerPage');
+        const sortBy = document.getElementById('sortBy');
+        const autoRefresh = document.getElementById('autoRefresh');
+        
+        if (itemsPerPage) this.settings.itemsPerPage = parseInt(itemsPerPage.value);
+        if (sortBy) this.settings.sortBy = sortBy.value;
+        if (autoRefresh) this.settings.autoRefresh = autoRefresh.checked;
+        
+        localStorage.setItem('historySettings', JSON.stringify(this.settings));
+        
+        // Reaplicar filtros e ordenação
+        this.filterHistory();
+      }
+
+      exportToCSV() {
+        const csv = this.convertToCSV(this.filteredScans);
+        this.downloadFile(csv, 'history.csv', 'text/csv');
+      }
+
+      exportToJSON() {
+        const json = JSON.stringify(this.filteredScans, null, 2);
+        this.downloadFile(json, 'history.json', 'application/json');
+      }
+
+      exportToPDF() {
+        alert('Função de exportação para PDF será implementada em breve.');
+      }
+
+      exportStatsToCSV() {
+        const stats = this.calculateStats();
+        const csv = this.convertStatsToCSV(stats);
+        this.downloadFile(csv, 'stats.csv', 'text/csv');
+      }
+
+      exportStatsToJSON() {
+        const stats = this.calculateStats();
+        const json = JSON.stringify(stats, null, 2);
+        this.downloadFile(json, 'stats.json', 'application/json');
+      }
+
+      convertToCSV(data) {
+        const headers = ['ID', 'Produto', 'Marca', 'Categoria', 'Data', 'Status', 'Confiança'];
+        const rows = data.map(scan => [
+          scan.id,
+          scan.product,
+          scan.brand,
+          this.getCategoryLabel(scan.category),
+          new Date(scan.date).toLocaleDateString('pt-BR'),
+          this.getStatusLabel(scan.status),
+          scan.confidence + '%'
+        ]);
+        
+        return [headers, ...rows].map(row => row.join(',')).join('\n');
+      }
+
+      convertStatsToCSV(stats) {
+        const headers = ['Métrica', 'Valor'];
+        const rows = [
+          ['Total de Scans', stats.total],
+          ['Produtos Seguros', stats.safe],
+          ['Com Cuidado', stats.caution],
+          ['Evitar', stats.avoid],
+          ['Confiança Média', stats.avgConfidence + '%'],
+          ['Novos este Mês', stats.newThisMonth]
+        ];
+        
+        return [headers, ...rows].map(row => row.join(',')).join('\n');
+      }
+
+      downloadFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    // Funções globais
+    function showSection(sectionName) {
+      historyController.showSection(sectionName);
+    }
+
+    function filterHistory() {
+      historyController.filterHistory();
+    }
+
+    function updateSettings() {
+      historyController.updateSettings();
+    }
+
+    function exportToCSV() {
+      historyController.exportToCSV();
+    }
+
+    function exportToJSON() {
+      historyController.exportToJSON();
+    }
+
+    function exportToPDF() {
+      historyController.exportToPDF();
+    }
+
+    function exportStatsToCSV() {
+      historyController.exportStatsToCSV();
+    }
+
+    function exportStatsToJSON() {
+      historyController.exportStatsToJSON();
+    }
+
+    function viewScanDetails(scanId) {
+      const scan = historyController.scans.find(s => s.id === scanId);
+      if (scan) {
+        alert(`Detalhes do Scan #${scanId}:\n\nProduto: ${scan.product}\nMarca: ${scan.brand}\nCategoria: ${historyController.getCategoryLabel(scan.category)}\nStatus: ${historyController.getStatusLabel(scan.status)}\nConfiança: ${scan.confidence}%\nData: ${new Date(scan.date).toLocaleDateString('pt-BR')}`);
+      }
+    }
+
+    function goToDashboard() {
+      safeRedirect('dashboard.html');
+    }
+
+    function goToScanner() {
+      safeRedirect('allergy-scanner.html');
+    }
+  </script>
+  
+  <!-- Scripts necessários -->
+  <script src="api-config.js"></script>
+  <script src="file-checker.js"></script>
+  
+  <!-- Sistema de Sincronização de Usuário -->
+  <script src="user-sync.js"></script>
+  
+  <!-- Inicializar controller
+  let historyController;
+  document.addEventListener('DOMContentLoaded', () => {
+    historyController = new HistoryController();
+    window.historyController = historyController;
+  });
 </body>
 </html>

@@ -55,7 +55,7 @@ function setupScannerButtons() {
             if (href && href !== '#') {
                 e.preventDefault();
                 console.log('Navegando para:', href);
-                window.location.href = href;
+                safeRedirect(href);
             }
         });
     });

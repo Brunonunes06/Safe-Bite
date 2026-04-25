@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           // Fallback se o popup não estiver disponível
           console.log('Popup não disponível, redirecionando...');
-          window.location.href = 'payment.html';
+          safeRedirect('payment.html');
         }
       });
     }
@@ -146,7 +146,7 @@ function showScanResult() {
         <button onclick="this.closest('div').parentElement.remove()" style="padding: 0.8rem 1.5rem; background: var(--medium-gray); color: var(--text-dark); border: none; border-radius: 8px; cursor: pointer;">
           Fechar
         </button>
-        <button onclick="window.location.href='scanner.html'" style="padding: 0.8rem 1.5rem; background: var(--gradient-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+        <button onclick="safeRedirect('scanner.html')" style="padding: 0.8rem 1.5rem; background: var(--gradient-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
           Ver Detalhes
         </button>
       </div>
@@ -309,10 +309,10 @@ function handleHeroStartFree() {
   
   if (token && user) {
     // Usuário já logado, redirecionar para dashboard
-    window.location.href = 'dashboard.html';
+    safeRedirect('dashboard.html');
   } else {
     // Usuário não logado, redirecionar para página de login
-    window.location.href = 'login.html';
+    safeRedirect('login.html');
   }
 }
 

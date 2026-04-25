@@ -632,6 +632,10 @@ body {
   margin: 0 auto;
 }
 
+.pricing-card:hover{
+  border: 2px solid var(--primary-green); 
+}
+
 .pricing-card {
   background: var(--white);
   border-radius: 20px;

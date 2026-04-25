@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Safe-Bite</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="upgrade-popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Estilos específicos do dashboard */
+    .dashboard-container {
+      min-height: 100vh;
+      background: var(--light-gray);
+      padding: 20px;
+      padding-top: 80px;
+    }
+
+    .dashboard-header {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .dashboard-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition-normal);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .icon-green {
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--primary-green);
+    }
+
+    .icon-blue {
+      background: rgba(52, 152, 219, 0.1);
+      color: #3498db;
+    }
+
+    .icon-purple {
+      background: rgba(155, 89, 182, 0.1);
+      color: #9b59b6;
+    }
+
+    .icon-orange {
+      background: rgba(243, 156, 18, 0.1);
+      color: #f39c12;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--light-gray);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .btn-dashboard {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--light-gray);
+      color: var(--text-dark);
+      border: 2px solid var(--medium-gray);
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .btn-secondary:hover {
+      background: var(--medium-gray);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Progress Bar Styles */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: var(--light-gray);
+      border-radius: 3px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+      border-radius: 3px;
+      transition: width 0.5s ease, background 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Real-time notification styles */
+    .realtime-indicator {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--success-green);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      animation: pulse 2s infinite;
+    }
+
+    .realtime-indicator.offline {
+      background: var(--danger-red);
+      animation: none;
+    }
+
+    /* Enhanced scan item styles */
+    .scan-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--light-gray);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border-left: 3px solid var(--primary-green);
+      transition: var(--transition-fast);
+    }
+
+    .scan-item:hover {
+      transform: translateX(5px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .scan-item.warning {
+      border-left-color: var(--warning-orange);
+    }
+
+    .scan-item.danger {
+      border-left-color: var(--danger-red);
+    }
+
+    .scan-status.status-safe {
+      background: rgba(39, 174, 96, 0.1);
+      color: var(--success-green);
+    }
+
+    .scan-status.status-warning {
+      background: rgba(243, 156, 18, 0.1);
+      color: var(--warning-orange);
+    }
+
+    .scan-status.status-danger {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--danger-red);
+    }
+
+    @keyframes slideInLeft {
+      from {
+        transform: translateX(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .recent-scans {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .scans-list {
+      margin-top: 20px;
+    }
+
+    .scan-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      border-bottom: 1px solid var(--light-gray);
+      transition: background 0.3s ease;
+    }
+
+    .scan-item:hover {
+      background: rgba(46, 204, 113, 0.05);
+    }
+
+    .scan-info {
+      flex: 1;
+    }
+
+    .scan-product {
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 5px;
+    }
+
+    .scan-date {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    .scan-status {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-safe {
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--primary-green);
+    }
+
+    .status-warning {
+      background: rgba(243, 156, 18, 0.1);
+      color: #f39c12;
+    }
+
+    .status-danger {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <i class="fas fa-leaf"></i>
+          <span>Safe-Bite</span>
+        </div>
+        
+        <nav class="nav-menu">
+          <ul>
+            <li><a href="index.html" class="nav-link">Início</a></li>
+            <li><a href="allergy-scanner.html" class="nav-link">Scanner</a></li>
+            <li><a href="history.html" class="nav-link">Histórico</a></li>
+            <li><a href="profile.html" class="nav-link">Perfil</a></li>
+            <li><a href="settings.html" class="nav-link">Configurações</a></li>
+            <li><a href="#" class="nav-link" id="logoutBtn">Sair</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-container">
+    <div class="container">
+      <!-- Header do Dashboard -->
+      <div class="dashboard-header">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h1 style="margin-bottom: 10px;">Bem-vindo de volta!</h1>
+            <p style="color: var(--text-light);" id="userWelcome">Carregando...</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.9rem; color: var(--text-light);">Plano Atual</div>
+            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-green);" id="userPlan">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="dashboard-content">
+        <div class="dashboard-card">
+          <div class="card-header">
+            <div>
+              <div class="stat-value" id="totalScans">0</div>
+              <div class="stat-label">Total de Scans</div>
+            </div>
+            <div class="card-icon icon-green">
+              <i class="fas fa-barcode"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-header">
+            <div>
+              <div class="stat-value" id="safeProducts">0</div>
+              <div class="stat-label">Produtos Seguros</div>
+            </div>
+            <div class="card-icon icon-blue">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-header">
+            <div>
+              <div class="stat-value" id="warningsFound">0</div>
+              <div class="stat-label">Alertas</div>
+            </div>
+            <div class="card-icon icon-orange">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-header">
+            <div>
+              <div class="stat-value" id="planUsage">0/10</div>
+              <div class="stat-label">Uso do Plano</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar" id="planProgressBar"></div>
+              </div>
+            </div>
+            <div class="card-icon icon-purple">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="dashboard-content">
+        <div class="dashboard-card">
+          <h3 class="card-title">Ações Rápidas</h3>
+          <div class="action-buttons">
+            <a href="allergy-scanner.html" class="btn-dashboard btn-primary">
+              <i class="fas fa-camera"></i> Novo Scan
+            </a>
+            <a href="allergy-scanner.html" class="btn-dashboard btn-primary" style="background: linear-gradient(135deg, #e74c3c, #f39c12);">
+              <i class="fas fa-shield-virus"></i> Verificar Alergias
+            </a>
+            <a href="history.html" class="btn-dashboard btn-secondary">
+              <i class="fas fa-history"></i> Ver Histórico
+            </a>
+            <a href="profile.html" class="btn-dashboard btn-secondary">
+              <i class="fas fa-user"></i> Meu Perfil
+            </a>
+            <a href="payment.html" class="btn-dashboard btn-primary">
+              <i class="fas fa-crown"></i> Upgrade Premium
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Scans -->
+      <div class="recent-scans">
+        <h3 style="margin-bottom: 20px;">Scans Recentes</h3>
+        <div class="scans-list" id="recentScansList">
+          <div style="text-align: center; padding: 40px; color: var(--text-light);">
+            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+            <p>Nenhum scan realizado ainda</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Faça seu primeiro scan para começar!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Safe-Bite</h4>
+          <p>Seu assistente de segurança alimentar</p>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Links Úteis</h4>
+          <ul>
+            <li><a href="index.html">Início</a></li>
+            <li><a href="allergy-scanner.html">Scanner</a></li>
+            <li><a href="help.html">Ajuda</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="privacy.html">Privacidade</a></li>
+            <li><a href="help.html">Termos</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Safe-Bite. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="api-config.js"></script>
+  <script src="file-checker.js"></script>
+  <script src="realtime-sync.js"></script>
+  <script src="dashboard-corrections.js"></script>
+  <script>
+    // Enhanced Dashboard Controller with Real-time Sync
+    class DashboardController {
+      constructor() {
+        this.user = null;
+        this.scans = [];
+        this.stats = {
+          totalScans: 0,
+          safeProducts: 0,
+          warningsFound: 0,
+          planUsage: 0,
+          planLimit: 10
+        };
+        this.syncInterval = null;
+        this.init();
+      }
+
+      init() {
+        this.loadUserData();
+        this.setupEventListeners();
+        this.initializeRealtimeSync();
+        this.updateUI();
+        this.startPeriodicUpdates();
+      }
+
+      loadUserData() {
+        const userStr = localStorage.getItem('nutriScanUser');
+        if (userStr) {
+          this.user = JSON.parse(userStr);
+        }
+
+        // Carregar scans do localStorage ou API
+        this.loadScansFromStorage();
+      }
+
+      loadScansFromStorage() {
+        const scansStr = localStorage.getItem('nutriScanScans');
+        if (scansStr) {
+          this.scans = JSON.parse(scansStr);
+        } else {
+          // Criar dados simulados para demonstração
+          this.scans = [
+            {
+              id: 1,
+              product: 'NutriSafe Cereal',
+              date: new Date(Date.now() - 86400000).toISOString(),
+              status: 'safe',
+              confidence: 95
+            },
+            {
+              id: 2,
+              product: 'Protein Bar X',
+              date: new Date(Date.now() - 172800000).toISOString(),
+              status: 'warning',
+              confidence: 87
+            },
+            {
+              id: 3,
+              product: 'Organic Juice',
+              date: new Date(Date.now() - 259200000).toISOString(),
+              status: 'safe',
+              confidence: 92
+            },
+            {
+              id: 4,
+              product: 'Chocolate Bar',
+              date: new Date(Date.now() - 345600000).toISOString(),
+              status: 'danger',
+              confidence: 94
+            },
+            {
+              id: 5,
+              product: 'Vegan Cookies',
+              date: new Date(Date.now() - 432000000).toISOString(),
+              status: 'safe',
+              confidence: 89
+            }
+          ];
+          localStorage.setItem('nutriScanScans', JSON.stringify(this.scans));
+        }
+        
+        this.calculateStats();
+      }
+
+      initializeRealtimeSync() {
+        // Adicionar indicador de tempo real
+        this.addRealtimeIndicator();
+        
+        // Configurar listener para atualizações em tempo real
+        if (window.realtimeSync) {
+          console.log('🔄 Real-time sync initialized');
+        }
+      }
+
+      addRealtimeIndicator() {
+        const indicator = document.createElement('div');
+        indicator.className = 'realtime-indicator';
+        indicator.innerHTML = `
+          <i class="fas fa-wifi"></i>
+          <span>Tempo Real</span>
+        `;
+        document.body.appendChild(indicator);
+      }
+
+      calculateStats() {
+        this.stats.totalScans = this.scans.length;
+        this.stats.safeProducts = this.scans.filter(scan => scan.status === 'safe').length;
+        this.stats.warningsFound = this.scans.filter(scan => scan.status === 'warning' || scan.status === 'danger').length;
+        this.stats.planUsage = this.scans.filter(scan => this.isToday(scan.date)).length;
+        
+        // Obter limite do plano do usuário
+        if (this.user && this.user.plan) {
+          this.stats.planLimit = this.getPlanLimit(this.user.plan);
+        }
+      }
+
+      getPlanLimit(plan) {
+        const limits = {
+          'Free': 10,
+          'Basic': 50,
+          'Premium': 200,
+          'Enterprise': 1000
+        };
+        return limits[plan] || 10;
+      }
+
+      isToday(dateString) {
+        const date = new Date(dateString);
+        const today = new Date();
+        return date.toDateString() === today.toDateString();
+      }
+
+      setupEventListeners() {
+        // Simular novos scans para demonstração
+        this.setupDemoMode();
+      }
+
+      setupDemoMode() {
+        // Adicionar botão para simular novo scan
+        const dashboardContent = document.querySelector('.dashboard-content');
+        if (dashboardContent) {
+          const demoButton = document.createElement('button');
+          demoButton.className = 'btn-dashboard btn-secondary';
+          demoButton.innerHTML = '<i class="fas fa-plus"></i> Simular Novo Scan';
+          demoButton.style.marginTop = '1rem';
+          demoButton.onclick = () => this.simulateNewScan();
+          
+          const actionButtons = document.querySelector('.action-buttons');
+          if (actionButtons) {
+            actionButtons.appendChild(demoButton);
+          }
+        }
+      }
+
+      simulateNewScan() {
+        const products = [
+          { name: 'Healthy Granola', status: 'safe', confidence: 96 },
+          { name: 'Energy Drink', status: 'warning', confidence: 78 },
+          { name: 'Nut Butter', status: 'danger', confidence: 91 },
+          { name: 'Green Tea', status: 'safe', confidence: 88 },
+          { name: 'Protein Shake', status: 'safe', confidence: 93 }
+        ];
+        
+        const randomProduct = products[Math.floor(Math.random() * products.length)];
+        
+        const newScan = {
+          id: this.scans.length + 1,
+          product: randomProduct.name,
+          date: new Date().toISOString(),
+          status: randomProduct.status,
+          confidence: randomProduct.confidence
+        };
+        
+        // Adicionar ao início da lista
+        this.scans.unshift(newScan);
+        
+        // Manter apenas os 20 mais recentes
+        if (this.scans.length > 20) {
+          this.scans = this.scans.slice(0, 20);
+        }
+        
+        // Salvar no localStorage
+        localStorage.setItem('nutriScanScans', JSON.stringify(this.scans));
+        
+        // Recalcular estatísticas
+        this.calculateStats();
+        
+        // Atualizar UI com animação
+        this.updateUIWithAnimation();
+        
+        // Notificar em tempo real
+        this.notifyNewScan(newScan);
+      }
+
+      notifyNewScan(scanData) {
+        // Criar notificação em tempo real
+        const notification = document.createElement('div');
+        notification.className = 'realtime-notification';
+        notification.innerHTML = `
+          <div class="notification-content">
+            <i class="fas fa-${scanData.status === 'safe' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            <span>Novo scan: ${scanData.product}</span>
+            <span class="status-${scanData.status}">${this.getStatusText(scanData.status)}</span>
+          </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remover após 5 segundos
+        setTimeout(() => {
+          notification.style.animation = 'slideOutRight 0.5s ease';
+          setTimeout(() => notification.remove(), 500);
+        }, 5000);
+      }
+
+      getStatusText(status) {
+        const texts = {
+          'safe': 'Seguro',
+          'warning': 'Atenção',
+          'danger': 'Perigo'
+        };
+        return texts[status] || 'Desconhecido';
+      }
+
+      updateUIWithAnimation() {
+        // Atualizar contadores com animação
+        this.animateCounter('totalScans', this.stats.totalScans);
+        this.animateCounter('safeProducts', this.stats.safeProducts);
+        this.animateCounter('warningsFound', this.stats.warningsFound);
+        this.animateCounter('planUsage', `${this.stats.planUsage}/${this.stats.planLimit}`);
+        
+        // Atualizar barra de progresso
+        this.updateProgressBar();
+        
+        // Atualizar lista de scans recentes
+        this.updateRecentScans();
+      }
+
+      animateCounter(elementId, endValue) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const startValue = parseInt(element.textContent) || 0;
+        const duration = 1000;
+        const startTime = performance.now();
+        
+        const animate = (currentTime) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          const current = Math.floor(startValue + (endValue - startValue) * progress);
+          element.textContent = typeof endValue === 'string' ? endValue : current;
+          
+          // Adicionar efeito de pulse
+          if (progress === 1) {
+            element.style.transform = 'scale(1.1)';
+            element.style.transition = 'transform 0.2s ease';
+            setTimeout(() => {
+              element.style.transform = 'scale(1)';
+            }, 200);
+          }
+          
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          }
+        };
+        
+        requestAnimationFrame(animate);
+      }
+
+      updateProgressBar() {
+        const progressBar = document.getElementById('planProgressBar');
+        if (!progressBar) return;
+        
+        const percentage = (this.stats.planUsage / this.stats.planLimit) * 100;
+        progressBar.style.width = `${Math.min(percentage, 100)}%`;
+        
+        // Mudar cor baseado no uso
+        if (percentage >= 90) {
+          progressBar.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+        } else if (percentage >= 70) {
+          progressBar.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+        } else {
+          progressBar.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+        }
+      }
+
+      updateRecentScans() {
+        const recentScansList = document.getElementById('recentScansList');
+        if (!recentScansList) return;
+        
+        recentScansList.innerHTML = '';
+        
+        this.scans.slice(0, 5).forEach((scan, index) => {
+          const scanItem = document.createElement('div');
+          scanItem.className = `scan-item ${scan.status}`;
+          scanItem.innerHTML = `
+            <div class="scan-info">
+              <div class="scan-product">${scan.product}</div>
+              <div class="scan-date">${new Date(scan.date).toLocaleString('pt-BR')}</div>
+            </div>
+            <div class="scan-status status-${scan.status}">
+              <i class="fas fa-${this.getStatusIcon(scan.status)}"></i>
+              ${this.getStatusText(scan.status)}
+            </div>
+          `;
+          
+          // Adicionar animação de entrada
+          scanItem.style.animation = `slideInLeft 0.5s ease ${index * 0.1}s both`;
+          
+          recentScansList.appendChild(scanItem);
+        });
+      }
+
+      getStatusIcon(status) {
+        const icons = {
+          'safe': 'check-circle',
+          'warning': 'exclamation-triangle',
+          'danger': 'times-circle'
+        };
+        return icons[status] || 'question-circle';
+      }
+
+      startPeriodicUpdates() {
+        // Sincronizar com servidor a cada 30 segundos
+        this.syncInterval = setInterval(() => {
+          this.syncWithServer();
+        }, 30000);
+      }
+
+      async syncWithServer() {
+        try {
+          const response = await fetch('/api/dashboard/stats', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('nutriScanToken')}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            this.updateFromServer(data);
+          }
+        } catch (error) {
+          console.log('🔄 Sync failed, using local data');
+        }
+      }
+
+      updateFromServer(data) {
+        // Atualizar dados do servidor
+        if (data.stats) {
+          this.stats = { ...this.stats, ...data.stats };
+          this.updateUI();
+        }
+      }
+
+      updateUI() {
+        // Atualizar contadores
+        document.getElementById('totalScans').textContent = this.stats.totalScans;
+        document.getElementById('safeProducts').textContent = this.stats.safeProducts;
+        document.getElementById('warningsFound').textContent = this.stats.warningsFound;
+        document.getElementById('planUsage').textContent = `${this.stats.planUsage}/${this.stats.planLimit}`;
+        
+        // Atualizar barra de progresso
+        this.updateProgressBar();
+        
+        // Atualizar scans recentes
+        this.updateRecentScans();
+      }
+
+      setupEventListeners() {
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', () => this.logout());
+        }
+      }
+
+      updateUI() {
+        if (!this.user) {
+          this.redirectToLogin();
+          return;
+        }
+
+        // Atualizar informações do usuário
+        const welcomeEl = document.getElementById('userWelcome');
+        const planEl = document.getElementById('userPlan');
+        
+        if (welcomeEl) {
+          welcomeEl.textContent = `Olá, ${this.user.name}!`;
+        }
+        
+        if (planEl) {
+          const plan = this.user.subscription?.plan || 'free';
+          planEl.textContent = plan === 'premium' ? 'Premium' : 'Gratuito';
+        }
+
+        // Atualizar estatísticas
+        this.updateStats();
+        this.updateRecentScans();
+      }
+
+      updateStats() {
+        const totalScansEl = document.getElementById('totalScans');
+        const safeProductsEl = document.getElementById('safeProducts');
+        const warningsFoundEl = document.getElementById('warningsFound');
+        const planUsageEl = document.getElementById('planUsage');
+        const usageProgressEl = document.getElementById('usageProgress');
+
+        if (totalScansEl) {
+          totalScansEl.textContent = this.scans.length;
+        }
+
+        const safeCount = this.scans.filter(s => s.status === 'safe').length;
+        if (safeProductsEl) {
+          safeProductsEl.textContent = safeCount;
+        }
+
+        const warningCount = this.scans.filter(s => s.status === 'warning').length;
+        if (warningsFoundEl) {
+          warningsFoundEl.textContent = warningCount;
+        }
+
+        // Atualizar uso do plano
+        const limit = this.user.subscription?.scansLimit || 10;
+        const used = this.user.subscription?.scansUsed || this.scans.length;
+        
+        if (planUsageEl) {
+          planUsageEl.textContent = `${used}/${limit}`;
+        }
+
+        if (usageProgressEl) {
+          const percentage = Math.min((used / limit) * 100, 100);
+          usageProgressEl.style.width = `${percentage}%`;
+        }
+      }
+
+      updateRecentScans() {
+        const recentScansEl = document.getElementById('recentScansList');
+        if (!recentScansEl) return;
+
+        const recentScans = this.scans.slice(0, 5);
+        
+        if (recentScans.length === 0) {
+          recentScansEl.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-light);">
+              <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+              <p>Nenhum scan realizado ainda</p>
+              <p style="font-size: 0.9rem; margin-top: 10px;">Faça seu primeiro scan para começar!</p>
+            </div>
+          `;
+          return;
+        }
+
+        recentScansEl.innerHTML = recentScans.map(scan => `
+          <div class="scan-item">
+            <div class="scan-info">
+              <div class="scan-product">${scan.product}</div>
+              <div class="scan-date">${new Date(scan.date).toLocaleDateString('pt-BR')}</div>
+            </div>
+            <div class="scan-status status-${scan.status}">
+              ${scan.status === 'safe' ? 'Seguro' : scan.status === 'warning' ? 'Alerta' : 'Perigoso'}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      logout() {
+        localStorage.removeItem('nutriScanToken');
+        localStorage.removeItem('nutriScanUser');
+        window.location.href = 'index.html';
+      }
+
+      redirectToLogin() {
+        window.location.href = 'login.html';
+      }
+    }
+
+    // Inicializar dashboard
+    let dashboardController;
+    document.addEventListener('DOMContentLoaded', () => {
+      dashboardController = new DashboardController();
+    });
+  </script>
+</body>
+</html>

@@ -9,7 +9,7 @@ function setupDashboardButtons() {
         viewAllBtn.addEventListener('click', function(e) {
             e.preventDefault();
             console.log('Redirecionando para histórico...');
-            window.location.href = 'history.html';
+            safeRedirect('history.html');
         });
     }
 
@@ -18,7 +18,7 @@ function setupDashboardButtons() {
     if (upgradeBtn) {
         upgradeBtn.addEventListener('click', function() {
             console.log('Botão de upgrade clicado');
-            window.location.href = 'payment.html';
+            safeRedirect('payment.html');
         });
     }
 
@@ -27,7 +27,7 @@ function setupDashboardButtons() {
     if (firstScanBtn) {
         firstScanBtn.addEventListener('click', function() {
             console.log('Botão de primeiro scan clicado');
-            window.location.href = 'scanner.html';
+            safeRedirect('scanner.html');
         });
     }
 
@@ -40,7 +40,7 @@ function setupDashboardButtons() {
             if (href && href !== '#') {
                 e.preventDefault();
                 console.log('Navegando para:', href);
-                window.location.href = href;
+                safeRedirect(href);
             }
         });
     });
@@ -51,13 +51,12 @@ function setupDashboardButtons() {
         logoutBtn.addEventListener('click', function() {
             console.log('Botão de logout clicado');
             
-            // Limpar token
+            // Limpar dados do usuário
             localStorage.removeItem('nutriScanToken');
+            localStorage.removeItem('nutriScanUser');
             
-            // Mostrar confirmação
-            if (confirm('Tem certeza que deseja sair?')) {
-                window.location.href = 'index.html';
-            }
+            // Redirecionar para login
+            safeRedirect('login.html');
         });
     }
 }

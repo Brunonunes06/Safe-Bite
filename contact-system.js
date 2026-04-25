@@ -1,7 +1,13 @@
 // Sistema de Contato Safe-Bite
 class ContactSystem {
   constructor() {
-    this.api = new NutriScanAPI();
+    // Verificar se NutriScanAPI está disponível
+    if (typeof NutriScanAPI !== 'undefined') {
+      this.api = new NutriScanAPI();
+    } else {
+      console.warn('NutriScanAPI não encontrada, usando modo simulado');
+      this.api = null;
+    }
     this.form = null;
     this.submitButton = null;
     this.storageKey = 'nutriscan_contact_form_data';

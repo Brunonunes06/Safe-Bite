@@ -304,6 +304,18 @@
     .btn-secondary {
       background: var(--light-gray);
       color: var(--text-dark);
+      border: 2px solid var(--medium-gray);
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .btn-secondary:hover {
+      background: var(--medium-gray);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
     }
 
     .btn:hover {
@@ -399,7 +411,7 @@
             </a>
           </li>
           <li>
-            <a href="scanner.html" class="nav-link">
+            <a href="allergy-scanner.html" class="nav-link">
               <i class="fas fa-camera"></i>
               <span>Scanner</span>
             </a>

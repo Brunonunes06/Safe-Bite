@@ -471,7 +471,7 @@ class BrazilianPaymentManager {
           if (data.payment.status === 'paid') {
             this.showSuccess('Pagamento confirmado! Redirecionando...');
             setTimeout(() => {
-              window.location.href = 'dashboard.html';
+              safeRedirect('dashboard.html');
             }, 3000);
           } else if (data.payment.status === 'expired') {
             this.showError('Pagamento expirado. Tente novamente.');

@@ -219,7 +219,7 @@ class UserManager {
       localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
       
       alert(`Login realizado como ${foundUser.name}!`);
-      window.location.href = 'index.html';
+      safeRedirect('index.html');
     } else {
       // Login como usuário demo
       const result = {
@@ -250,7 +250,7 @@ class UserManager {
       localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
       
       alert('Login realizado como Usuário Demo!');
-      window.location.href = 'index.html';
+      safeRedirect('index.html');
     }
   }
 }

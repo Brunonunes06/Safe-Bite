@@ -21,7 +21,7 @@ document.querySelectorAll('.plan-button').forEach(button => {
       showUpgradePopup();
     } else {
       // Fallback se o popup não estiver disponível
-      window.location.href = 'payment.html';
+      safeRedirect('payment.html');
     }
   });
 });                
@@ -53,7 +53,7 @@ document.querySelectorAll('.plan-button').forEach(button => {
                             <button onclick="this.closest('div').parentElement.remove()" style="padding: 0.8rem 1.5rem; background: var(--medium-gray); color: var(--text-dark); border: none; border-radius: 8px; cursor: pointer;">
                                 Cancelar
                             </button>
-                            <button onclick="window.location.href='payment.html'" style="padding: 0.8rem 1.5rem; background: var(--gradient-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            <button onclick="safeRedirect('payment.html')" style="padding: 0.8rem 1.5rem; background: var(--gradient-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
                                 Continuar
                             </button>
                         </div>

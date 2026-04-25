@@ -3,7 +3,13 @@
 
 class SignupSystem {
   constructor() {
-    this.api = new NutriScanAPI();
+    // Verificar se NutriScanAPI está disponível
+    if (typeof NutriScanAPI !== 'undefined') {
+      this.api = new NutriScanAPI();
+    } else {
+      console.warn('NutriScanAPI não encontrada, usando modo simulado');
+      this.api = null;
+    }
     this.init();
   }
 
@@ -170,7 +176,7 @@ class SignupSystem {
 
         // Redirecionar para index.html
         setTimeout(() => {
-          window.location.href = 'index.html';
+          safeRedirect('index.html');
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro');
@@ -237,7 +243,7 @@ class SignupSystem {
         this.showSuccess('Conta criada com Google! Redirecionando...');
 
         setTimeout(() => {
-          window.location.href = 'index.html';
+          safeRedirect('index.html');
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro Google');

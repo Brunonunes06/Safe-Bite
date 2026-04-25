@@ -18,7 +18,7 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    // Verificar token
+    // Verificar token.
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nutri_scan_secret_key');
 
     // Adicionar usuário ao request usando banco simplificado

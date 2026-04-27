@@ -1,7 +1,7 @@
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const User = require('../models/User');
-const { protect, requirePremium } = require('../middleware/auth');
+const { protect, requirePremium } = require('../middleware/auth-simple');
 const router = express.Router();
 
 // @desc    Obter planos disponíveis

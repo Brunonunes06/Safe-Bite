@@ -1,6 +1,6 @@
 const express = require('express');
 const Product = require('../models/Product');
-const { protect } = require('../middleware/auth');
+const { protect } = require('../middleware/auth-simple');
 const router = express.Router();
 
 // @desc    Buscar produtos

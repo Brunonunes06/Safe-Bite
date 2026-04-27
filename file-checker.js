@@ -14,7 +14,6 @@ class FileChecker {
       'login.html', 
       'signup.html',
       'dashboard.html',
-      'profile.html',
       'settings.html',
       'scanner.html',
       'history.html',

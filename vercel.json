@@ -11,10 +11,6 @@
       "dest": "/dashboard.html"
     },
     {
-      "src": "/profile",
-      "dest": "/profile.html"
-    },
-    {
       "src": "/settings",
       "dest": "/settings.html"
     },

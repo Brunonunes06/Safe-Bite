@@ -129,7 +129,6 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/dashboard.html',
-  '/profile.html',
   '/settings.html',
   '/scanner.html',
   '/history.html',

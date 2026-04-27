@@ -189,7 +189,6 @@ const urlsToCache = [
   '/${this.repoName}/',
   '/${this.repoName}/index.html',
   '/${this.repoName}/dashboard.html',
-  '/${this.repoName}/profile.html',
   '/${this.repoName}/settings.html',
   '/${this.repoName}/scanner.html',
   '/${this.repoName}/history.html',

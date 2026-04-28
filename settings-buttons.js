@@ -12,43 +12,43 @@ class SettingsButtonsManager {
   /**
    * Inicializa todos os botões com listeners
    */
-  initializeButtons() {
-    // Salvar
-    const saveBtn = document.querySelector('button[onclick="saveSettings()"]');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleSaveSettings.bind(this)));
-    }
+//   initializeButtons() {
+//     // Salvar
+//     const saveBtn = document.querySelector('button[onclick="saveSettings()"]');
+//     if (saveBtn) {
+//       saveBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleSaveSettings.bind(this)));
+//     }
 
-    // Exportar
-    const exportBtn = document.querySelector('button[onclick="exportData()"]');
-    if (exportBtn) {
-      exportBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleExportData.bind(this)));
-    }
+//     // Exportar
+//     const exportBtn = document.querySelector('button[onclick="exportData()"]');
+//     if (exportBtn) {
+//       exportBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleExportData.bind(this)));
+//     }
 
-    // Limpar Histórico
-    const clearBtn = document.querySelector('button[onclick="clearHistory()"]');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleClearHistory.bind(this)));
-    }
+//     // Limpar Histórico
+//     const clearBtn = document.querySelector('button[onclick="clearHistory()"]');
+//     if (clearBtn) {
+//       clearBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleClearHistory.bind(this)));
+//     }
 
-    // Sair
-    const logoutBtn = document.querySelector('button[onclick="logout()"]');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleLogout.bind(this)));
-    }
+//     // Sair
+//     const logoutBtn = document.querySelector('button[onclick="logout()"]');
+//     if (logoutBtn) {
+//       logoutBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleLogout.bind(this)));
+//     }
 
-    // Limpar Cache
-    const cacheBtn = document.querySelector('button[onclick="clearCache()"]');
-    if (cacheBtn) {
-      cacheBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleClearCache.bind(this)));
-    }
+//     // Limpar Cache
+//     const cacheBtn = document.querySelector('button[onclick="clearCache()"]');
+//     if (cacheBtn) {
+//       cacheBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleClearCache.bind(this)));
+//     }
 
-    // Restaurar Padrão
-    const resetBtn = document.querySelector('button[onclick="resetSettings()"]');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleResetSettings.bind(this)));
-    }
-  }
+//     // Restaurar Padrão
+//     const resetBtn = document.querySelector('button[onclick="resetSettings()"]');
+//     if (resetBtn) {
+//       resetBtn.addEventListener('click', (e) => this.slideOutAction(e, this.handleResetSettings.bind(this)));
+//     }
+//   }
 
   /**
    * Animação de deslize para o lado quando o botão é clicado

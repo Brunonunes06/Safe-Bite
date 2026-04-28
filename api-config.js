@@ -7,6 +7,28 @@ const API_CONFIG = {
   }
 };
 
+/**
+ * Função utilitária de redirecionamento seguro
+ * Pode ser sobrescrita por módulos específicos se necessário
+ */
+function safeRedirect(url) {
+  // Validar URL para evitar redirects maliciosos
+  if (!url) return;
+  
+  // Se a URL começa com http, validar o domínio
+  if (url.startsWith('http')) {
+    const currentDomain = window.location.hostname;
+    const urlObj = new URL(url);
+    if (urlObj.hostname !== currentDomain) {
+      console.warn('Redirecto bloqueado para domínio externo:', url);
+      return;
+    }
+  }
+  
+  // Redirecionamento seguro
+  window.location.href = url;
+}
+
 // Classe para comunicação com a API
 class NutriScanAPI {
   constructor() {
@@ -261,7 +283,7 @@ const APIUtils = {
       hour: '2-digit',
       minute: '2-digit'
     });
-  }
+  },
 
   // Método para fornecer respostas simuladas quando servidor não está disponível
   getSimulatedResponse(endpoint, options = {}) {

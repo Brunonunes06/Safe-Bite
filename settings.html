@@ -619,6 +619,45 @@
       animation: shake 0.5s;
     }
 
+    /* Animações de deslize para os botões */
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Classe para animação de deslize */
+    .btn-setting.slide-out-right {
+      animation: slideOutRight 0.4s ease forwards;
+    }
+
     /* Alert Box */
     .alert-box {
       background: linear-gradient(135deg, #fff3cd, #fef5e7);
@@ -1658,244 +1697,18 @@
         // Simulação - em um app real, isso chamaria uma API
         setTimeout(() => {
           localStorage.clear();
-        }, 3000);
+          window.location.href = 'index.html';
+        }, 2000);
       } else if (confirmation !== null) {
         alert('Texto de confirmação incorreto. Ação cancelada.');
       }
-
-      populateSettings() {
-        if (!this.user || !this.user.preferences) return;
-
-        // Update user info
-        const initials = this.user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        document.getElementById('userAvatar').textContent = initials;
-        document.getElementById('userName').textContent = this.user.name;
-
-        // Populate settings
-        const prefs = this.user.preferences;
-
-        // Notifications
-        this.setToggle('emailNotifications', prefs.notifications?.email !== false);
-        this.setToggle('pushNotifications', prefs.notifications?.push !== false);
-        this.setToggle('monthlyReports', prefs.notifications?.reports !== false);
-
-        // Privacy
-        this.setToggle('saveHistory', prefs.privacy?.saveHistory !== false);
-        this.setToggle('shareData', prefs.privacy?.shareData === true);
-
-        // Display
-        document.getElementById('languageSelect').value = prefs.language || 'pt-BR';
-        this.setToggle('darkMode', prefs.display?.darkMode === true);
-
-        // Show danger zone
-        document.getElementById('dangerZone').style.display = 'block';
-      }
-
-      getToggleValue(toggleId) {
-        const toggle = document.getElementById(toggleId);
-        return toggle ? toggle.classList.contains('active') : false;
-      }
-
-      setToggle(toggleId, value) {
-        const toggle = document.getElementById(toggleId);
-        if (toggle) {
-          if (value) {
-            toggle.classList.add('active');
-          } else {
-            toggle.classList.remove('active');
-          }
-        }
-      }
-
-      toggleSwitch(element) {
-        const setting = element.id;
-        
-        // Adicionar animação imediata ao elemento
-        element.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-        
-        // Alternar classe active para animação da bola
-        if (element.classList.contains('active')) {
-          element.classList.remove('active');
-          // Adicionar efeito de clique para esquerda
-          element.style.transform = 'scale(0.95)';
-          setTimeout(() => {
-            element.style.transform = 'scale(1)';
-          }, 100);
-        } else {
-          element.classList.add('active');
-          // Adicionar efeito de clique para direita
-          element.style.transform = 'scale(1.05)';
-          setTimeout(() => {
-            element.style.transform = 'scale(1)';
-          }, 100);
-        }
-        
-        // Chamar o gerenciador de configurações
-        settingsManager.toggleSetting(setting);
-      }
-
-      async saveSettings() {
-        try {
-          this.showLoading(true);
-          this.hideMessages();
-
-          // Collect settings
-          const settings = {
-            notifications: {
-              email: this.getToggleValue('emailNotifications'),
-              push: this.getToggleValue('pushNotifications'),
-              reports: this.getToggleValue('monthlyReports')
-            },
-            privacy: {
-              saveHistory: this.getToggleValue('saveHistory'),
-              shareData: this.getToggleValue('shareData')
-            },
-            display: {
-              language: document.getElementById('languageSelect').value,
-              darkMode: this.getToggleValue('darkMode')
-            }
-          };
-
-          // Save to localStorage (simulated API)
-          localStorage.setItem('nutriscan_settings', JSON.stringify(settings));
-          
-          this.showSuccess('Configurações salvas com sucesso!');
-          
-          this.showLoading(false);
-        } catch (error) {
-          console.error('Erro ao salvar configurações:', error);
-          this.showError(error.message || 'Erro ao salvar configurações');
-          this.showLoading(false);
-        }
-      }
-
-      handleLanguageChange(language) {
-        // In a real app, this would change the interface language
-        console.log('Idioma alterado para:', language);
-      }
-
-      async exportData() {
-        if (!confirm('Tem certeza que deseja exportar seus dados?')) {
-          return;
-        }
-
-        try {
-          const response = await api.getScans(1, 1000); // Get all scans
-          
-          const data = {
-            user: this.user,
-            scans: response.scans,
-            exportDate: new Date().toISOString()
-          };
-
-          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Safe-Bite-data-${new Date().toISOString().split('T')[0]}.json`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-
-          this.showSuccess('Dados exportados com sucesso!');
-        } catch (error) {
-          console.error('Erro ao exportar dados:', error);
-          this.showError('Erro ao exportar dados. Tente novamente.');
-        }
-      }
-
-      async deleteAccount() {
-        const confirmation = prompt('Para excluir sua conta, digite "EXCLUIR" (em maiúsculas):');
-        
-        if (confirmation !== 'EXCLUIR') {
-          this.showError('Texto de confirmação incorreto.');
-          return;
-        }
-
-        if (!confirm('ATENÇÃO: Esta ação é IRREVERSÍVEL e excluirá permanentemente todos os seus dados. Deseja continuar?')) {
-          return;
-        }
-
-        try {
-          await api.delete('/users/account');
-          
-          this.showSuccess('Conta excluída com sucesso.');
-          
-          setTimeout(() => {
-            localStorage.removeItem('nutriScanToken');
-            window.location.href = 'index.html';
-          }, 2000);
-        } catch (error) {
-          console.error('Erro ao excluir conta:', error);
-          this.showError('Erro ao excluir conta. Tente novamente.');
-        }
-      }
-
-      showLoading(show) {
-        document.getElementById('loadingState').style.display = show ? 'flex' : 'none';
-        document.getElementById('settingsForm').style.display = show ? 'none' : 'block';
-        document.getElementById('dangerZone').style.display = show ? 'none' : 'block';
-      }
-
-      showSuccess(message) {
-        const element = document.getElementById('successMessage');
-        element.textContent = message;
-        element.style.display = 'block';
-        document.getElementById('errorMessage').style.display = 'none';
-        
-        setTimeout(() => {
-          element.style.display = 'none';
-        }, 5000);
-      }
-
-      showError(message) {
-        const element = document.getElementById('errorMessage');
-        element.textContent = message;
-        element.style.display = 'block';
-        document.getElementById('successMessage').style.display = 'none';
-        
-        setTimeout(() => {
-          element.style.display = 'none';
-        }, 5000);
-      }
-
-      hideMessages() {
-        document.getElementById('successMessage').style.display = 'none';
-        document.getElementById('errorMessage').style.display = 'none';
-      }
-
-      goToDashboard() {
-        APIUtils.redirectToDashboard();
-      }
     }
-
-    // Global functions
-    function goToDashboard() {
-      APIUtils.redirectToDashboard();
-    }
-
-    function saveSettings() {
-      window.settingsInstance.saveSettings();
-    }
-
-    function exportData() {
-      window.settingsInstance.exportData();
-    }
-
-    function deleteAccount() {
-      window.settingsInstance.deleteAccount();
-    }
-
-    // Função toggleSwitch já definida acima - removendo duplicata
-
-    // Initialize settings when DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
-      window.settingsInstance = new NutriScanSettings();
-    });
   </script>
   
   <!-- Sistema de Sincronização de Usuário -->
   <script src="user-sync.js"></script>
+  
+  <!-- Gerenciador de Funções dos Botões com Animações -->
+  <script src="settings-buttons.js"></script>
 </body>
 </html>

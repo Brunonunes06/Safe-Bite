@@ -36,7 +36,37 @@ class PaymentManager {
         throw new Error(data.message || 'Erro ao gerar PIX');
       }
 
-      return data.payment;
+      // Garantir que exista um QR Code para exibição no cliente.
+      try {
+        const payment = data.payment || {};
+
+        if (!payment.qrCode && payment.pixCode) {
+          // Tentar gerar via qrCodeGenerator se disponível
+          if (typeof qrCodeGenerator !== 'undefined') {
+            try {
+              await qrCodeGenerator.loadLibrary();
+              if (qrCodeGenerator.isLibraryLoaded()) {
+                payment.qrCode = await qrCodeGenerator.generatePixQRCode(payment.pixCode);
+              } else {
+                // fallback para API externa
+                const encoded = encodeURIComponent(payment.pixCode);
+                payment.qrCode = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}&color=2ecc71&bgcolor=ffffff`;
+              }
+            } catch (e) {
+              const encoded = encodeURIComponent(payment.pixCode);
+              payment.qrCode = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}&color=2ecc71&bgcolor=ffffff`;
+            }
+          } else {
+            const encoded = encodeURIComponent(payment.pixCode);
+            payment.qrCode = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}&color=2ecc71&bgcolor=ffffff`;
+          }
+        }
+
+        return payment;
+      } catch (err) {
+        console.warn('Erro ao garantir QR Code localmente:', err);
+        return data.payment;
+      }
     } catch (error) {
       console.error('[PIX] Erro:', error);
       throw error;

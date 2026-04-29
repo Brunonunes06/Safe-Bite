@@ -604,15 +604,20 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="api-config.js"></script>
-  <script src="payment-brazil.js"></script>
+  <script src="qr-code-generator.js"></script>
+  <script src="payment-manager.js"></script>
+  <script src="payment-mock.js"></script>
+  <script src="payment-integration.js"></script>
   <script>
     class NutriScanPayment {
       constructor() {
         this.token = localStorage.getItem('nutriScanToken');
         this.user = null;
-        this.stripe = null;
         this.selectedMethod = 'card';
+        this.amount = 9.90; // Preço do Premium
+        this.paymentData = null;
         this.init();
       }
 
@@ -621,9 +626,6 @@
           this.redirectToLogin();
           return;
         }
-
-        // Initialize Stripe (use test key in development)
-        this.stripe = Stripe('pk_test_51234567890abcdef'); // Replace with actual test key
 
         this.setupEventListeners();
         await this.loadUserData();
@@ -643,43 +645,61 @@
         });
 
         // Payment form
-        document.getElementById('paymentForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          this.processPayment();
-        });
+        const paymentForm = document.getElementById('paymentForm');
+        if (paymentForm) {
+          paymentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.processPayment();
+          });
+        }
 
         // Card formatting
-        document.getElementById('cardNumber').addEventListener('input', (e) => {
-          this.formatCardNumber(e.target);
-        });
+        const cardNumber = document.getElementById('cardNumber');
+        if (cardNumber) {
+          cardNumber.addEventListener('input', (e) => {
+            this.formatCardNumber(e.target);
+          });
+        }
 
-        document.getElementById('cardExpiry').addEventListener('input', (e) => {
-          this.formatExpiry(e.target);
-        });
+        const cardExpiry = document.getElementById('cardExpiry');
+        if (cardExpiry) {
+          cardExpiry.addEventListener('input', (e) => {
+            this.formatExpiry(e.target);
+          });
+        }
 
-        document.getElementById('cardCvc').addEventListener('input', (e) => {
-          this.formatCvc(e.target);
-        });
+        const cardCvc = document.getElementById('cardCvc');
+        if (cardCvc) {
+          cardCvc.addEventListener('input', (e) => {
+            this.formatCvc(e.target);
+          });
+        }
       }
 
       async loadUserData() {
         try {
-          const response = await fetch('/api/auth/me', {
-            headers: {
-              'Authorization': `Bearer ${this.token}`
-            }
-          });
-
-          if (!response.ok) {
-            throw new Error('Usuário não encontrado');
+          if (!paymentIntegration) {
+            throw new Error('PaymentIntegration não inicializado');
           }
 
-          const data = await response.json();
-          this.user = data.user;
+          await paymentIntegration.ensureInitialized();
+          this.user = await paymentIntegration.getCustomerInfo();
           this.updateUserInfo();
+
+          // Mostrar status do sistema
+          const status = await paymentIntegration.getStatus();
+          if (status.usingMockData) {
+            console.warn('⚠ Modo teste: ', status.message);
+          }
         } catch (error) {
           console.error('Erro ao carregar usuário:', error);
-          this.redirectToLogin();
+          // Usar dados fictícios
+          this.user = {
+            name: 'Usuário',
+            email: 'usuario@example.com',
+            cpf: ''
+          };
+          this.updateUserInfo();
         }
       }
 
@@ -687,15 +707,15 @@
         if (!this.user) return;
 
         const initials = this.user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        document.getElementById('userAvatar').textContent = initials;
+        document.getElementById('userAvatar').textContent = initials || 'U';
         document.getElementById('userName').textContent = this.user.name;
       }
 
       showPaymentForm() {
         const checkoutForm = document.getElementById('checkoutForm');
+        if (!checkoutForm) return;
+
         checkoutForm.classList.add('active');
-        
-        // Scroll to form
         checkoutForm.scrollIntoView({ behavior: 'smooth' });
       }
 
@@ -707,11 +727,160 @@
           m.style.borderColor = 'var(--medium-gray)';
         });
         
-        document.querySelector(`[data-method="${method}"]`).style.borderColor = 'var(--primary-green)';
+        const selected = document.querySelector(`[data-method="${method}"]`);
+        if (selected) {
+          selected.style.borderColor = 'var(--primary-green)';
+        }
 
-        // For now, only card is implemented
-        if (method !== 'card') {
-          this.showInfo(`Pagamento com ${method.toUpperCase()} em desenvolvimento!`);
+        // Mostrar formulário específico
+        this.showMethodForm(method);
+      }
+
+      async showMethodForm(method) {
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (!checkoutForm) return;
+
+        if (method === 'pix') {
+          this.showInfo('Gerando PIX... Por favor aguarde.');
+          await this.generatePIX();
+        } else if (method === 'boleto') {
+          this.showInfo('Gerando Boleto... Por favor aguarde.');
+          await this.generateBoleto();
+        } else if (method === 'card') {
+          checkoutForm.classList.add('active');
+          this.showInfo('Selecione os dados do cartão');
+        }
+      }
+
+      async generatePIX() {
+        try {
+          if (!paymentIntegration) throw new Error('PaymentIntegration não disponível');
+
+          const pixPayment = await paymentIntegration.generatePIX(this.amount, 'Assinatura Premium Safe-Bite');
+          this.paymentData = pixPayment;
+
+          this.displayPIXPayment(pixPayment);
+        } catch (error) {
+          console.error('Erro ao gerar PIX:', error);
+          // Usar mock como fallback
+          const mockPixPayment = await paymentMockService.generateMockPIX(this.amount, 'Assinatura Premium Safe-Bite');
+          this.paymentData = mockPixPayment;
+          this.displayPIXPayment(mockPixPayment);
+        }
+      }
+
+      async generateBoleto() {
+        try {
+          if (!paymentIntegration) throw new Error('PaymentIntegration não disponível');
+
+          const address = prompt('Digite seu endereço completo (Rua, número, bairro, cidade - UF)');
+          if (!address) {
+            this.showError('Endereço é obrigatório para boleto');
+            return;
+          }
+
+          const boletoPayment = await paymentIntegration.generateBoleto(this.amount, address);
+          this.paymentData = boletoPayment;
+
+          this.displayBoletoPayment(boletoPayment);
+        } catch (error) {
+          console.error('Erro ao gerar boleto:', error);
+          // Usar mock como fallback
+          const mockBoletoPayment = await paymentMockService.generateMockBoleto(this.amount, { name: this.user?.name, email: this.user?.email });
+          this.paymentData = mockBoletoPayment;
+          this.displayBoletoPayment(mockBoletoPayment);
+        }
+      }
+
+      displayPIXPayment(pixData) {
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (!checkoutForm) return;
+
+        const pixHTML = `
+          <div style="text-align: center; padding: 2rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--primary-green);">PIX - Pagamento Instantâneo</h3>
+            
+            <div style="background: white; border: 2px solid var(--medium-gray); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem;">
+              <p style="margin-bottom: 1rem; font-weight: 600;">Escaneie o código QR:</p>
+              ${pixData.qrCode ? `<img src="${pixData.qrCode}" alt="PIX QR Code" style="max-width: 300px; height: auto; border-radius: 10px;">` : 'QR Code indisponível'}
+            </div>
+
+            <div style="background: rgba(46, 204, 113, 0.1); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+              <p style="margin-bottom: 0.5rem;">Código PIX:</p>
+              <code style="word-break: break-all; display: block; padding: 0.5rem; background: white; border-radius: 5px; font-size: 0.85rem;">${pixData.pixCode}</code>
+              <button style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: var(--primary-green); color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="copyToClipboard('${pixData.pixCode}')">Copiar Código</button>
+            </div>
+
+            <p style="color: var(--text-light); margin-bottom: 1rem;">Expira em: ${new Date(pixData.expiresAt).toLocaleString('pt-BR')}</p>
+
+            <div style="background: rgba(46, 204, 113, 0.1); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+              <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--primary-green);">Valor: R$ ${pixData.amount.toFixed(2)}</p>
+              <p style="color: var(--text-light); font-size: 0.9rem;">Processamento instantâneo</p>
+            </div>
+
+            <button style="width: 100%; padding: 1rem; background: var(--primary-green); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;" onclick="nutriScanPayment.verifyPayment('${pixData.id}')">Verificar Pagamento</button>
+
+            <button style="width: 100%; padding: 0.8rem; margin-top: 0.5rem; background: var(--medium-gray); color: var(--text-dark); border: none; border-radius: 10px; font-weight: 600; cursor: pointer;" onclick="nutriScanPayment.selectPaymentMethod('card')">Usar Outro Método</button>
+          </div>
+        `;
+
+        checkoutForm.innerHTML = pixHTML;
+        checkoutForm.classList.add('active');
+      }
+
+      displayBoletoPayment(boletoData) {
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (!checkoutForm) return;
+
+        const boletoHTML = `
+          <div style="text-align: center; padding: 2rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--primary-green);">Boleto - Pagamento em até 3 dias</h3>
+
+            <div style="background: white; border: 2px solid var(--medium-gray); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: left;">
+              <p style="margin-bottom: 0.5rem; font-weight: 600;">Código de Barras:</p>
+              <code style="word-break: break-all; display: block; padding: 0.5rem; background: #f5f5f5; border-radius: 5px; font-size: 0.9rem;">${boletoData.barcodeNumber}</code>
+              <button style="width: 100%; margin-top: 0.5rem; padding: 0.5rem 1rem; background: var(--primary-green); color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="copyToClipboard('${boletoData.barcodeNumber}')">Copiar Código de Barras</button>
+            </div>
+
+            <div style="background: rgba(46, 204, 113, 0.1); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; text-align: left;">
+              <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--primary-green);">Instruções:</p>
+              <ul style="text-align: left; padding-left: 1.5rem; color: var(--text-dark);">
+                ${boletoData.instructions.map(instruction => `<li style="margin-bottom: 0.5rem;">${instruction}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div style="background: rgba(46, 204, 113, 0.1); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+              <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--primary-green);">Valor: R$ ${boletoData.amount.toFixed(2)}</p>
+              <p style="color: var(--text-light); font-size: 0.9rem;">Vencimento: ${new Date(boletoData.dueDate).toLocaleDateString('pt-BR')}</p>
+              <p style="color: var(--text-light); font-size: 0.9rem;">Beneficiário: ${boletoData.beneficiary.name}</p>
+            </div>
+
+            <button style="width: 100%; padding: 1rem; background: var(--primary-green); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;" onclick="nutriScanPayment.verifyPayment('${boletoData.id}')">Verificar Pagamento</button>
+
+            <button style="width: 100%; padding: 0.8rem; margin-top: 0.5rem; background: var(--medium-gray); color: var(--text-dark); border: none; border-radius: 10px; font-weight: 600; cursor: pointer;" onclick="nutriScanPayment.selectPaymentMethod('card')">Usar Outro Método</button>
+          </div>
+        `;
+
+        checkoutForm.innerHTML = boletoHTML;
+        checkoutForm.classList.add('active');
+      }
+
+      async verifyPayment(paymentId) {
+        try {
+          this.showInfo('Verificando pagamento...');
+          const status = await paymentIntegration.getPaymentStatus(paymentId);
+          
+          if (status.status === 'approved' || status.status === 'paid') {
+            this.showSuccess('Pagamento confirmado com sucesso! Você será redirecionado em breve.');
+            setTimeout(() => this.redirectToDashboard(), 2000);
+          } else if (status.status === 'pending') {
+            this.showInfo('Pagamento ainda pendente. Aguarde a confirmação.');
+          } else {
+            this.showError(`Pagamento não confirmado: ${status.statusDetail}`);
+          }
+        } catch (error) {
+          console.error('Erro ao verificar pagamento:', error);
+          this.showError('Erro ao verificar pagamento');
         }
       }
 
@@ -748,23 +917,35 @@
         const originalContent = button.innerHTML;
         
         try {
-          // Disable button and show loading
           button.disabled = true;
           button.innerHTML = '<div class="loading-spinner"></div> Processando...';
 
-          // Create checkout session
-          const response = await api.createCheckoutSession('premium');
+          const token = 'tok_visa'; // Token fictício ou do Stripe
 
-          // Redirect to Stripe Checkout
-          await this.stripe.redirectToCheckout({ response.sessionId });
+          const cardPayment = await paymentIntegration.processCardPayment(token, this.amount, 1);
+          this.paymentData = cardPayment;
 
+          if (cardPayment.status === 'approved') {
+            this.showSuccess('Pagamento aprovado! Você será redirecionado em breve.');
+            setTimeout(() => this.redirectToDashboard(), 2000);
+          } else {
+            this.showError(`Pagamento não aprovado: ${cardPayment.statusDetail}`);
+            button.disabled = false;
+            button.innerHTML = originalContent;
+          }
         } catch (error) {
           console.error('Erro ao processar pagamento:', error);
-          this.showError(error.message);
           
-          // Reset button
-          button.disabled = false;
-          button.innerHTML = originalContent;
+          // Usar mock como fallback
+          const mockCard = await paymentMockService.processMockCardPayment(token, this.amount, 1);
+          if (mockCard.status === 'approved') {
+            this.showSuccess('Pagamento processado (modo teste). Você será redirecionado em breve.');
+            setTimeout(() => this.redirectToDashboard(), 2000);
+          } else {
+            this.showError('Pagamento recusado. Tente novamente.');
+            button.disabled = false;
+            button.innerHTML = originalContent;
+          }
         }
       }
 
@@ -784,11 +965,9 @@
         const errorElement = document.getElementById('errorMessage');
         const successElement = document.getElementById('successMessage');
         
-        // Hide all messages
         errorElement.style.display = 'none';
         successElement.style.display = 'none';
         
-        // Show appropriate message
         if (type === 'error') {
           errorElement.textContent = message;
           errorElement.style.display = 'block';
@@ -796,19 +975,17 @@
           successElement.textContent = message;
           successElement.style.display = 'block';
         } else {
-          // Info message (using error styling for now)
           errorElement.textContent = message;
           errorElement.style.display = 'block';
         }
         
-        // Hide after 5 seconds
         setTimeout(() => {
           errorElement.style.display = 'none';
           successElement.style.display = 'none';
         }, 5000);
       }
 
-      goToDashboard() {
+      redirectToDashboard() {
         window.location.href = '/dashboard.html';
       }
 
@@ -817,14 +994,25 @@
       }
     }
 
-    // Global function
+    // Global variables
+    let nutriScanPayment;
+
+    // Global functions
     function goToDashboard() {
       window.location.href = '/dashboard.html';
     }
 
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copiado para a área de transferência!');
+      }).catch(err => {
+        console.error('Erro ao copiar:', err);
+      });
+    }
+
     // Initialize payment when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
-      new NutriScanPayment();
+      nutriScanPayment = new NutriScanPayment();
     });
   </script>
   

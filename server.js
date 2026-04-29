@@ -1,16 +1,19 @@
 // ============================================================
-// routes/payment-brazil.js
-// Rotas: /api/payment/methods | /pix | /boleto | /card | /:id/status | /webhook
-// Integração com Mercado Pago SDK v2
+// server.js — Backend de Pagamento com Mercado Pago
+// Rotas: /api/payment/pix | /boleto | /card | /:id/status
 // ============================================================
 
 const express = require('express');
-const router = express.Router();
+const cors = require('cors');
 const { MercadoPagoConfig, Payment } = require('mercadopago');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
 
 // ── Configuração do Mercado Pago ─────────────────────────────
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN,
+  accessToken: process.env.MP_ACCESS_TOKEN, // sua chave secreta
   options: { timeout: 5000 }
 });
 
@@ -41,8 +44,22 @@ function validateCpf(cpf) {
   return second === parseInt(digits[10]);
 }
 
-// ── GET /api/payment/methods ─────────────────────────────────
-router.get('/methods', (req, res) => {
+// Middleware de validação de campos obrigatórios
+function requireFields(fields) {
+  return (req, res, next) => {
+    const missing = fields.filter(f => !req.body[f] && !req.body.customerInfo?.[f]);
+    if (missing.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Campos obrigatórios ausentes: ${missing.join(', ')}`
+      });
+    }
+    next();
+  };
+}
+
+// ── Rota: GET /api/payment/methods ──────────────────────────
+app.get('/api/payment/methods', (req, res) => {
   res.json({
     success: true,
     methods: [
@@ -53,11 +70,12 @@ router.get('/methods', (req, res) => {
   });
 });
 
-// ── POST /api/payment/pix ────────────────────────────────────
-router.post('/pix', async (req, res) => {
+// ── Rota: POST /api/payment/pix ──────────────────────────────
+app.post('/api/payment/pix', async (req, res) => {
   const { amount, description, customerInfo } = req.body;
   const { name, email, cpf } = customerInfo || {};
 
+  // Validações
   if (!amount || !name || !email || !cpf) {
     return res.status(400).json({ success: false, message: 'Campos obrigatórios ausentes.' });
   }
@@ -83,17 +101,6 @@ router.post('/pix', async (req, res) => {
 
     const txInfo = result.point_of_interaction?.transaction_data;
 
-    // Salvar no banco de dados se disponível
-    if (req.db) {
-      req.db.createPayment?.({
-        id: String(result.id),
-        method: 'pix',
-        status: result.status,
-        amount: result.transaction_amount,
-        customerEmail: email
-      });
-    }
-
     res.json({
       success: true,
       payment: {
@@ -113,8 +120,8 @@ router.post('/pix', async (req, res) => {
   }
 });
 
-// ── POST /api/payment/boleto ─────────────────────────────────
-router.post('/boleto', async (req, res) => {
+// ── Rota: POST /api/payment/boleto ───────────────────────────
+app.post('/api/payment/boleto', async (req, res) => {
   const { amount, customerInfo } = req.body;
   const { name, email, cpf, address } = customerInfo || {};
 
@@ -125,7 +132,7 @@ router.post('/boleto', async (req, res) => {
     return res.status(400).json({ success: false, message: 'CPF inválido.' });
   }
 
-  // Parsear endereço livre: "Rua X, 123, Centro, Londrina - PR"
+  // Parsear endereço simples: "Rua X, 123, Centro, Londrina - PR"
   const addressParts = address.split(',').map(s => s.trim());
 
   try {
@@ -133,14 +140,14 @@ router.post('/boleto', async (req, res) => {
       body: {
         transaction_amount: Number(amount),
         description: 'Pagamento via Boleto',
-        payment_method_id: 'bolbradesco',
+        payment_method_id: 'bolbradesco', // boleto Bradesco (aceito em todos os bancos)
         payer: {
           email,
           first_name: name.split(' ')[0],
           last_name: name.split(' ').slice(1).join(' ') || '-',
           identification: { type: 'CPF', number: sanitizeCpf(cpf) },
           address: {
-            zip_code: '00000-000',
+            zip_code: '00000-000',      // ideal: capturar CEP separado no formulário
             street_name: addressParts[0] || address,
             street_number: addressParts[1] || 'S/N',
             neighborhood: addressParts[2] || '',
@@ -153,18 +160,7 @@ router.post('/boleto', async (req, res) => {
     });
 
     const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 3);
-
-    // Salvar no banco de dados se disponível
-    if (req.db) {
-      req.db.createPayment?.({
-        id: String(result.id),
-        method: 'boleto',
-        status: result.status,
-        amount: result.transaction_amount,
-        customerEmail: email
-      });
-    }
+    dueDate.setDate(dueDate.getDate() + 3); // vencimento em 3 dias úteis
 
     res.json({
       success: true,
@@ -190,9 +186,10 @@ router.post('/boleto', async (req, res) => {
   }
 });
 
-// ── POST /api/payment/card ───────────────────────────────────
-// O frontend usa o SDK JS do MP para gerar o token — nunca envie dados brutos do cartão
-router.post('/card', async (req, res) => {
+// ── Rota: POST /api/payment/card ─────────────────────────────
+// O frontend deve usar o SDK JS do MP para gerar o token do cartão
+// e enviar apenas o token aqui (NUNCA envie dados brutos do cartão)
+app.post('/api/payment/card', async (req, res) => {
   const { token, amount, installments, email, cpf, name } = req.body;
 
   if (!token || !amount || !email || !cpf) {
@@ -206,10 +203,10 @@ router.post('/card', async (req, res) => {
     const result = await payment.create({
       body: {
         transaction_amount: Number(amount),
-        token,
+        token,                          // token gerado pelo SDK JS
         description: 'Assinatura Premium Nutri-Scan',
         installments: Number(installments) || 1,
-        payment_method_id: 'visa',
+        payment_method_id: 'visa',      // o SDK JS retorna o método correto
         payer: {
           email,
           identification: { type: 'CPF', number: sanitizeCpf(cpf) }
@@ -217,17 +214,6 @@ router.post('/card', async (req, res) => {
       },
       requestOptions: { idempotencyKey: `card-${Date.now()}-${token}` }
     });
-
-    // Salvar no banco de dados se disponível
-    if (req.db) {
-      req.db.createPayment?.({
-        id: String(result.id),
-        method: 'card',
-        status: result.status,
-        amount: result.transaction_amount,
-        customerEmail: email
-      });
-    }
 
     if (result.status === 'approved') {
       res.json({ success: true, payment: { id: result.id, status: 'approved' } });
@@ -243,20 +229,20 @@ router.post('/card', async (req, res) => {
   }
 });
 
-// ── GET /api/payment/:id/status ──────────────────────────────
-router.get('/:id/status', async (req, res) => {
+// ── Rota: GET /api/payment/:id/status ────────────────────────
+app.get('/api/payment/:id/status', async (req, res) => {
   const { id } = req.params;
 
   try {
     const result = await payment.get({ id });
 
     const statusMap = {
-      approved:   'paid',
-      pending:    'pending',
-      in_process: 'pending',
-      rejected:   'rejected',
-      cancelled:  'expired',
-      refunded:   'refunded'
+      approved:      'paid',
+      pending:       'pending',
+      in_process:    'pending',
+      rejected:      'rejected',
+      cancelled:     'expired',
+      refunded:      'refunded'
     };
 
     res.json({
@@ -273,23 +259,20 @@ router.get('/:id/status', async (req, res) => {
   }
 });
 
-// ── POST /api/payment/webhook ────────────────────────────────
-// Registre esta URL no painel do MP → Configurações → Webhooks
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+// ── Rota: POST /api/payment/webhook ──────────────────────────
+// Registre esta URL no painel do Mercado Pago → Configurações → Webhooks
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
   if (body.type === 'payment') {
     const paymentId = body.data?.id;
     console.log(`[WEBHOOK] Notificação de pagamento: ${paymentId}`);
 
+    // Aqui você consulta o status e atualiza seu banco de dados
     try {
       const result = await payment.get({ id: paymentId });
       console.log(`[WEBHOOK] Status: ${result.status} — ${result.status_detail}`);
-
-      // Atualizar status no banco de dados se disponível
-      if (req.db) {
-        req.db.updatePayment?.(String(paymentId), { status: result.status });
-      }
+      // TODO: atualizar status no seu banco de dados
     } catch (err) {
       console.error('[WEBHOOK] Erro ao consultar pagamento:', err.message);
     }
@@ -298,4 +281,9 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   res.sendStatus(200); // sempre responder 200 para o MP não reenviar
 });
 
-module.exports = router;
+// ── Start ────────────────────────────────────────────────────
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`✅ Servidor rodando na porta ${PORT}`);
+  console.log(`   MP_ACCESS_TOKEN: ${process.env.MP_ACCESS_TOKEN ? '✓ configurado' : '✗ AUSENTE'}`);
+});

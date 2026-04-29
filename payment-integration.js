@@ -111,7 +111,7 @@ class PaymentIntegration {
     return this.manager.getCustomerInfo();
   }
 
-  validateCPF(cpf) {
+  async validateCPF(cpf) {
     await this.ensureInitialized();
     return this.manager.validateCPF(cpf);
   }

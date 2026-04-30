@@ -451,6 +451,9 @@
             <a href="history.html" class="btn-dashboard btn-secondary">
               <i class="fas fa-history"></i> Ver Histórico
             </a>
+            <a href="plans.html" class="btn-dashboard btn-secondary" style="margin-left:6px;">
+              <i class="fas fa-star"></i> Planos
+            </a>
             <a href="payment.html" class="btn-dashboard btn-primary">
               <i class="fas fa-crown"></i> Upgrade Premium
             </a>
@@ -533,6 +536,8 @@
         this.initializeRealtimeSync();
         this.updateUI();
         this.startPeriodicUpdates();
+        // Sincronizar uso do plano a partir do histórico local
+        this.syncUsageFromHistory();
       }
 
       loadUserData() {
@@ -618,11 +623,19 @@
         this.stats.totalScans = this.scans.length;
         this.stats.safeProducts = this.scans.filter(scan => scan.status === 'safe').length;
         this.stats.warningsFound = this.scans.filter(scan => scan.status === 'warning' || scan.status === 'danger').length;
-        this.stats.planUsage = this.scans.filter(scan => this.isToday(scan.date)).length;
-        
-        // Obter limite do plano do usuário
-        if (this.user && this.user.plan) {
-          this.stats.planLimit = this.getPlanLimit(this.user.plan);
+        // Uso do plano no mês atual
+        this.stats.planUsage = this.scans.filter(scan => this.isSameMonth(scan.date)).length;
+
+        // Obter limite do plano do usuário (verificar localStorage / escolha de plano)
+        try {
+          const planData = JSON.parse(localStorage.getItem('nutriScanPlan') || 'null');
+          if (planData && planData.plan === 'premium') {
+            this.stats.planLimit = 999999; // virtualmente ilimitado
+          } else {
+            this.stats.planLimit = 10;
+          }
+        } catch (e) {
+          this.stats.planLimit = 10;
         }
       }
 
@@ -640,6 +653,12 @@
         const date = new Date(dateString);
         const today = new Date();
         return date.toDateString() === today.toDateString();
+      }
+
+      isSameMonth(dateString) {
+        const d = new Date(dateString);
+        const now = new Date();
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       }
 
       setupEventListeners() {
@@ -660,6 +679,19 @@
           const actionButtons = document.querySelector('.action-buttons');
           if (actionButtons) {
             actionButtons.appendChild(demoButton);
+            // Botão para resetar dados (apenas para desenvolvimento/testes)
+            const resetButton = document.createElement('button');
+            resetButton.className = 'btn-dashboard btn-secondary';
+            resetButton.style.background = '#e74c3c';
+            resetButton.style.color = 'white';
+            resetButton.style.marginTop = '1rem';
+            resetButton.innerHTML = '<i class="fas fa-trash"></i> Resetar Dados (Test)';
+            resetButton.onclick = () => {
+              if (confirm('Deseja realmente resetar todos os dados de teste para zero?')) {
+                this.resetAllData();
+              }
+            };
+            actionButtons.appendChild(resetButton);
           }
         }
       }
@@ -702,6 +734,124 @@
         
         // Notificar em tempo real
         this.notifyNewScan(newScan);
+
+        // Sincronizar uso do plano após novo scan
+        this.syncUsageFromHistory();
+      }
+
+      // Sincroniza estatísticas e uso do plano a partir do histórico local
+      syncUsageFromHistory() {
+        try {
+          const history = JSON.parse(localStorage.getItem('allergyAnalysisHistory') || '[]');
+          const scans = JSON.parse(localStorage.getItem('nutriScanScans') || '[]');
+
+          // Total de scans
+          this.scans = scans;
+
+          // Contagens derivadas
+          const total = scans.length;
+          const safe = scans.filter(s => s.status === 'safe').length;
+          const alerts = scans.filter(s => s.status === 'warning' || s.status === 'danger').length;
+
+          // Uso do plano no mês atual (contar por timestamp em allergyAnalysisHistory quando disponível)
+          const now = new Date();
+          const monthlyUsage = history.filter(h => {
+            const d = new Date(h.timestamp || h.date || h.id);
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+          }).length;
+
+          // Atualizar usuário local
+          const userStr = localStorage.getItem('nutriScanUser');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            user.subscription = user.subscription || {};
+            user.subscription.scansUsed = monthlyUsage;
+            // manter scansLimit conforme plano salvo
+            const planData = JSON.parse(localStorage.getItem('nutriScanPlan') || 'null');
+            if (planData && planData.plan === 'premium') {
+              user.subscription.scansLimit = 999999;
+            } else {
+              user.subscription.scansLimit = 10;
+            }
+            localStorage.setItem('nutriScanUser', JSON.stringify(user));
+          }
+
+          // Atualizar dados locais e UI
+          this.scans = scans;
+          this.stats.totalScans = total;
+          this.stats.safeProducts = safe;
+          this.stats.warningsFound = alerts;
+          this.stats.planUsage = monthlyUsage;
+          this.stats.planLimit = (JSON.parse(localStorage.getItem('nutriScanPlan') || 'null') || {}).plan === 'premium' ? 999999 : 10;
+          this.updateUI();
+        } catch (e) {
+          console.warn('Erro ao sincronizar uso do histórico:', e);
+        }
+      }
+
+      // Zera os dados relevantes para testes
+      resetAllData() {
+        try {
+          // Limpar arrays de armazenamento
+          localStorage.setItem('nutriScanScans', JSON.stringify([]));
+          localStorage.setItem('allergyAnalysisHistory', JSON.stringify([]));
+
+          // Resetar plano para gratuito
+          const planData = { plan: 'free', date: new Date().toISOString() };
+          localStorage.setItem('nutriScanPlan', JSON.stringify(planData));
+
+          // Resetar usuário local com subscription zerada
+          const user = { name: 'Usuário Teste', subscription: { plan: 'free', scansLimit: 10, scansUsed: 0 } };
+          localStorage.setItem('nutriScanUser', JSON.stringify(user));
+
+          // Atualizar estado interno e UI
+          this.scans = [];
+          this.stats = { totalScans: 0, safeProducts: 0, warningsFound: 0, planUsage: 0, planLimit: 10 };
+          this.updateUI();
+
+          alert('Dados resetados com sucesso. Tudo zerado para testes.');
+        } catch (e) {
+          console.error('Erro ao resetar dados:', e);
+          alert('Falha ao resetar dados. Veja o console para detalhes.');
+        }
+      }
+
+      // Função de auxílio: popula dados de exemplo e mantém uso do plano em zero
+      seedDemoData() {
+        try {
+          const now = new Date();
+          const scans = [
+            { id: 1001, product: 'Produto A', date: new Date(now.getTime() - 1 * 24*60*60*1000).toISOString(), status: 'safe', confidence: 95 },
+            { id: 1002, product: 'Produto B', date: new Date(now.getTime() - 2 * 24*60*60*1000).toISOString(), status: 'safe', confidence: 92 },
+            { id: 1003, product: 'Produto C', date: new Date(now.getTime() - 3 * 24*60*60*1000).toISOString(), status: 'safe', confidence: 90 },
+            { id: 1004, product: 'Produto D', date: new Date(now.getTime() - 4 * 24*60*60*1000).toISOString(), status: 'warning', confidence: 80 },
+            { id: 1005, product: 'Produto E', date: new Date(now.getTime() - 5 * 24*60*60*1000).toISOString(), status: 'other', confidence: 70 }
+          ];
+
+          // Gravar scans locais
+          localStorage.setItem('nutriScanScans', JSON.stringify(scans));
+
+          // Limpar allergyAnalysisHistory para que uso do plano permaneça 0
+          localStorage.setItem('allergyAnalysisHistory', JSON.stringify([]));
+
+          // Garantir nutriScanPlan e nutriScanUser com scansUsed = 0
+          const planData = JSON.parse(localStorage.getItem('nutriScanPlan') || 'null') || { plan: 'free', date: new Date().toISOString() };
+          localStorage.setItem('nutriScanPlan', JSON.stringify(planData));
+
+          const userStr = localStorage.getItem('nutriScanUser');
+          let user = userStr ? JSON.parse(userStr) : { name: 'Você' };
+          user.subscription = user.subscription || {};
+          user.subscription.scansUsed = 0;
+          user.subscription.scansLimit = planData.plan === 'premium' ? 999999 : 10;
+          localStorage.setItem('nutriScanUser', JSON.stringify(user));
+
+          // Re-sincronizar e atualizar UI
+          this.syncUsageFromHistory();
+          alert('Dados de demonstração inseridos. Verifique o dashboard (uso do plano permanece 0/10).');
+        } catch (e) {
+          console.error('Erro ao semear dados de demo:', e);
+          alert('Falha ao semear dados de demonstração. Veja o console.');
+        }
       }
 
       notifyNewScan(scanData) {

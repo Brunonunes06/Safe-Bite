@@ -198,6 +198,28 @@ class AllergyScanner {
             return;
         }
 
+        // Verificar limite do plano antes de analisar
+        try {
+            const planData = JSON.parse(localStorage.getItem('nutriScanPlan') || 'null');
+            const plan = planData ? planData.plan : 'free';
+            if (plan === 'free') {
+                const history = JSON.parse(localStorage.getItem('allergyAnalysisHistory') || '[]');
+                // contar scans no mês atual
+                const now = new Date();
+                const monthCount = history.filter(h => {
+                    const d = new Date(h.timestamp || h.date || h.id);
+                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                }).length;
+
+                if (monthCount >= 10) {
+                    this.showError('Limite de 10 scans/mês atingido para o plano gratuito. Faça upgrade para mais scans.');
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn('Erro ao verificar plano:', e);
+        }
+
         const analyzeBtn = document.getElementById('analyzeBtn');
         const originalText = analyzeBtn.innerHTML;
         
@@ -425,6 +447,55 @@ class AllergyScanner {
         }
         
         localStorage.setItem('allergyAnalysisHistory', JSON.stringify(history));
+        
+        // Também adicionar entrada simplificada em nutriScanScans para o dashboard
+        try {
+            const scans = JSON.parse(localStorage.getItem('nutriScanScans') || '[]');
+            const scanEntry = {
+                id: analysis.id,
+                product: 'Imagem analisada',
+                date: analysis.timestamp || new Date().toISOString(),
+                status: (analysis.overallRisk === 'safe' ? 'safe' : (analysis.overallRisk === 'warning' ? 'warning' : 'danger')),
+                confidence: analysis.detectedAllergens && analysis.detectedAllergens[0] ? Math.round(analysis.detectedAllergens[0].confidence * 100) : 90
+            };
+            scans.unshift(scanEntry);
+            // manter 100 scans locais
+            if (scans.length > 100) scans.splice(100);
+            localStorage.setItem('nutriScanScans', JSON.stringify(scans));
+        } catch (e) {
+            console.warn('Erro ao adicionar scan simplificado:', e);
+        }
+
+        // Atualizar contador de uso do plano no usuário local
+        try {
+            const userStr = localStorage.getItem('nutriScanUser');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                user.subscription = user.subscription || {};
+                user.subscription.scansUsed = (user.subscription.scansUsed || 0) + 1;
+                localStorage.setItem('nutriScanUser', JSON.stringify(user));
+            }
+        } catch (e) {
+            console.warn('Erro ao atualizar uso do plano do usuário:', e);
+        }
+        
+        // Incluir dados do usuário e notificar histórico (outras abas)
+        try {
+            const userStr = localStorage.getItem('nutriScanUser');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                analysis.user = { name: user.name || 'Usuário', id: user.id || null };
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        try {
+            localStorage.setItem('allergyAnalysisLast', JSON.stringify(analysis));
+            localStorage.setItem('allergyAnalysisLastUpdate', Date.now().toString());
+        } catch (e) {
+            console.warn('Erro ao sinalizar atualização de histórico:', e);
+        }
     }
 
     // Populate allergy table

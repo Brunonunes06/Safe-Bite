@@ -986,11 +986,11 @@
       }
 
       redirectToDashboard() {
-        window.location.href = '/dashboard.html';
+        safeRedirect('dashboard.html');
       }
 
       redirectToLogin() {
-        window.location.href = '/index.html';
+        safeRedirect('index.html');
       }
     }
 
@@ -999,7 +999,7 @@
 
     // Global functions
     function goToDashboard() {
-      window.location.href = '/dashboard.html';
+      safeRedirect('dashboard.html');
     }
 
     function copyToClipboard(text) {

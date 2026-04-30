@@ -22,8 +22,12 @@ class FileChecker {
       'privacy.html'
     ];
 
-    this.checkFiles();
-    this.setupGlobalRedirect();
+    // Verifica os arquivos primeiro e só depois configura interceptores de
+    // redirecionamento para evitar redirecionamentos prematuros enquanto a
+    // lista de arquivos disponíveis ainda está sendo carregada.
+    this.checkFiles().then(() => {
+      this.setupGlobalRedirect();
+    });
   }
 
   async checkFiles() {

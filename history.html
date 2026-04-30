@@ -573,10 +573,10 @@
   <div class="history-container">
     <!-- Header -->
     <header class="history-header">
-      <div class="history-logo">
+      <a class="history-logo" href="index.html" title="Voltar para Início">
         <i class="fas fa-leaf"></i>
         <span>Safe-Bite</span>
-      </div>
+      </a>
       <nav class="history-nav">
         <button class="nav-btn active" onclick="showSection('history')" data-section="history">
           <i class="fas fa-history"></i>
@@ -613,6 +613,7 @@
 
     <!-- Main Content -->
     <main class="history-main">
+      <div id="historyCard">
       <!-- Loading State -->
       <div class="loading" id="loadingState">
         <div class="spinner"></div>
@@ -859,10 +860,12 @@
           Fazer Primeiro Scan
         </button>
       </div>
+      </div>
     </main>
   </div>
 
   <!-- Scripts -->
+  <!-- Carregar dependências essenciais apenas uma vez -->
   <script src="api-config.js"></script>
   <script>
     // History JavaScript
@@ -1192,7 +1195,7 @@
       }
 
       goToScanner() {
-        window.location.href = 'allergy-scanner.html';
+        safeRedirect('allergy-scanner.html');
       }
     }
 
@@ -1202,7 +1205,7 @@
     }
 
     function goToScanner() {
-      window.location.href = 'allergy-scanner.html';
+      safeRedirect('allergy-scanner.html');
     }
 
     function filterHistory() {
@@ -1231,11 +1234,9 @@
     });
   </script>
   
-  <!-- Scripts necessários -->
-  <script src="api-config.js"></script>
+  <!-- Scripts necessários (únicos) -->
   <script src="login-system.js"></script>
-  
-  <!-- Sistema de Sincronização de Usuário -->
+  <script src="file-checker.js"></script>
   <script src="user-sync.js"></script>
   <script>
     // Histórico Controller
@@ -1775,12 +1776,7 @@
     }
   </script>
   
-  <!-- Scripts necessários -->
-  <script src="api-config.js"></script>
-  <script src="file-checker.js"></script>
-  
-  <!-- Sistema de Sincronização de Usuário -->
-  <script src="user-sync.js"></script>
+  <!-- Removidas inclusões duplicadas; dependências carregadas acima -->
   
   <!-- Inicializar controller
   let historyController;

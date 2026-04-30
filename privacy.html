@@ -438,7 +438,7 @@
 
       async init() {
         if (!this.token) {
-          window.location.href = 'index.html';
+          safeRedirect('index.html');
           return;
         }
 
@@ -472,13 +472,13 @@
       }
 
       goToDashboard() {
-        window.location.href = 'dashboard.html';
+        safeRedirect('dashboard.html');
       }
     }
 
     // Global function
     function goToDashboard() {
-      window.location.href = 'dashboard.html';
+      safeRedirect('dashboard.html');
     }
 
     // Initialize privacy page when DOM is loaded

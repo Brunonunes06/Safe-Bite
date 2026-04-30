@@ -316,6 +316,17 @@ if (typeof window !== 'undefined') {
   paymentMockService = new PaymentMockService();
 }
 
+  // Retornar informações de cliente mock (utilitário)
+  PaymentMockService.prototype.getMockCustomerInfo = async function() {
+    const keys = Object.keys(this.mockUsers || {});
+    const u = this.mockUsers[keys[0]] || {};
+    return {
+      name: u.name || 'Cliente Mock',
+      email: u.email || 'user@example.com',
+      cpf: u.cpf || '000.000.000-00'
+    };
+  };
+
 // Exemplo de uso:
 /*
 // Gerar PIX fictício

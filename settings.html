@@ -1697,7 +1697,7 @@
         // Simulação - em um app real, isso chamaria uma API
         setTimeout(() => {
           localStorage.clear();
-          window.location.href = 'index.html';
+          safeRedirect('index.html');
         }, 2000);
       } else if (confirmation !== null) {
         alert('Texto de confirmação incorreto. Ação cancelada.');

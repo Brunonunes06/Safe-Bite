@@ -980,11 +980,11 @@
       logout() {
         localStorage.removeItem('nutriScanToken');
         localStorage.removeItem('nutriScanUser');
-        window.location.href = 'index.html';
+        safeRedirect('index.html');
       }
 
       redirectToLogin() {
-        window.location.href = 'login.html';
+        safeRedirect('login.html');
       }
     }
 

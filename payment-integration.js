@@ -108,18 +108,69 @@ class PaymentIntegration {
 
   async getCustomerInfo() {
     await this.ensureInitialized();
-    return this.manager.getCustomerInfo();
-  }
-
-  validateCPF(cpf) {
-    await this.ensureInitialized();
-    return this.manager.validateCPF(cpf);
-  }
-
-  getTransactionHistory(limit) {
     if (this.usesMockData) {
-      return this.mock.getMockTransactionHistory(limit);
+      if (this.mock.getMockCustomerInfo) {
+        return await this.mock.getMockCustomerInfo();
+      }
+
+      // Fallback: pegar primeiro usuário mock
+      if (this.mock && this.mock.mockUsers) {
+        const keys = Object.keys(this.mock.mockUsers);
+        const u = this.mock.mockUsers[keys[0]] || {};
+        return {
+          name: u.name || 'Cliente',
+          email: u.email || '',
+          cpf: u.cpf || ''
+        };
+      }
+
+      return { name: 'Cliente', email: '', cpf: '' };
     }
+
+    return await this.manager.getCustomerInfo();
+  }
+
+  async validateCPF(cpf) {
+    await this.ensureInitialized();
+
+    // Usar o validador do manager quando disponível
+    if (!this.usesMockData && this.manager && typeof this.manager.validateCPF === 'function') {
+      return this.manager.validateCPF(cpf);
+    }
+
+    // Validação simples local (fallback para mock)
+    const digits = String(cpf).replace(/\D/g, '');
+    if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
+
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
+    let first = (sum * 10) % 11;
+    if (first === 10 || first === 11) first = 0;
+    if (first !== parseInt(digits[9])) return false;
+
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
+    let second = (sum * 10) % 11;
+    if (second === 10 || second === 11) second = 0;
+    return second === parseInt(digits[10]);
+  }
+
+    
+
+  async getTransactionHistory(limit = 10) {
+    await this.ensureInitialized();
+
+    if (this.usesMockData) {
+      if (this.mock && typeof this.mock.getMockTransactionHistory === 'function') {
+        return this.mock.getMockTransactionHistory(limit);
+      }
+      return [];
+    }
+
+    if (this.manager && typeof this.manager.getTransactionHistory === 'function') {
+      return await this.manager.getTransactionHistory(limit);
+    }
+
     return [];
   }
 

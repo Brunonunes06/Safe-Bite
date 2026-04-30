@@ -456,7 +456,8 @@ class AllergyScanner {
                 product: 'Imagem analisada',
                 date: analysis.timestamp || new Date().toISOString(),
                 status: (analysis.overallRisk === 'safe' ? 'safe' : (analysis.overallRisk === 'warning' ? 'warning' : 'danger')),
-                confidence: analysis.detectedAllergens && analysis.detectedAllergens[0] ? Math.round(analysis.detectedAllergens[0].confidence * 100) : 90
+                confidence: analysis.detectedAllergens && analysis.detectedAllergens[0] ? Math.round(analysis.detectedAllergens[0].confidence * 100) : 90,
+                image: analysis.image || this.currentImage || ''
             };
             scans.unshift(scanEntry);
             // manter 100 scans locais
@@ -464,6 +465,21 @@ class AllergyScanner {
             localStorage.setItem('nutriScanScans', JSON.stringify(scans));
         } catch (e) {
             console.warn('Erro ao adicionar scan simplificado:', e);
+        }
+
+        // Notificar o dashboard em tempo real na mesma aba
+        try {
+            // Disparar evento DOM para listeners na página
+            const event = new CustomEvent('scan:completed', { detail: scanEntry });
+            document.dispatchEvent(event);
+
+            // Se houver um sincronizador real-time global, chamar o handler diretamente
+            if (window.realtimeSync && typeof window.realtimeSync.handleScanUpdate === 'function') {
+                window.realtimeSync.handleScanUpdate(scanEntry);
+            }
+        } catch (e) {
+            // não bloquear fluxo se notificação falhar
+            console.warn('Erro ao notificar dashboard sobre novo scan:', e);
         }
 
         // Atualizar contador de uso do plano no usuário local

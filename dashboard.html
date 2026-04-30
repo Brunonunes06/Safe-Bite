@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Safe-Bite</title>
+  <link rel="icon" href="Logos/logo.jpeg" type="image/jpeg">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="upgrade-popup.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -607,6 +608,47 @@
         if (window.realtimeSync) {
           console.log('🔄 Real-time sync initialized');
         }
+
+        // Ouvir eventos locais de novo scan (disparados pelo scanner)
+        document.addEventListener('scan:completed', (e) => {
+          try {
+            const scan = e.detail;
+            this.handleIncomingScan(scan);
+          } catch (err) {
+            console.warn('Erro ao processar evento scan:completed', err);
+          }
+        });
+      }
+
+      handleIncomingScan(scan) {
+        // Garantir formato mínimo
+        if (!scan || !scan.id) return;
+
+        // Adicionar no início da lista local
+        this.scans.unshift(scan);
+
+        // Limitar a 100 scans locais para compatibilidade
+        if (this.scans.length > 100) this.scans = this.scans.slice(0, 100);
+
+        // Persistir
+        try {
+          localStorage.setItem('nutriScanScans', JSON.stringify(this.scans));
+        } catch (e) {
+          console.warn('Falha ao salvar scans no localStorage:', e);
+        }
+
+        // Recalcular estatísticas e atualizar UI
+        this.calculateStats();
+        this.updateUIWithAnimation();
+
+        // Mostrar notificação local (caso realtimeSync não esteja presente)
+        try {
+          if (!window.realtimeSync) {
+            this.notifyNewScan(scan);
+          }
+        } catch (e) {
+          // ignore
+        }
       }
 
       addRealtimeIndicator() {
@@ -698,11 +740,11 @@
 
       simulateNewScan() {
         const products = [
-          { name: 'Healthy Granola', status: 'safe', confidence: 96 },
-          { name: 'Energy Drink', status: 'warning', confidence: 78 },
-          { name: 'Nut Butter', status: 'danger', confidence: 91 },
-          { name: 'Green Tea', status: 'safe', confidence: 88 },
-          { name: 'Protein Shake', status: 'safe', confidence: 93 }
+          { name: 'Healthy Granola', status: 'safe', confidence: 96, image: 'https://via.placeholder.com/80?text=Granola' },
+          { name: 'Energy Drink', status: 'warning', confidence: 78, image: 'https://via.placeholder.com/80?text=Drink' },
+          { name: 'Nut Butter', status: 'danger', confidence: 91, image: 'https://via.placeholder.com/80?text=Butter' },
+          { name: 'Green Tea', status: 'safe', confidence: 88, image: 'https://via.placeholder.com/80?text=Tea' },
+          { name: 'Protein Shake', status: 'safe', confidence: 93, image: 'https://via.placeholder.com/80?text=Shake' }
         ];
         
         const randomProduct = products[Math.floor(Math.random() * products.length)];
@@ -712,7 +754,8 @@
           product: randomProduct.name,
           date: new Date().toISOString(),
           status: randomProduct.status,
-          confidence: randomProduct.confidence
+          confidence: randomProduct.confidence,
+          image: randomProduct.image || 'https://via.placeholder.com/80?text=Produto'
         };
         
         // Adicionar ao início da lista
@@ -859,10 +902,12 @@
         const notification = document.createElement('div');
         notification.className = 'realtime-notification';
         notification.innerHTML = `
-          <div class="notification-content">
-            <i class="fas fa-${scanData.status === 'safe' ? 'check-circle' : 'exclamation-triangle'}"></i>
-            <span>Novo scan: ${scanData.product}</span>
-            <span class="status-${scanData.status}">${this.getStatusText(scanData.status)}</span>
+          <div class="notification-content" style="display:flex;align-items:center;gap:10px;">
+            <img src="${scanData.image || 'https://via.placeholder.com/48?text=Img'}" alt="thumb" style="width:48px;height:48px;border-radius:8px;object-fit:cover;"/>
+            <div style="display:flex;flex-direction:column;">
+              <strong style="font-size:0.95rem">${scanData.product}</strong>
+              <small style="color:var(--text-light)">${this.getStatusText(scanData.status)}</small>
+            </div>
           </div>
         `;
         
@@ -1101,8 +1146,9 @@
         const recentScansEl = document.getElementById('recentScansList');
         if (!recentScansEl) return;
 
+        recentScansEl.innerHTML = '';
+
         const recentScans = this.scans.slice(0, 5);
-        
         if (recentScans.length === 0) {
           recentScansEl.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-light);">
@@ -1114,17 +1160,44 @@
           return;
         }
 
-        recentScansEl.innerHTML = recentScans.map(scan => `
-          <div class="scan-item">
-            <div class="scan-info">
-              <div class="scan-product">${scan.product}</div>
-              <div class="scan-date">${new Date(scan.date).toLocaleDateString('pt-BR')}</div>
-            </div>
-            <div class="scan-status status-${scan.status}">
-              ${scan.status === 'safe' ? 'Seguro' : scan.status === 'warning' ? 'Alerta' : 'Perigoso'}
-            </div>
-          </div>
-        `).join('');
+        recentScans.forEach((scan, index) => {
+          const scanItem = document.createElement('div');
+          scanItem.className = `scan-item ${scan.status}`;
+          scanItem.style.display = 'flex';
+          scanItem.style.alignItems = 'center';
+          scanItem.style.justifyContent = 'space-between';
+
+          const left = document.createElement('div');
+          left.style.display = 'flex';
+          left.style.alignItems = 'center';
+
+          const img = document.createElement('img');
+          img.src = scan.image || 'https://via.placeholder.com/80?text=Img';
+          img.alt = scan.product;
+          img.style.width = '56px';
+          img.style.height = '56px';
+          img.style.borderRadius = '8px';
+          img.style.objectFit = 'cover';
+          img.style.marginRight = '12px';
+
+          const info = document.createElement('div');
+          info.className = 'scan-info';
+          info.innerHTML = `<div class="scan-product">${scan.product}</div><div class="scan-date">${new Date(scan.date).toLocaleDateString('pt-BR')}</div>`;
+
+          left.appendChild(img);
+          left.appendChild(info);
+
+          const status = document.createElement('div');
+          status.className = `scan-status status-${scan.status}`;
+          status.innerHTML = scan.status === 'safe' ? 'Seguro' : scan.status === 'warning' ? 'Alerta' : 'Perigoso';
+
+          scanItem.appendChild(left);
+          scanItem.appendChild(status);
+
+          scanItem.style.animation = `slideInLeft 0.45s ease ${index * 0.08}s both`;
+
+          recentScansEl.appendChild(scanItem);
+        });
       }
 
       logout() {

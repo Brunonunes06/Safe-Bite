@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Histórico - Safe-Bite</title>
+  <link rel="icon" href="Logos/logo.jpeg" type="image/jpeg">
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -940,7 +941,8 @@
               _id: s.id || s._id || Date.now().toString(),
               product: { name: s.product || 'Imagem analisada', brand: s.brand || '' },
               createdAt: s.date || s.createdAt || new Date().toISOString(),
-              analysis: { overallRisk: s.status === 'safe' ? 'safe' : s.status === 'warning' ? 'caution' : 'avoid' }
+              analysis: { overallRisk: s.status === 'safe' ? 'safe' : s.status === 'warning' ? 'caution' : 'avoid' },
+              image: s.image || ''
             }));
             this.totalPages = 1;
           }
@@ -953,7 +955,8 @@
               product: { name: d.productName || 'Imagem analisada', brand: d.productBrand || '' },
               createdAt: d.timestamp || d.date || new Date().toISOString(),
               analysis: { overallRisk: d.overallRisk || d.analysis?.overallRisk || 'safe' },
-              raw: d
+              raw: d,
+              image: d.image || ''
             }));
             // colocar as entradas detalhadas à frente
             scans = [...mapped, ...scans];
@@ -1041,11 +1044,14 @@
         const riskClass = scan.analysis.overallRisk;
         const riskIcon = riskClass === 'safe' ? 'check' : 
                         riskClass === 'caution' ? 'exclamation' : 'times';
-        
+        const imgSrc = (scan.raw && scan.raw.image) ? scan.raw.image : (scan.image || '');
+
+        const imageHTML = imgSrc ? `<img src="${imgSrc}" alt="scan" style="width:80px;height:80px;border-radius:10px;object-fit:cover;"/>` : `<i class="fas fa-${riskIcon}"></i>`;
+
         return `
           <div class="scan-item" onclick="viewScan('${scan._id}')">
             <div class="scan-image">
-              <i class="fas fa-${riskIcon}"></i>
+              ${imageHTML}
             </div>
             <div class="scan-details">
               <div class="scan-product">${scan.product.name}</div>
@@ -1122,14 +1128,58 @@
 
       async viewScan(scanId) {
         try {
+          // Primeiro, procurar no histórico detalhado local
+          const detailed = JSON.parse(localStorage.getItem('allergyAnalysisHistory') || '[]');
+          const foundDetail = detailed.find(d => String(d.id) === String(scanId));
+          if (foundDetail) {
+            this.openScanPopup(foundDetail);
+            return;
+          }
+
+          // Procurar em nutriScanScans simplificados
+          const localScans = JSON.parse(localStorage.getItem('nutriScanScans') || '[]');
+          const foundSimple = localScans.find(s => String(s.id) === String(scanId));
+          if (foundSimple) {
+            this.openScanPopup(foundSimple);
+            return;
+          }
+
+          // Fallback: pedir ao servidor
           const scan = await api.getScan(scanId);
-          
-          // In a real app, this would open a modal or navigate to scan details
-          console.log('Scan details:', scan);
-          alert(`Detalhes do scan:\n\nProduto: ${scan.product.name}\nMarca: ${scan.product.brand}\nRisco: ${scan.analysis.overallRisk}`);
+          if (scan) {
+            this.openScanPopup(scan);
+          } else {
+            this.showError('Detalhes do scan não encontrados.');
+          }
         } catch (error) {
           console.error('Erro ao carregar scan:', error);
           this.showError('Erro ao carregar detalhes do scan.');
+        }
+      }
+
+      openScanPopup(scan) {
+        // Criar uma nova janela com conteúdo do scan (imagem + detalhes)
+        const image = scan.image || (scan.raw && scan.raw.image) || '';
+        const productName = (scan.product && scan.product.name) || scan.productName || scan.product || 'Imagem analisada';
+        const brand = (scan.product && scan.product.brand) || scan.productBrand || scan.brand || '';
+        const risk = (scan.analysis && scan.analysis.overallRisk) || scan.overallRisk || scan.status || 'safe';
+        const detailsHtml = `
+          <div style="font-family:Inter, Arial, sans-serif; padding:20px; max-width:800px;">
+            <h2>${productName}</h2>
+            <p style="color:#666">${brand}</p>
+            ${image ? `<img src="${image}" style="max-width:100%;height:auto;border-radius:12px;margin:10px 0;"/>` : ''}
+            <p><strong>Risco:</strong> ${risk}</p>
+            <p><strong>Data:</strong> ${APIUtils.formatDate(scan.createdAt || scan.date || new Date().toISOString())} ${APIUtils.formatTime(scan.createdAt || scan.date || new Date().toISOString())}</p>
+            <pre style="background:#f6f6f6;padding:10px;border-radius:8px;overflow:auto;">${JSON.stringify(scan.raw || scan, null, 2)}</pre>
+          </div>
+        `;
+
+        const w = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
+        if (w) {
+          w.document.write(`<!doctype html><html><head><title>Detalhes do Scan</title></head><body>${detailsHtml}</body></html>`);
+          w.document.close();
+        } else {
+          alert('Não foi possível abrir janela de detalhes. Bloqueador de popups pode estar ativo.');
         }
       }
 

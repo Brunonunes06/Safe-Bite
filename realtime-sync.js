@@ -295,11 +295,69 @@ class RealtimeDashboardSync {
                 this.updateDashboard(data);
                 this.lastSyncTime = new Date();
                 console.log('🔄 Dashboard synced successfully');
+                // Após buscar estatísticas, tentar enviar alterações locais (análises/exclusões)
+                await this.pushPendingUpdates();
             }
         } catch (error) {
             console.error('🔄 Sync error:', error);
             // Use cached data if available
             this.loadFromCache();
+        }
+    }
+
+    // Push local pending updates (new analysis or deletions) to server
+    async pushPendingUpdates() {
+        try {
+            // Push last analysis if exists
+            const last = JSON.parse(localStorage.getItem('allergyAnalysisLast') || 'null');
+            const lastUpdate = localStorage.getItem('allergyAnalysisLastUpdate');
+            const pushedMarker = localStorage.getItem('realtime_last_pushed') || '';
+
+            if (last && lastUpdate && pushedMarker !== String(lastUpdate)) {
+                // POST to server
+                try {
+                    const resp = await fetch('/api/scans', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('nutriScanToken')}` },
+                        body: JSON.stringify(last)
+                    });
+
+                    if (resp.ok) {
+                        console.log('🔼 Pushed last analysis to server');
+                        localStorage.setItem('realtime_last_pushed', String(lastUpdate));
+                        // notify via websocket if connected
+                        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                            this.ws.send(JSON.stringify({ type: 'scan_update', payload: last }));
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to push last analysis:', e);
+                }
+            }
+
+            // Handle deletions
+            const deleted = JSON.parse(localStorage.getItem('allergyAnalysisDeleted') || 'null');
+            const deletedMarker = localStorage.getItem('realtime_last_deleted') || '';
+            if (deleted && deleted.ts && String(deleted.ts) !== deletedMarker) {
+                try {
+                    const resp = await fetch(`/api/scans/${deleted.id}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('nutriScanToken')}` }
+                    });
+
+                    if (resp.ok || resp.status === 404) {
+                        console.log('🔽 Pushed deletion to server for', deleted.id);
+                        localStorage.setItem('realtime_last_deleted', String(deleted.ts));
+                        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                            this.ws.send(JSON.stringify({ type: 'scan_delete', payload: { id: deleted.id } }));
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to push deletion:', e);
+                }
+            }
+        } catch (e) {
+            console.warn('pushPendingUpdates error:', e);
         }
     }
 

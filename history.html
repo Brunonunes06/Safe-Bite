@@ -894,6 +894,14 @@
 
         await this.loadUserData();
         await this.loadHistory();
+        // Ouvir atualizações locais (quando análises são feitas ou excluídas em outra aba)
+        window.addEventListener('storage', (e) => {
+          if (!e.key) return;
+          if (e.key === 'allergyAnalysisLastUpdate' || e.key === 'allergyAnalysisLast' || e.key === 'allergyAnalysisDeleted') {
+            // Recarregar histórico local para refletir mudanças
+            this.loadHistory().catch(() => {});
+          }
+        });
       }
 
       async loadUserData() {
@@ -919,10 +927,42 @@
         try {
           this.showLoading(true);
           
-          const response = await api.getScans(this.currentPage, this.pageSize);
-          this.scans = response.scans || [];
+          // Primeiro tentar obter do servidor
+          let scans = [];
+          try {
+            const response = await api.getScans(this.currentPage, this.pageSize);
+            scans = response.scans || [];
+            this.totalPages = response.pages || 1;
+          } catch (err) {
+            // Se API falhar, carregar do armazenamento local
+            const localScans = JSON.parse(localStorage.getItem('nutriScanScans') || '[]');
+            scans = localScans.map(s => ({
+              _id: s.id || s._id || Date.now().toString(),
+              product: { name: s.product || 'Imagem analisada', brand: s.brand || '' },
+              createdAt: s.date || s.createdAt || new Date().toISOString(),
+              analysis: { overallRisk: s.status === 'safe' ? 'safe' : s.status === 'warning' ? 'caution' : 'avoid' }
+            }));
+            this.totalPages = 1;
+          }
+
+          // Também mesclar entradas detalhadas de allergyAnalysisHistory (se existirem)
+          try {
+            const detailed = JSON.parse(localStorage.getItem('allergyAnalysisHistory') || '[]');
+            const mapped = detailed.map(d => ({
+              _id: d.id || Date.now().toString(),
+              product: { name: d.productName || 'Imagem analisada', brand: d.productBrand || '' },
+              createdAt: d.timestamp || d.date || new Date().toISOString(),
+              analysis: { overallRisk: d.overallRisk || d.analysis?.overallRisk || 'safe' },
+              raw: d
+            }));
+            // colocar as entradas detalhadas à frente
+            scans = [...mapped, ...scans];
+          } catch (e) {
+            // ignore
+          }
+
+          this.scans = scans;
           this.filteredScans = [...this.scans];
-          this.totalPages = response.pages || 1;
           
           this.applyFilters();
           this.renderHistory();
@@ -1098,8 +1138,40 @@
           return;
         }
 
+        // Remover localmente e notificar outras abas; tentar também remover no servidor
         try {
-          await api.delete(`/scans/${scanId}`);
+          // Remover de nutriScanScans local
+          try {
+            const scans = JSON.parse(localStorage.getItem('nutriScanScans') || '[]');
+            const filtered = scans.filter(s => String(s.id) !== String(scanId));
+            localStorage.setItem('nutriScanScans', JSON.stringify(filtered));
+          } catch (e) {
+            console.warn('Falha ao remover scan localmente:', e);
+          }
+
+          // Remover de allergyAnalysisHistory local
+          try {
+            const history = JSON.parse(localStorage.getItem('allergyAnalysisHistory') || '[]');
+            const filteredH = history.filter(h => String(h.id) !== String(scanId));
+            localStorage.setItem('allergyAnalysisHistory', JSON.stringify(filteredH));
+          } catch (e) {
+            console.warn('Falha ao remover análise detalhada localmente:', e);
+          }
+
+          // Sinalizar exclusão para outras abas
+          try {
+            localStorage.setItem('allergyAnalysisDeleted', JSON.stringify({ id: scanId, ts: Date.now() }));
+          } catch (e) {
+            console.warn('Falha ao sinalizar exclusão em localStorage:', e);
+          }
+
+          // Tentar remover no servidor (se disponível)
+          try {
+            await api.delete(`/scans/${scanId}`);
+          } catch (err) {
+            console.warn('Falha ao remover no servidor (pode estar offline):', err);
+          }
+
           this.showSuccess('Scan excluído com sucesso!');
           await this.loadHistory();
         } catch (error) {

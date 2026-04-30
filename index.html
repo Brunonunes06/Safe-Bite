@@ -4,11 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Safe-Bite - O Assistente de Segurança Alimentar</title>
+  <meta name="description" content="Proteja sua saúde com tecnologia inteligente. Análise de alimentos com IA para evitar alergias e riscos alimentares.">
+  <meta name="keywords" content="segurança alimentar, alergias, análise de alimentos, inteligência artificial, saúde, nutrição">
+  <meta name="author" content="Safe-Bite">
+  <meta property="og:title" content="Safe-Bite - O Assistente de Segurança Alimentar">
+  <meta property="og:description" content="Proteja sua saúde com tecnologia inteligente. Análise de alimentos com IA para evitar alergias e riscos alimentares.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="Logos/logo.jpeg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" href="Logos/logo.jpeg" as="image" type="image/jpeg">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="upgrade-popup.css">
+  <link rel="stylesheet" href="auth-indicators.css">
+  <link rel="stylesheet" href="dark-mode.css">
+  <link rel="stylesheet" href="keyboard-shortcuts.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <link rel="icon" href="Logos/logo.jpeg" type="image/jpeg">
+  <link rel="apple-touch-icon" href="Logos/logo.jpeg">
+  <meta name="theme-color" content="#2ecc71">
 </head>
 <body>
   
@@ -23,38 +41,76 @@
         
         <nav class="nav-menu">
           <ul>
-            
             <li><a href="#inicio" class="nav-link">Início</a></li>
             <li><a href="#sobre" class="nav-link">Sobre</a></li>
-            <li><a href="#como-funciona" class="nav-link">Como Funciona</a></li>
+            <!-- <li><a href="#como-funciona" class="nav-link">Como Funciona</a></li> -->
             <!-- <li><a href="allergy-scanner.html" class="nav-link" style="color: #e74c3c;">Verificar Alergias</a></li> -->
             <li><a href="#planos" class="nav-link">Planos</a></li>
             <li><a href="#contato" class="nav-link">Contato</a></li>
-            <li><a href="dashboard.html" class="nav-link" id="dashboardLink">Dashboard</a></li>
+            <li><a href="dashboard.html" class="nav-link" id="dashboardLink"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
           </ul>
         </nav>
         
-        <!-- Menu Mobile -->
-        <div class="mobile-menu-toggle">
-          <i class="fas fa-bars"></i>
+        <!-- Controls Container -->
+        <div class="header-controls">
+          <!-- Status Indicators -->
+          <div class="auth-status-container">
+            <span class="auth-status" id="authStatus">
+              <span class="auth-loading">
+                <div class="spinner"></div>
+                Verificando...
+              </span>
+            </span>
+            <div class="user-info" id="userInfo">
+              <div class="auth-loading">
+                <div class="spinner"></div>
+                Carregando...
+              </div>
+            </div>
+            <div class="plan-status" id="planStatus">
+              <div class="auth-loading">
+                <div class="spinner"></div>
+                Carregando...
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="header-actions">
+            <div class="theme-toggle">
+              <button class="theme-toggle-btn" id="themeToggleBtn" title="Alternar tema (Ctrl+Shift+D)">
+                <i class="fas fa-moon"></i>
+              </button>
+            </div>
+            <div class="keyboard-help-btn">
+              <button id="keyboardHelpBtn" title="Atalhos de Teclado (?)">
+                <i class="fas fa-keyboard"></i>
+              </button>
+            </div>
+          </div>
         </div>
+        
+        <!-- Menu Mobile -->
+        <button class="mobile-menu-toggle" aria-label="Abrir menu" aria-expanded="false">
+          <i class="fas fa-bars"></i>
+        </button>
       </div>
     </div>
   </header>
 
   <!-- Hero Section -->
-  <section id="inicio" class="hero">
+  <section id="inicio" class="hero" aria-labelledby="hero-title">
     <div class="container">
       <div class="hero-content">
-        <h1 class="hero-title">
+        <h1 class="hero-title" id="hero-title">
           Sua segurança alimentar com <span>inteligência artificial</span>
         </h1>
         <p class="hero-subtitle">
           Proteja sua saúde e evite alimentos perigosos com tecnologia inteligente
         </p>
-        <button class="btn-hero" onclick="handleHeroStartFree()">
+        <button class="btn-hero" onclick="handleHeroStartFree()" aria-label="Começar a usar o Safe-Bite gratuitamente">
           Começar grátis
-          <i class="fas fa-arrow-right"></i>
+          <i class="fas fa-arrow-right" aria-hidden="true"></i>
         </button>
       </div>
       <div class="hero-image">
@@ -350,6 +406,28 @@
           </div>
           <button class="btn-pricing btn-primary" onclick="showUpgradePopup()">Assinar Agora</button>
         </div>
+        
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Empresarial</h3>
+            <div class="price">
+              <span class="currency">R$</span>
+              <span class="amount">29,90</span>
+              <span class="period">/mês</span>
+            </div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li><i class="fas fa-check"></i> Tudo do Premium</li>
+              <li><i class="fas fa-check"></i> Multi-usuários</li>
+              <li><i class="fas fa-check"></i> API access</li>
+              <li><i class="fas fa-check"></i> Relatórios customizados</li>
+              <li><i class="fas fa-check"></i> Suporte prioritário</li>
+              <li><i class="fas fa-check"></i> SLA garantido</li>
+            </ul>
+          </div>
+          <button class="btn-pricing" onclick="showUpgradePopup()">Fale Conosco</button>
+        </div>
       </div>
     </div>
   </section>
@@ -490,6 +568,9 @@
   <!-- Scripts -->
   <script src="api-config.js"></script>
   <script src="file-checker.js"></script>
+  <script src="auth-monitor.js"></script>
+  <script src="dark-mode.js"></script>
+  <script src="keyboard-shortcuts.js"></script>
   <script src="script-corrections-fixed.js"></script>
   <script src="upgrade-popup.js"></script>
   <script src="contact-system.js"></script>

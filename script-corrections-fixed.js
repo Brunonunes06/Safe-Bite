@@ -1,6 +1,23 @@
 // Correções para botões não funcionais do Nutri-Scan
 // Versão corrigida e otimizada
 
+// Função para scroll suave para seções
+function scrollToSection(sectionId) {
+  const section = document.querySelector(sectionId);
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' });
+    // Fechar menu mobile se estiver aberto
+    const navMenu = document.querySelector('.nav-menu');
+    if (navMenu && navMenu.classList.contains('active')) {
+      navMenu.classList.remove('active');
+      const toggle = document.querySelector('.mobile-menu-toggle');
+      if (toggle) {
+        toggle.classList.remove('active');
+      }
+    }
+  }
+}
+
 // Aguardar DOM carregar
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Script de correções carregado');

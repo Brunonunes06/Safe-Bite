@@ -239,11 +239,19 @@ class AuthMonitor {
         `;
       } else {
         element.innerHTML = `
-          <div class="login-prompt">
+          <div class="login-prompt" style="cursor: pointer;">
             <i class="fas fa-user-slash"></i>
             <span>Faça login para continuar</span>
           </div>
         `;
+        
+        // Adicionar evento de clique
+        const loginPrompt = element.querySelector('.login-prompt');
+        if (loginPrompt) {
+          loginPrompt.addEventListener('click', () => {
+            window.location.href = 'signup.html';
+          });
+        }
       }
     });
   }

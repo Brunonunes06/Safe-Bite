@@ -19,6 +19,7 @@
   <link rel="preload" href="Logos/logo.jpeg" as="image" type="image/jpeg">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="upgrade-popup.css">
+  <link rel="stylesheet" href="actions-popup.css">
   <link rel="stylesheet" href="auth-indicators.css">
   <link rel="stylesheet" href="dark-mode.css">
   <link rel="stylesheet" href="keyboard-shortcuts.css">
@@ -41,13 +42,13 @@
         
         <nav class="nav-menu">
           <ul>
-            <li><a href="#inicio" class="nav-link">Início</a></li>
-            <li><a href="#sobre" class="nav-link">Sobre</a></li>
-            <!-- <li><a href="#como-funciona" class="nav-link">Como Funciona</a></li> -->
-            <!-- <li><a href="allergy-scanner.html" class="nav-link" style="color: #e74c3c;">Verificar Alergias</a></li> -->
-            <li><a href="#planos" class="nav-link">Planos</a></li>
-            <li><a href="#contato" class="nav-link">Contato</a></li>
-            <li><a href="dashboard.html" class="nav-link" id="dashboardLink"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><button class="btn-nav" onclick="scrollToSection('#inicio')">Início</button></li>
+            <li><button class="btn-nav" onclick="scrollToSection('#sobre')">Sobre</button></li>
+            <!-- <li><button class="btn-nav" onclick="scrollToSection('#como-funciona')">Como Funciona</button></li> -->
+            <!-- <li><button class="btn-nav" onclick="location.href='allergy-scanner.html'" style="color: #e74c3c;">Verificar Alergias</button></li> -->
+            <li><button class="btn-nav" onclick="scrollToSection('#planos')">Planos</button></li>
+            <li><button class="btn-nav" onclick="scrollToSection('#contato')">Contato</button></li>
+            <li><button class="btn-nav btn-nav-primary" onclick="location.href='dashboard.html'" id="dashboardLink"><i class="fas fa-tachometer-alt"></i> Dashboard</button></li>
           </ul>
         </nav>
         
@@ -77,14 +78,9 @@
           
           <!-- Action Buttons -->
           <div class="header-actions">
-            <div class="theme-toggle">
-              <button class="theme-toggle-btn" id="themeToggleBtn" title="Alternar tema (Ctrl+Shift+D)">
-                <i class="fas fa-moon"></i>
-              </button>
-            </div>
-            <div class="keyboard-help-btn">
-              <button id="keyboardHelpBtn" title="Atalhos de Teclado (?)">
-                <i class="fas fa-keyboard"></i>
+            <div class="actions-menu-btn">
+              <button id="actionsMenuBtn" onclick="openActionsPopup()" title="Abrir configurações rápidas">
+                <i class="fas fa-sliders-h"></i>
               </button>
             </div>
           </div>
@@ -574,6 +570,7 @@
   <script src="script-corrections-fixed.js"></script>
   <script src="upgrade-popup.js"></script>
   <script src="contact-system.js"></script>
+  <script src="actions-popup.js"></script>
   
   <!-- <script>
     // Verificar se usuário está logado antes de permitir acesso ao Dashboard

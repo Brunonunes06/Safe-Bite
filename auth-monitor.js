@@ -249,7 +249,7 @@ class AuthMonitor {
         const loginPrompt = element.querySelector('.login-prompt');
         if (loginPrompt) {
           loginPrompt.addEventListener('click', () => {
-            window.location.href = 'signup.html';
+            window.location.href = 'login.html';
           });
         }
       }

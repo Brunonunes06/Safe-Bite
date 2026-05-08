@@ -217,30 +217,7 @@ class KeyboardShortcutsManager {
     });
   }
 
-  // Adicionar botão de ajuda
-  addHelpButton() {
-    const helpButton = document.createElement('div');
-    helpButton.className = 'keyboard-help-btn';
-    helpButton.innerHTML = `
-      <button id="keyboardHelpBtn" title="Atalhos de Teclado (?)">
-        <i class="fas fa-keyboard"></i>
-      </button>
-    `;
-    
-    // Adicionar ao header
-    const header = document.querySelector('.header-content');
-    if (header) {
-      header.appendChild(helpButton);
-    }
-    
-    // Configurar evento
-    const btn = document.getElementById('keyboardHelpBtn');
-    if (btn) {
-      btn.addEventListener('click', () => this.showHelp());
-    }
-  }
-
-  // Mostrar modal de ajuda
+   // Mostrar modal de ajuda
   showHelp() {
     if (this.helpModal) {
       this.helpModal.remove();

@@ -139,27 +139,27 @@ class DarkModeManager {
   }
 
   // Adicionar botão de toggle
-  addThemeToggle() {
-    const toggle = document.createElement('div');
-    toggle.className = 'theme-toggle';
-    toggle.innerHTML = `
-      <button class="theme-toggle-btn" id="themeToggleBtn" title="Alternar tema (Ctrl+Shift+D)">
-        <i class="fas fa-${this.isDarkMode ? 'sun' : 'moon'}"></i>
-      </button>
-    `;
+  // addThemeToggle() {
+  //   const toggle = document.createElement('div');
+  //   toggle.className = 'theme-toggle';
+  //   toggle.innerHTML = `
+  //     <button class="theme-toggle-btn" id="themeToggleBtn" title="Alternar tema (Ctrl+Shift+D)">
+  //       <i class="fas fa-${this.isDarkMode ? 'sun' : 'moon'}"></i>
+  //     </button>
+  //   `;
     
-    // Adicionar ao header
-    const header = document.querySelector('.header-content');
-    if (header) {
-      header.appendChild(toggle);
-    }
+  //   // Adicionar ao header
+  //   const header = document.querySelector('.header-content');
+  //   if (header) {
+  //     header.appendChild(toggle);
+  //   }
     
-    // Configurar evento de clique
-    const toggleBtn = document.getElementById('themeToggleBtn');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => this.toggleTheme());
-    }
-  }
+  //   // Configurar evento de clique
+  //   const toggleBtn = document.getElementById('themeToggleBtn');
+  //   if (toggleBtn) {
+  //     toggleBtn.addEventListener('click', () => this.toggleTheme());
+  //   }
+  // }
 
   // Atualizar botão de toggle
   updateThemeToggle() {

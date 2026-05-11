@@ -58,6 +58,10 @@ body.dark-mode .nav-menu ul li a {
   color: var(--text-primary);
 }
 
+body.dark-mode .nav-menu ul li  button {
+  color: var(--text-primary);
+}
+
 body.dark-mode .nav-menu ul li a:hover {
   color: var(--accent-primary);
 }

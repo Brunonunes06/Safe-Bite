@@ -1,428 +1,268 @@
-/**
- * BACKEND_INTEGRATION_EXAMPLE.js
- * 
- * Exemplo de como integrar payment-brazil.js no seu projeto Express.js
- * Coloque este arquivo na pasta backend/ para referência de implementação
- */
-
-// ============================================================
-// EXEMPLO: Como integrar pagamentos no backend
-// ============================================================
-
-// 1. INSTALAR DEPENDÊNCIAS
-// ─────────────────────────────────────────────────────────
-// npm install mercadopago express cors dotenv
-
-// 2. ARQUIVO: backend/server.js (ou server principal)
-// ─────────────────────────────────────────────────────────
-
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const validator = require('validator');
 require('dotenv').config();
+
+const requiredEnvVars = ['MP_ACCESS_TOKEN', 'MP_PUBLIC_KEY'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('Variáveis de ambiente obrigatórias ausentes:', missingEnvVars.join(', '));
+  process.exit(1);
+}
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
 
-// Importar rotas de pagamento
-const paymentBrazilRouter = require('./routes/payment-brazil');
-
-// Rotas
-app.use('/api/payment', paymentBrazilRouter);
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Servidor funcionando' });
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    success: false,
+    message: 'Muitas requisições deste IP, tente novamente mais tarde.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// Iniciar servidor
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✓ Servidor de pagamento iniciado em http://localhost:${PORT}`);
-  console.log(`✓ Endpoint de pagamento: http://localhost:${PORT}/api/payment`);
-});
+app.use('/api/', limiter);
 
-// 3. ARQUIVO: .env (na pasta raiz ou backend/)
-// ─────────────────────────────────────────────────────────
-
-// MP_ACCESS_TOKEN=seu_token_mercado_pago_aqui
-// MP_PUBLIC_KEY=sua_public_key_mercado_pago_aqui
-// NODE_ENV=development
-// PORT=5000
-
-// 4. ARQUIVO: backend/routes/payment-brazil.js
-// ─────────────────────────────────────────────────────────
-// [Já existe no projeto - use conforme está]
-
-// 5. COMO TESTAR
-// ─────────────────────────────────────────────────────────
-
-/*
-// Terminal 1: Iniciar servidor
-$ cd backend
-$ npm start
-
-// Terminal 2: Abrir navegador
-$ Acesse http://localhost:3000/payment.html
-
-// Terminal 3: Testar via curl (opcional)
-$ curl -X POST http://localhost:5000/api/payment/pix \
-  -H "Content-Type: application/json" \
-  -d '{
-    "amount": 9.90,
-    "description": "Assinatura Premium",
-    "customerInfo": {
-      "name": "João Silva",
-      "email": "joao@example.com",
-      "cpf": "111.444.777-35"
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? ['https://yourdomain.com', 'https://www.yourdomain.com']
+      : ['http://localhost:3000', 'http://localhost:8080', 'http://127.0.0.1:3000'];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Não permitido pelo CORS'));
     }
-  }'
-*/
-
-// ============================================================
-// ENDPOINTS DISPONÍVEIS
-// ============================================================
-
-/*
-
-1. GET /api/payment/methods
-   Retorna lista de métodos disponíveis
-   
-   Response:
-   {
-     "success": true,
-     "methods": [
-       { "id": "pix", "name": "PIX", "processingTime": "Instantâneo" },
-       { "id": "boleto", "name": "Boleto", "processingTime": "1–3 dias úteis" },
-       { "id": "card", "name": "Cartão", "processingTime": "Instantâneo" }
-     ]
-   }
-
-2. POST /api/payment/pix
-   Gera um PIX para pagamento
-   
-   Request Body:
-   {
-     "amount": 9.90,
-     "description": "Assinatura Premium",
-     "customerInfo": {
-       "name": "João Silva",
-       "email": "joao@example.com",
-       "cpf": "111.444.777-35"
-     }
-   }
-   
-   Response:
-   {
-     "success": true,
-     "payment": {
-       "id": "pix_123456",
-       "status": "pending",
-       "amount": 9.90,
-       "qrCode": "data:image/png;base64,...",
-       "pixCode": "000201...",
-       "expiresAt": "2026-04-29T12:30:00Z"
-     }
-   }
-
-3. POST /api/payment/boleto
-   Gera um Boleto para pagamento
-   
-   Request Body:
-   {
-     "amount": 9.90,
-     "customerInfo": {
-       "name": "João Silva",
-       "email": "joao@example.com",
-       "cpf": "111.444.777-35",
-       "address": "Rua X, 123, Centro, Londrina - PR"
-     }
-   }
-   
-   Response:
-   {
-     "success": true,
-     "payment": {
-       "id": "boleto_123456",
-       "status": "pending",
-       "amount": 9.90,
-       "barcodeNumber": "12345.67890 ...",
-       "digitableLine": "12345.67890 ...",
-       "boletoUrl": "https://...",
-       "dueDate": "2026-05-01T23:59:59Z",
-       "instructions": [...]
-     }
-   }
-
-4. POST /api/payment/card
-   Processa pagamento com cartão
-   
-   Request Body:
-   {
-     "token": "tok_visa",
-     "amount": 9.90,
-     "installments": 1,
-     "email": "joao@example.com",
-     "cpf": "111.444.777-35",
-     "name": "João Silva"
-   }
-   
-   Response:
-   {
-     "success": true/false,
-     "payment": {
-       "id": "card_123456",
-       "status": "approved/rejected",
-       "statusDetail": "Cartão aprovado/recusado"
-     }
-   }
-
-5. GET /api/payment/:id/status
-   Verifica status de um pagamento
-   
-   Response:
-   {
-     "success": true,
-     "payment": {
-       "id": "pix_123456",
-       "status": "paid/pending/rejected",
-       "statusDetail": "Descrição do status"
-     }
-   }
-
-6. POST /api/payment/webhook
-   Recebe notificações do Mercado Pago
-   
-   [Configurar em: Dashboard MP → Configurações → Webhooks]
-
-*/
-
-// ============================================================
-// EXEMPLO DE INTEGRAÇÃO CUSTOMIZADA
-// ============================================================
-
-/*
-// Arquivo: backend/utils/payment-processor.js
-// Classe auxiliar para processar pagamentos
-
-class PaymentProcessor {
-  constructor() {
-    this.paymentRouter = require('../routes/payment-brazil');
-  }
-
-  // Processar PIX
-  async processPIX(amount, customerData) {
-    try {
-      const response = await fetch('http://localhost:5000/api/payment/pix', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          description: 'Pagamento Safe-Bite',
-          customerInfo: customerData
-        })
-      });
-
-      const data = await response.json();
-      
-      // Salvar no banco de dados
-      await this.savePaymentToDatabase(data.payment);
-      
-      return data.payment;
-    } catch (error) {
-      console.error('Erro ao processar PIX:', error);
-      throw error;
-    }
-  }
-
-  // Processar Boleto
-  async processBoleto(amount, customerData) {
-    // Similar ao PIX
-  }
-
-  // Verificar Status
-  async checkPaymentStatus(paymentId) {
-    const response = await fetch(`http://localhost:5000/api/payment/${paymentId}/status`);
-    return response.json();
-  }
-
-  // Salvar na base de dados
-  async savePaymentToDatabase(paymentData) {
-    // Implementar segundo seu banco de dados
-    // Exemplo com MongoDB:
-    // const payment = new Payment(paymentData);
-    // await payment.save();
-  }
-}
-
-module.exports = PaymentProcessor;
-*/
-
-// ============================================================
-// VARIÁVEIS DE AMBIENTE NECESSÁRIAS
-// ============================================================
-
-/*
-# .env (ou .env.local)
-
-# Mercado Pago
-MP_ACCESS_TOKEN=APP_USR-1234567890123456-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-MP_PUBLIC_KEY=APP_USR-1234567890123456-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-
-# Servidor
-NODE_ENV=development
-PORT=5000
-HOST=localhost
-
-# Banco de Dados (opcional)
-DB_HOST=localhost
-DB_PORT=27017
-DB_NAME=safe_bite
-
-# Webhook (opcional)
-WEBHOOK_SECRET=seu_secret_webhook_aqui
-*/
-
-// ============================================================
-// VALIDAÇÃO DOS DADOS
-// ============================================================
-
-/*
-// Middleware para validar requisição de pagamento
-const validatePaymentRequest = (req, res, next) => {
-  const { amount, customerInfo } = req.body;
-
-  // Validar amount
-  if (!amount || typeof amount !== 'number' || amount <= 0) {
-    return res.status(400).json({
-      success: false,
-      message: 'Valor inválido'
-    });
-  }
-
-  // Validar informações do cliente
-  if (!customerInfo || !customerInfo.email || !customerInfo.cpf) {
-    return res.status(400).json({
-      success: false,
-      message: 'Dados do cliente incompletos'
-    });
-  }
-
-  next();
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
-// Usar no router
-app.post('/api/payment/pix', validatePaymentRequest, (req, res) => {
-  // Processar pagamento
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '10mb' }));
+
+const paymentBrazilRouter = require('./routes/payment-brazil');
+app.use('/api/payment', paymentBrazilRouter);
+
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Servidor funcionando',
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version || '1.0.0'
+  });
 });
-*/
 
-// ============================================================
-// TRATAMENTO DE ERROS
-// ============================================================
+const validatePaymentRequest = (req, res, next) => {
+  try {
+    const { amount, customerInfo } = req.body;
 
-/*
-// Middleware global de erro
+    if (!amount || typeof amount !== 'number' || amount <= 0 || amount > 10000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valor inválido. O valor deve estar entre R$ 0.01 e R$ 10.000,00'
+      });
+    }
+
+    if (!customerInfo || typeof customerInfo !== 'object') {
+      return res.status(400).json({
+        success: false,
+        message: 'Dados do cliente são obrigatórios'
+      });
+    }
+
+    if (!customerInfo.email || !validator.isEmail(customerInfo.email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email inválido'
+      });
+    }
+
+    if (!customerInfo.cpf || !validator.isNumeric(customerInfo.cpf.replace(/\D/g, '')) || 
+        customerInfo.cpf.replace(/\D/g, '').length !== 11) {
+      return res.status(400).json({
+        success: false,
+        message: 'CPF inválido'
+      });
+    }
+
+    if (customerInfo.name) {
+      customerInfo.name = validator.escape(customerInfo.name.trim()).substring(0, 100);
+      if (customerInfo.name.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Nome deve ter pelo menos 2 caracteres'
+        });
+      }
+    }
+
+    if (customerInfo.address) {
+      customerInfo.address = validator.escape(customerInfo.address.trim()).substring(0, 200);
+    }
+
+    if (req.body.description) {
+      req.body.description = validator.escape(req.body.description.trim()).substring(0, 200);
+    }
+
+    customerInfo.email = validator.normalizeEmail(customerInfo.email.toLowerCase().trim());
+
+    next();
+  } catch (error) {
+    console.error('Erro de validação:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro na validação dos dados'
+    });
+  }
+};
+
+const validateWebhook = (req, res, next) => {
+  try {
+    const signature = req.headers['x-signature'];
+    const requestId = req.headers['x-request-id'];
+    
+    if (!signature) {
+      return res.status(401).json({
+        success: false,
+        message: 'Assinatura do webhook não fornecida'
+      });
+    }
+
+    const webhookSecret = process.env.WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error('WEBHOOK_SECRET não configurado');
+      return res.status(500).json({
+        success: false,
+        message: 'Configuração do webhook incompleta'
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Erro na validação do webhook:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro na validação do webhook'
+    });
+  }
+};
+
+const validatePaymentId = (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id || typeof id !== 'string' || id.length > 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de pagamento inválido'
+      });
+    }
+
+    req.params.id = validator.escape(id.trim());
+    
+    next();
+  } catch (error) {
+    console.error('Erro na validação do ID de pagamento:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro na validação do ID de pagamento'
+    });
+  }
+};
+
+app.post('/api/payment/pix', validatePaymentRequest, (req, res) => {
+  res.json({ success: false, message: 'Rota de pagamento não implementada' });
+});
+
+app.post('/api/payment/boleto', validatePaymentRequest, (req, res) => {
+  res.json({ success: false, message: 'Rota de pagamento não implementada' });
+});
+
+app.post('/api/payment/card', validatePaymentRequest, (req, res) => {
+  res.json({ success: false, message: 'Rota de pagamento não implementada' });
+});
+
+app.get('/api/payment/:id/status', validatePaymentId, (req, res) => {
+  res.json({ success: false, message: 'Rota de status não implementada' });
+});
+
+app.post('/api/payment/webhook', validateWebhook, (req, res) => {
+  res.json({ success: true, message: 'Webhook recebido' });
+});
+
 app.use((error, req, res, next) => {
-  console.error('Erro:', error);
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Detalhes completos do erro:', {
+      message: error.message,
+      stack: error.stack,
+      url: req.url,
+      method: req.method,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    console.error('Erro de produção:', {
+      message: error.message,
+      url: req.url,
+      method: req.method,
+      ip: req.ip,
+      timestamp: new Date().toISOString()
+    });
+  }
 
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
   res.status(error.status || 500).json({
     success: false,
-    message: error.message || 'Erro interno do servidor',
+    message: isDevelopment ? error.message : 'Erro interno do servidor',
+    timestamp: new Date().toISOString(),
+    ...(isDevelopment && { stack: error.stack })
+  });
+});
+
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint não encontrado',
     timestamp: new Date().toISOString()
   });
 });
-*/
 
-// ============================================================
-// TESTES (Jest ou Mocha)
-// ============================================================
-
-/*
-// Arquivo: backend/__tests__/payment.test.js
-
-describe('Payment Routes', () => {
-  
-  test('GET /api/payment/methods deve retornar lista de métodos', async () => {
-    const response = await fetch('http://localhost:5000/api/payment/methods');
-    const data = await response.json();
-    
-    expect(response.ok).toBe(true);
-    expect(data.methods).toBeDefined();
-    expect(data.methods.length).toBeGreaterThan(0);
-  });
-
-  test('POST /api/payment/pix deve gerar PIX válido', async () => {
-    const response = await fetch('http://localhost:5000/api/payment/pix', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount: 9.90,
-        customerInfo: {
-          name: 'Teste',
-          email: 'test@example.com',
-          cpf: '111.444.777-35'
-        }
-      })
-    });
-
-    const data = await response.json();
-    
-    expect(data.success).toBe(true);
-    expect(data.payment.id).toBeDefined();
-    expect(data.payment.qrCode).toBeDefined();
-  });
+process.on('uncaughtException', (error) => {
+  console.error('Exceção não capturada:', error);
+  process.exit(1);
 });
 
-// Executar testes
-// npm test
-*/
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Rejeição não tratada em:', promise, 'motivo:', reason);
+  process.exit(1);
+});
 
-// ============================================================
-// DOCUMENTAÇÃO E RECURSOS
-// ============================================================
+const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || 'localhost';
 
-/*
-RECURSOS ÚTEIS:
-
-1. Mercado Pago Docs
-   https://www.mercadopago.com.br/developers/en
-
-2. SDK NodeJS
-   https://github.com/mercadopago/sdk-nodejs
-
-3. Test Cards (para desenvolvimento)
-   Visa:       4111111111111111
-   Mastercard: 5555555555554444
-   Amex:       378282246310005
-
-4. Webhook Testing
-   https://webhook.site/
-
-5. Dashboard Mercado Pago
-   https://www.mercadopago.com.br/sellers/
-
-PRÓXIMAS ETAPAS:
-
-1. Integrar com banco de dados (MongoDB/MySQL)
-2. Implementar autenticação JWT
-3. Adicionar taxa de transação
-4. Criar dashboard de vendas
-5. Implementar reembolsos
-6. Adicionar análise de fraude
-7. Integrar com email/SMS
-8. Implementar retry de webhooks
-*/
-
-console.log(`
-╔════════════════════════════════════════════════════════════════╗
-║                                                                ║
-║     BACKEND INTEGRATION EXAMPLE LOADED                        ║
-║                                                                ║
-║     Use este arquivo como referência para integrar           ║
-║     o sistema de pagamentos no seu backend!                  ║
-║                                                                ║
-╚════════════════════════════════════════════════════════════════╝
-`);
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor de pagamento iniciado em http://${HOST}:${PORT}`);
+  console.log(`Endpoint de pagamento: http://${HOST}:${PORT}/api/payment`);
+  console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+});

@@ -232,7 +232,7 @@ body {
   color: var(--primary-green);
   transform: scale(1.1);
 }
-}
+
 
 .nav-link {
   text-decoration: none;
@@ -1347,7 +1347,7 @@ body {
   .section-subtitle {
     font-size: 1rem;
   }
-} 
+
 
 
 @media (max-width: 480px) {

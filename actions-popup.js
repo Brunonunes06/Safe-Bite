@@ -1,5 +1,3 @@
-// Gerenciador de Popup de Ações do Header
-
 class ActionsPopupManager {
   constructor() {
     this.popup = null;
@@ -14,12 +12,10 @@ class ActionsPopupManager {
   }
 
   createPopup() {
-    // Criar overlay
     const overlay = document.createElement('div');
     overlay.id = 'actionsPopupOverlay';
     overlay.className = 'actions-popup-overlay';
     
-    // Criar conteúdo do popup
     const popupContent = `
       <div class="actions-popup-content">
         <div class="actions-popup-header">
@@ -33,7 +29,7 @@ class ActionsPopupManager {
         </div>
         
         <div class="actions-popup-body">
-          <!-- Tema Escuro -->
+          <div class="action-item" id="themeActionItem">
           <div class="action-item" id="themeActionItem">
             <div class="action-info">
               <div class="action-icon">
@@ -129,6 +125,11 @@ class ActionsPopupManager {
 
     // Atualizar status do tema ao carregar
     this.updateThemeStatus();
+
+    // Ouvir mudanças de tema para manter o toggle sincronizado
+    document.addEventListener('themechange', () => {
+      this.updateThemeStatus();
+    });
   }
 
   openPopup() {
@@ -154,7 +155,8 @@ class ActionsPopupManager {
 
   updateThemeStatus() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || 
-                   localStorage.getItem('theme') === 'dark';
+                   (window.darkModeManager && window.darkModeManager.isDarkMode) ||
+                   localStorage.getItem('darkModePreference') === 'dark';
     const themeToggle = document.getElementById('themeToggleSwitch');
     const themeStatus = document.getElementById('themeStatus');
     
@@ -172,8 +174,8 @@ class ActionsPopupManager {
   toggleTheme(event) {
     event.stopPropagation();
     
-    if (typeof toggleDarkMode === 'function') {
-      toggleDarkMode();
+    if (window.darkModeManager) {
+      window.darkModeManager.toggleTheme();
     }
     
     setTimeout(() => {

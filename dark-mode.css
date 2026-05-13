@@ -58,8 +58,9 @@ body.dark-mode .nav-menu ul li a {
   color: var(--text-primary);
 }
 
-body.dark-mode .nav-menu ul li  button {
+body.dark-mode .nav-menu ul li  button:hover{
   color: var(--text-primary);
+  background-color: gray;
 }
 
 body.dark-mode .nav-menu ul li a:hover {

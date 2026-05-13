@@ -61,6 +61,7 @@ body.dark-mode .nav-menu ul li a {
 body.dark-mode .nav-menu ul li  button:hover{
   color: var(--text-primary);
   background-color: gray;
+
 }
 
 body.dark-mode .nav-menu ul li a:hover {
@@ -231,6 +232,20 @@ body.dark-mode .user-info {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
 }
+
+body.dark-mode .user-info h3 {
+  color: var(--text-primary);
+}
+
+body.dark-mode .section-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+
 
 body.dark-mode .plan-status {
   background: var(--bg-secondary);

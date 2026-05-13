@@ -441,7 +441,7 @@ body {
 
 .section-subtitle {
   font-size: 1.2rem;
-  color: var(--text-light);
+  color: var(--text-);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;

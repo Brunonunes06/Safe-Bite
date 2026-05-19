@@ -6,7 +6,7 @@ class DarkModeManager {
     this.isDarkMode = false;
     this.userPreference = null;
     this.systemPreference = null;
-    this.init();
+    // this.init();
   }
 
   init() {
@@ -25,7 +25,7 @@ class DarkModeManager {
     this.setupEventListeners();
     
     // Adicionar toggle de tema
-    this.addThemeToggle();
+    // this.addThemeToggle();
   }
 
   // Carregar preferências do usuário

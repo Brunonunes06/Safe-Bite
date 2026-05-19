@@ -63,7 +63,7 @@ body {
 }
 
 .container {
-  max-width: 1500px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -441,7 +441,7 @@ body {
 
 .section-subtitle {
   font-size: 1.2rem;
-  color: var(--text-);
+  color: var(black);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;

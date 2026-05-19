@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { MercadoPagoConfig, Payment } = require('mercadopago');
-
+d
 // ── Configuração do Mercado Pago ─────────────────────────────
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,

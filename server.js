@@ -1,4 +1,5 @@
 // ============================================================
+require('dotenv').config(); // Carrega variáveis do .env
 // server.js — Backend de Pagamento com Mercado Pago
 // Rotas: /api/payment/pix | /boleto | /card | /:id/status
 // ============================================================
@@ -12,10 +13,16 @@ app.use(express.json());
 app.use(cors());
 
 // ── Configuração do Mercado Pago ─────────────────────────────
+
+// Carregar credenciais do .env
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN, // sua chave secreta
+  accessToken: process.env.MP_ACCESS_TOKEN, // Access Token seguro (backend)
   options: { timeout: 5000 }
 });
+
+// Apenas para referência, nunca use a Public Key para autenticação no backend
+const MP_PUBLIC_KEY = process.env.MP_PUBLIC_KEY || 'TEST-df907d47-3179-4f8e-90f3-3ed82ce0ee9d';
+console.log('Mercado Pago Public Key (frontend):', MP_PUBLIC_KEY);
 
 const payment = new Payment(client);
 

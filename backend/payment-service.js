@@ -2,18 +2,43 @@
 // Simulação de integração com provedores brasileiros
 
 const crypto = require('crypto');
+let QRCode;
+try {
+  QRCode = require('qrcode');
+} catch (err) {
+  // `qrcode` pode não estar instalado no ambiente local; manter fallback
+  QRCode = null;
+}
 
 class BrazilianPaymentService {
   constructor() {
-    this.apiKey = process.env.BRAZILIAN_PAYMENT_API_KEY || 'test_key';
+    // API keys e chaves configuráveis via .env
+    this.apiKey = process.env.BRAZILIAN_PAYMENT_API_KEY || process.env.PAYMENT_ACCESS_TOKEN || 'test_key';
+    this.accessToken = process.env.PAYMENT_ACCESS_TOKEN || process.env.BRAZILIAN_PAYMENT_API_KEY || null; // manter em segredo
+    this.publicKey = process.env.PAYMENT_PUBLIC_KEY || null; // chave pública que pode ser exposta ao cliente
     this.baseUrl = process.env.BRAZILIAN_PAYMENT_URL || 'https://api.payment-brazil.com';
+    // Contas de teste (forneça em backend/.env ou em variáveis de ambiente)
+    this.testAccounts = {
+      vendor: {
+        userId: process.env.TEST_VENDOR_USER_ID || null,
+        username: process.env.TEST_VENDOR_USERNAME || null,
+        password: process.env.TEST_VENDOR_PASSWORD || null,
+        verificationCode: process.env.TEST_VENDOR_CODE || null
+      },
+      buyer: {
+        userId: process.env.TEST_BUYER_USER_ID || null,
+        username: process.env.TEST_BUYER_USERNAME || null,
+        password: process.env.TEST_BUYER_PASSWORD || null,
+        verificationCode: process.env.TEST_BUYER_CODE || null
+      }
+    };
   }
 
   // Gerar PIX Copia e Cola
-  generatePix(amount, description, customerInfo) {
-    const pixKey = process.env.PIX_KEY || 'nutri-scan@pix.com.br';
+  async generatePix(amount, description, customerInfo) {
+    const pixKey = process.env.PIX_KEY || 'myhpc3301@gmail.com';
     const merchantName = 'Nutri-Scan';
-    const merchantCity = 'Sao Paulo';
+    const merchantCity = 'Paranavaí - PR';
     
     // Formatar valor para o padrão BCB
     const amountFormatted = amount.toFixed(2).replace('.', '');
@@ -31,14 +56,28 @@ class BrazilianPaymentService {
       description
     });
 
+    // Gerar QR Code (async) — se `qrcode` estiver disponível, use-o.
+    const qrCodeData = await this.generateQRCodeDataURL(payload);
+    // Texto "copia e cola" para o usuário (em muitos apps é o próprio BR Code)
+    const copyPaste = this.createCopyPaste(payload);
+
     return {
       type: 'pix',
       pixCode: payload,
-      qrCode: this.generateQRCodeDataURL(payload),
+      qrCode: qrCodeData,
+      copyPaste,
+      publicKey: this.publicKey || null,
       amount,
       expiresAt: new Date(Date.now() + 3600000), // 1 hora
       txid
     };
+  }
+
+  // Gerar texto "copia e cola" a partir do payload EMV
+  createCopyPaste(emvPayload) {
+    // Para agora retornamos o próprio EMV string como 'copia e cola'.
+    // Se desejar um formato mais amigável, podemos formatar com quebras/labels.
+    return String(emvPayload || '');
   }
 
   // Gerar Boleto
@@ -75,19 +114,82 @@ class BrazilianPaymentService {
   }
 
   // Gerar QR Code para PIX
-  generateQRCodeDataURL(payload) {
-    // Simulação - em produção usaria biblioteca como qrcode
-    const qrCodeData = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
-    
-    return qrCodeData;
+  async generateQRCodeDataURL(payload) {
+    if (QRCode && typeof QRCode.toDataURL === 'function') {
+      try {
+        return await QRCode.toDataURL(payload);
+      } catch (err) {
+        console.error('Erro ao gerar QR Code com qrcode:', err);
+        // fallback para placeholder
+      }
+    }
+
+    // Fallback: placeholder data URI
+    return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
   }
 
-  // Criar payload PIX (versão simplificada)
+  // Criar payload PIX em formato EMV (BR Code) — compatível com apps bancários
   createPixPayload(data) {
     const { txid, pixKey, amount, merchantName, merchantCity, description } = data;
-    
-    // Payload PIX simplificado para demonstração
-    return `0002010102123456789012BR.GOV.BRB.BRCODEPIXPIX${pixKey}5204000053039865404${amount}5802BR5913${merchantName}6009${merchantCity}62070503***6304${this.calculateCRC(txid + pixKey + amount + merchantName + merchantCity)}`;
+
+    const build = (id, value) => {
+      const v = String(value || '');
+      const l = v.length.toString().padStart(2, '0');
+      return `${id}${l}${v}`;
+    };
+
+    // 00 - Payload Format Indicator
+    let payload = '';
+    payload += build('00', '01');
+
+    // 01 - Point of Initiation Method (12 = dynamic, 11 = static). Usamos 12 para testes dinâmicos
+    payload += build('01', '12');
+
+    // 26 - Merchant Account Information (BR.GOV.BCB.PIX + chave)
+    // Subfields: 00 = GUI, 01 = chave (ou alternativa)
+    const gui = 'BR.GOV.BCB.PIX';
+    const mai = `00${gui.length.toString().padStart(2, '0')}${gui}01${pixKey.length.toString().padStart(2, '0')}${pixKey}`;
+    payload += build('26', mai);
+
+    // 52 - Merchant Category Code (0000 = unspecified)
+    payload += build('52', '0000');
+
+    // 53 - Transaction Currency (986 = BRL)
+    payload += build('53', '986');
+
+    // 54 - Transaction Amount (opcional)
+    if (amount !== undefined && amount !== null) {
+      // formatar com ponto decimal, sem milhar
+      const amt = Number(amount).toFixed(2);
+      payload += build('54', amt);
+    }
+
+    // 58 - Country Code
+    payload += build('58', 'BR');
+
+    // 59 - Merchant Name (até 25 chars)
+    payload += build('59', (merchantName || 'Nutri-Scan').substring(0, 25));
+
+    // 60 - Merchant City (até 15 chars)
+    payload += build('60', (merchantCity || 'Sao Paulo').substring(0, 15));
+
+    // 62 - Additional Data Field Template (txid)
+    if (txid) {
+      const txField = build('05', txid);
+      payload += build('62', txField);
+    }
+
+    // 64/63 - CRC (tag 63 with length 04)
+    const payloadForCrc = payload + '6304';
+    const crc = this.calculateCRC(payloadForCrc);
+    payload += build('63', crc);
+
+    return payload;
+  }
+
+  // Retorna as contas de teste carregadas do .env (se houver)
+  getTestAccounts() {
+    return this.testAccounts;
   }
 
   // Gerar TXID único
@@ -136,8 +238,21 @@ class BrazilianPaymentService {
   }
 
   // Calcular CRC (simplificado)
+  // Calcular CRC16-CCITT (polinômio 0x1021, valor inicial 0xFFFF)
   calculateCRC(data) {
-    return 'A1B2'; // Simulação - em produção usaria algoritmo CRC16
+    const buf = Buffer.from(data, 'utf8');
+    let crc = 0xffff;
+    for (let offset = 0; offset < buf.length; offset++) {
+      crc ^= (buf[offset] << 8);
+      for (let i = 0; i < 8; i++) {
+        if ((crc & 0x8000) !== 0) {
+          crc = ((crc << 1) ^ 0x1021) & 0xffff;
+        } else {
+          crc = (crc << 1) & 0xffff;
+        }
+      }
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
   }
 
   // Simular verificação de pagamento
@@ -160,7 +275,7 @@ class BrazilianPaymentService {
     
     let paymentData;
     if (paymentMethod === 'pix') {
-      paymentData = this.generatePix(plan.price, `Assinatura ${plan.name}`, customerInfo);
+      paymentData = await this.generatePix(plan.price, `Assinatura ${plan.name}`, customerInfo);
     } else if (paymentMethod === 'boleto') {
       const dueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 dias
       paymentData = this.generateBoleto(plan.price, customerInfo, dueDate);

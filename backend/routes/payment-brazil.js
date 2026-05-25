@@ -27,7 +27,7 @@ router.post('/pix', async (req, res) => {
     }
 
     // Gerar PIX
-    const pixPayment = paymentService.generatePix(amount, description, customerInfo);
+    const pixPayment = await paymentService.generatePix(amount, description, customerInfo);
 
     // Salvar pagamento no banco de dados
     const payment = await req.db.createPayment({
@@ -47,6 +47,7 @@ router.post('/pix', async (req, res) => {
         type: 'pix',
         pixCode: pixPayment.pixCode,
         qrCode: pixPayment.qrCode,
+        copyPaste: pixPayment.copyPaste,
         amount: pixPayment.amount,
         expiresAt: pixPayment.expiresAt,
         txid: pixPayment.txid

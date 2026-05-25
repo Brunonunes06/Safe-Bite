@@ -52,7 +52,7 @@ class LoginSystem {
     if (token && user) {
       // Usuário já está logado, redirecionar para dashboard
       if (window.location.pathname.includes('login.html') || 
-          window.location.pathname.includes('index.html')) {
+          window.location.pathname.includes('index_fixed.html')) {
         safeRedirect('dashboard.html');
       }
     }
@@ -146,6 +146,19 @@ class LoginSystem {
         // Salvar dados do usuário
         localStorage.setItem('nutriScanToken', result.token);
         localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
+        localStorage.setItem('lastActivity', Date.now().toString());
+
+        // Atualizar sistema de sincronização se presente
+        try {
+          if (window.userSync && typeof window.userSync.updateUser === 'function') {
+            window.userSync.updateUser(result.user);
+          }
+          if (window.authMonitor && typeof window.authMonitor.checkAuthStatus === 'function') {
+            window.authMonitor.checkAuthStatus();
+          }
+        } catch (e) {
+          console.warn('Não foi possível atualizar userSync/authMonitor imediatamente:', e);
+        }
 
         // Lembrar-me
         if (rememberMe) {
@@ -223,6 +236,18 @@ class LoginSystem {
         // Salvar dados
         localStorage.setItem('nutriScanToken', result.token);
         localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
+
+        // Atualizar sistema de sincronização se presente
+        try {
+          if (window.userSync && typeof window.userSync.updateUser === 'function') {
+            window.userSync.updateUser(result.user);
+          }
+          if (window.authMonitor && typeof window.authMonitor.checkAuthStatus === 'function') {
+            window.authMonitor.checkAuthStatus();
+          }
+        } catch (e) {
+          console.warn('Não foi possível atualizar userSync/authMonitor imediatamente:', e);
+        }
 
         this.showSuccess('Login com Google realizado com sucesso!');
 
@@ -375,8 +400,8 @@ class LoginSystem {
       return savedUrl;
     }
 
-    // Sempre redirecionar para index.html após login
-    return 'index.html';
+    // Sempre redirecionar para index_fixed.html após login
+    return 'index_fixed.html';
   }
 
   logout() {

@@ -10,7 +10,7 @@ class FileChecker {
   init() {
     // Lista de arquivos que devem existir
     this.requiredFiles = [
-      'index.html',
+      'index_fixed.html',
       'login.html', 
       'signup.html',
       'dashboard.html',
@@ -65,9 +65,9 @@ class FileChecker {
           console.log(`📂 Arquivos disponíveis:`, Array.from(this.availableFiles));
           
           // Redirecionar para página segura
-          if (this.availableFiles.has('index.html')) {
-            console.log('🔄 Redirecionando para index.html');
-            window.location.href = 'index.html';
+          if (this.availableFiles.has('index_fixed.html')) {
+            console.log('🔄 Redirecionando para index_fixed.html');
+            window.location.href = 'index_fixed.html';
             return;
           }
         }
@@ -112,48 +112,37 @@ class FileChecker {
       window.location.href = page;
     } else {
       console.error(`❌ Página ${page} não está disponível`);
-      if (this.availableFiles.has('index.html')) {
-        window.location.href = 'index.html';
+      if (this.availableFiles.has('index_fixed.html')) {
+        window.location.href = 'index_fixed.html';
       }
     }
   }
 }
 
-// Funções globais de redirecionamento seguro
-function safeRedirect(url) {
-  if (window.fileChecker) {
-    window.fileChecker.safeRedirectTo(url);
-  } else {
-    window.location.href = url;
-  }
-}
-
-function safeLogin() {
-  safeRedirect('login.html');
-}
-
-function safeSignup() {
-  safeRedirect('signup.html');
-}
-
-function safeDashboard() {
-  safeRedirect('dashboard.html');
-}
-
-function safeIndex() {
-  safeRedirect('index.html');
-}
+// Nota: não definir diretamente `window.safeRedirect` aqui para evitar
+// sobrescrever implementações centrais. Expor `fileChecker.safeRedirectTo`.
 
 // Inicializar verificador
 let fileChecker;
 document.addEventListener('DOMContentLoaded', () => {
   fileChecker = new FileChecker();
   window.fileChecker = fileChecker;
-  window.safeRedirect = safeRedirect;
-  window.safeLogin = safeLogin;
-  window.safeSignup = safeSignup;
-  window.safeDashboard = safeDashboard;
-  window.safeIndex = safeIndex;
+  // Registrar helpers globais apenas se ainda não existirem
+  if (!window.safeRedirect) {
+    window.safeRedirect = (url) => fileChecker.safeRedirectTo(url);
+  }
+  if (!window.safeLogin) {
+    window.safeLogin = () => window.safeRedirect('login.html');
+  }
+  if (!window.safeSignup) {
+    window.safeSignup = () => window.safeRedirect('signup.html');
+  }
+  if (!window.safeDashboard) {
+    window.safeDashboard = () => window.safeRedirect('dashboard.html');
+  }
+  if (!window.safeIndex) {
+    window.safeIndex = () => window.safeRedirect('index_fixed.html');
+  }
   
   console.log('🛡️ FileChecker inicializado');
   console.log('📋 Funções seguras disponíveis: safeRedirect, safeLogin, safeSignup, safeDashboard, safeIndex');

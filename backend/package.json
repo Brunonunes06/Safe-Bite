@@ -38,6 +38,8 @@
     "stripe": "^13.6.0"
     ,
     "qrcode": "^1.5.1"
+    ,
+    "node-fetch": "^3.4.0"
   },
   "devDependencies": {
     "jest": "^29.6.4",

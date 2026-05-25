@@ -17,6 +17,10 @@ class BrazilianPaymentService {
     this.accessToken = process.env.PAYMENT_ACCESS_TOKEN || process.env.BRAZILIAN_PAYMENT_API_KEY || null; // manter em segredo
     this.publicKey = process.env.PAYMENT_PUBLIC_KEY || null; // chave pública que pode ser exposta ao cliente
     this.baseUrl = process.env.BRAZILIAN_PAYMENT_URL || 'https://api.payment-brazil.com';
+    // Mercado Pago integration (optional)
+    this.mercadoAccessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN || null;
+    this.mercadoPublicKey = process.env.MERCADO_PAGO_PUBLIC_KEY || process.env.MP_PUBLIC_KEY || null;
+    this.useMercadoPago = !!this.mercadoAccessToken;
     // Contas de teste (forneça em backend/.env ou em variáveis de ambiente)
     this.testAccounts = {
       vendor: {
@@ -126,6 +130,83 @@ class BrazilianPaymentService {
 
     // Fallback: placeholder data URI
     return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
+  }
+
+  // Gerar pagamento PIX via Mercado Pago (quando disponível)
+  async generateMercadoPagoPix(amount, description = 'Pagamento PIX', payer = {}) {
+    if (!this.useMercadoPago) {
+      throw new Error('Mercado Pago não configurado (MERCADO_PAGO_ACCESS_TOKEN ausente)');
+    }
+
+    // montar payload esperado pela API de pagamentos do Mercado Pago
+    const body = {
+      transaction_amount: Number(amount),
+      payment_method_id: 'pix',
+      description: description,
+      external_reference: this.generateTxid(),
+      payer: {
+        email: (payer && payer.email) || payer.email || 'payer@example.com'
+      }
+    };
+
+    // Tentar usar global fetch (Node 18+) ou fallback para node-fetch
+    let fetchFn = null;
+    try {
+      fetchFn = global.fetch || (await import('node-fetch')).default;
+    } catch (e) {
+      // ignore — se não houver fetch, falharemos abaixo
+    }
+
+    if (!fetchFn) {
+      throw new Error('fetch não disponível no ambiente. Instale node-fetch ou use Node 18+.');
+    }
+
+    const res = await fetchFn('https://api.mercadopago.com/v1/payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.mercadoAccessToken}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Mercado Pago API error: ${res.status} ${txt}`);
+    }
+
+    const data = await res.json();
+
+    // tentar obter QR code — Mercado Pago pode retornar em point_of_interaction
+    let qrString = null;
+    let qrBase64 = null;
+    try {
+      qrString = data?.point_of_interaction?.transaction_data?.qr_code;
+      qrBase64 = data?.point_of_interaction?.transaction_data?.qr_code_base64;
+    } catch (e) {
+      // ignore
+    }
+
+    let qrDataUrl = null;
+    if (qrBase64) {
+      qrDataUrl = `data:image/png;base64,${qrBase64}`;
+    } else if (qrString) {
+      // se retornar string (BR Code), gerar dataURL usando qrcode lib quando possível
+      try {
+        qrDataUrl = await this.generateQRCodeDataURL(qrString);
+      } catch (e) {
+        qrDataUrl = null;
+      }
+    }
+
+    return {
+      provider: 'mercadopago',
+      raw: data,
+      qr: {
+        code: qrString,
+        image: qrDataUrl
+      }
+    };
   }
 
   // Criar payload PIX em formato EMV (BR Code) — compatível com apps bancários

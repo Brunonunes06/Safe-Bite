@@ -555,11 +555,4 @@ document.addEventListener('DOMContentLoaded', () => {
     new AllergyScanner();
 });
 
-// Safe redirect function
-function safeRedirect(url) {
-    if (window.fileChecker) {
-        window.fileChecker.safeRedirectTo(url);
-    } else {
-        window.location.href = url;
-    }
-}
+// Nota: `safeRedirect` é centralizado em `api-config.js`.

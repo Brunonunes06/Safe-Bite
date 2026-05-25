@@ -26,8 +26,29 @@ router.post('/pix', async (req, res) => {
       });
     }
 
-    // Gerar PIX
-    const pixPayment = await paymentService.generatePix(amount, description, customerInfo);
+    // Gerar PIX — preferir Mercado Pago quando configurado
+    let pixPayment;
+    if (paymentService.useMercadoPago) {
+      try {
+        const mp = await paymentService.generateMercadoPagoPix(amount, description, customerInfo);
+        pixPayment = {
+          type: 'pix',
+          provider: 'mercadopago',
+          pixCode: mp.qr.code || null,
+          qrCode: mp.qr.image || null,
+          copyPaste: mp.qr.code || null,
+          raw: mp.raw,
+          amount,
+          expiresAt: new Date(Date.now() + 3600000),
+          txid: mp.raw?.id || mp.raw?.external_reference || paymentService.generateTxid()
+        };
+      } catch (err) {
+        console.warn('Mercado Pago falhou, usando gerador local:', err.message);
+        pixPayment = await paymentService.generatePix(amount, description, customerInfo);
+      }
+    } else {
+      pixPayment = await paymentService.generatePix(amount, description, customerInfo);
+    }
 
     // Salvar pagamento no banco de dados
     const payment = await req.db.createPayment({

@@ -230,7 +230,7 @@ class PaymentMockService {
   generatePixCode() {
     // Gera um código PIX fictício (38 caracteres)
     const chars = '0123456789ABCDEF';
-    let code = '00020126580014br.gov.bcb.pix0136';
+    let code = '00020126580014br.0136';
     for (let i = 0; i < 36; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }

@@ -34,6 +34,38 @@
   <!-- Header -->
   <header class="header">
     <div class="container">
+  <script>
+    // Controle simples do menu móvel (abrir/fechar)
+    (function() {
+      const toggleBtn = document.querySelector('.mobile-menu-toggle');
+      const mobileNav = document.getElementById('mobileNav');
+
+      function toggleMobileNav(open) {
+        if (!mobileNav) return;
+        if (typeof open === 'undefined') open = !mobileNav.classList.contains('open');
+        mobileNav.classList.toggle('open', open);
+        mobileNav.setAttribute('aria-hidden', String(!open));
+        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', String(!!open));
+      }
+
+      window.toggleMobileNav = toggleMobileNav;
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          toggleMobileNav(true);
+        });
+      }
+
+      // Fechar ao clicar fora
+      document.addEventListener('click', function(e) {
+        if (!mobileNav || !mobileNav.classList.contains('open')) return;
+        if (mobileNav.contains(e.target) || (toggleBtn && toggleBtn.contains(e.target))) return;
+        toggleMobileNav(false);
+      });
+    })();
+  </script>
+
       <div class="header-content">
         <div class="logo">
           <i class="fas fa-leaf"></i>
@@ -88,6 +120,19 @@
         <button class="mobile-menu-toggle" aria-label="Abrir menu" aria-expanded="false">
           <i class="fas fa-bars"></i>
         </button>
+        <!-- Painel de navegação móvel (aparece em telas pequenas) -->
+        <div class="mobile-nav-panel" id="mobileNav" aria-hidden="true">
+          <button class="mobile-nav-close" aria-label="Fechar menu" onclick="toggleMobileNav(false)" style="background:none;border:none;font-size:2rem;align-self:flex-end;">&times;</button>
+          <nav>
+            <ul class="nav-list">
+              <li><button onclick="scrollToSection('#inicio'); toggleMobileNav(false)">Início</button></li>
+              <li><button onclick="scrollToSection('#sobre'); toggleMobileNav(false)">Sobre</button></li>
+              <li><button onclick="scrollToSection('#planos'); toggleMobileNav(false)">Planos</button></li>
+              <li><button onclick="scrollToSection('#contato'); toggleMobileNav(false)">Contato</button></li>
+              <li><button onclick="location.href='dashboard.html'">Dashboard</button></li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
   </header>

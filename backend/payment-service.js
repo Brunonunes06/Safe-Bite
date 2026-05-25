@@ -11,9 +11,9 @@ class BrazilianPaymentService {
 
   // Gerar PIX Copia e Cola
   generatePix(amount, description, customerInfo) {
-    const pixKey = process.env.PIX_KEY || 'nutri-scan@pix.com.br';
-    const merchantName = 'Nutri-Scan';
-    const merchantCity = 'Sao Paulo';
+    const pixKey = process.env.PIX_KEY || 'myhpc3301@gmail.com';
+    const merchantName = 'Bruno Perandré';
+    const merchantCity = 'Paranavai';
     
     // Formatar valor para o padrão BCB
     const amountFormatted = amount.toFixed(2).replace('.', '');

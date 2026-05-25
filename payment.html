@@ -763,10 +763,7 @@
           this.displayPIXPayment(pixPayment);
         } catch (error) {
           console.error('Erro ao gerar PIX:', error);
-          // Usar mock como fallback
-          const mockPixPayment = await paymentMockService.generateMockPIX(this.amount, 'Assinatura Premium Safe-Bite');
-          this.paymentData = mockPixPayment;
-          this.displayPIXPayment(mockPixPayment);
+          this.showError('Erro ao gerar PIX. Tente novamente mais tarde.');
         }
       }
 

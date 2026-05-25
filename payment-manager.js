@@ -248,17 +248,6 @@ class PaymentManager {
     ];
   }
 
-  // ── MOCK: PIX fictício ───────────────────────────────────
-  getMockPIXResponse(amount) {
-    return {
-      id: `pix_${Date.now()}`,
-      status: 'pending',
-      amount: amount,
-      qrCode: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-      pixCode: '00020126580014br.gov.bcb.pix0136A1234567-B890-C123-D456-E78901234567520400005303986540510.005802BR5913SAFEBITE6009SAFEBITE62070503***63041D3D',
-      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString()
-    };
-  }
 
   // ── MOCK: Boleto fictício ────────────────────────────────
   getMockBoletoResponse(amount) {

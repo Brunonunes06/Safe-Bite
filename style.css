@@ -84,7 +84,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 0;
+  padding: 0.75rem 0;
   gap: 2.5rem;
 }
 
@@ -119,6 +119,16 @@ body {
 
 .nav-menu ul li {
   position: relative;
+}
+
+/* Ensure nav buttons inherit nav styles when using <button> elements */
+.nav-menu ul li .btn-nav {
+  background: transparent;
+  border: none;
+  color: var(--text-dark);
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 
 .nav-menu ul li a {
@@ -346,7 +356,7 @@ body {
 
 /* Hero Section */
 .hero {
-  padding: 140px 0 100px;
+  padding: 120px 0 80px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: var(--white);
   overflow: hidden;
@@ -355,7 +365,7 @@ body {
 .hero-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 5rem;
+  gap: 3rem;
   align-items: center;
 }
 
@@ -383,6 +393,21 @@ body {
   display: flex;
   justify-content: center;
   animation: fadeInRight 1s ease 0.4s both;
+}
+
+.hero-image-container {
+  max-width: 520px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-logo {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
 }
 
 .phone-mockup {
@@ -913,6 +938,14 @@ body {
 
 .pricing-features i {
   font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(46,204,113,0.08);
+  color: var(--primary-green);
 }
 
 .pricing-features i.fa-check {
@@ -920,8 +953,11 @@ body {
 }
 
 .pricing-features i.fa-times {
+  background: rgba(231,76,60,0.06);
   color: #e74c3c;
 }
+
+.pricing-features li span { color: var(--text-dark); }
 
 /* Contato Section */
 .contact-content {
@@ -956,6 +992,44 @@ body {
   color: var(--white);
   font-size: 1.2rem;
 }
+
+/* Contact form improvements */
+.contact-form {
+  background: var(--white);
+  padding: 2.2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.contact-form .form-group label { font-size: 0.95rem; color: var(--text-dark); }
+.contact-form .form-group input,
+.contact-form .form-group textarea {
+  background: transparent;
+  border: 1px solid var(--medium-gray);
+  padding: 0.9rem 1rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  border-radius: 8px;
+}
+
+.contact-form .form-group input::placeholder,
+.contact-form .form-group textarea::placeholder { color: var(--medium-gray); }
+
+.contact-form .form-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 1rem; }
+
+/* Footer refinements */
+.footer {
+  background: linear-gradient(180deg, #111213 0%, #0d0f10 100%);
+  color: var(--white);
+  padding: 64px 0 24px;
+}
+
+.footer-content { gap: 2rem; }
+.footer-section h4 { display: flex; align-items: center; gap: 0.6rem; }
+.footer-section h4 i { color: var(--primary-green); }
+
+.footer-section ul li a { color: rgba(255,255,255,0.85); }
+.footer-section ul li a:hover { color: var(--primary-green); }
 
 .contact-text h4 {
   font-weight: 600;
@@ -1258,6 +1332,13 @@ body {
     flex-direction: column;
     gap: 1.25rem;
   }
+
+  /* Mobile hero adjustments */
+  .hero { padding: 100px 0 60px; }
+  .hero-content { grid-template-columns: 1fr; gap: 2rem; }
+  .hero-title { font-size: 2.2rem; text-align: center; }
+  .hero-subtitle { text-align: center; }
+  .mobile-menu-toggle { display: block; }
   
   .mobile-menu-toggle {
     display: block;

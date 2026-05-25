@@ -31,6 +31,7 @@
   width: 100%;
   max-width: 350px;
   box-shadow: var(--shadow-xl);
+  position: relative;
   transform: translateX(400px);
   transition: transform 0.3s ease;
   overflow: hidden;

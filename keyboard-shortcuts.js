@@ -29,8 +29,10 @@ class KeyboardShortcutsManager {
       window.location.href = 'index.html';
     });
     
-    this.addShortcut('d', 'dashboard', 'Ir para dashboard', () => {
-      window.location.href = 'dashboard.html';
+    this.addShortcut('d', 'theme-shortcut', 'Alternar tema', () => {
+      if (window.darkModeManager) {
+        darkModeManager.toggleTheme();
+      }
     });
     
     this.addShortcut('s', 'scan', 'Iniciar novo scan', () => {
@@ -268,7 +270,7 @@ class KeyboardShortcutsManager {
     const sections = {
       '🧭 Navegação': [
         { keys: 'H', desc: 'Ir para página inicial' },
-        { keys: 'D', desc: 'Ir para dashboard' },
+        { keys: 'D', desc: 'Alternar tema' },
         { keys: '← →', desc: 'Navegar entre páginas' }
       ],
       '📸 Scans': [

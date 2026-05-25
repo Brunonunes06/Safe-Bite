@@ -30,7 +30,6 @@ class ActionsPopupManager {
         
         <div class="actions-popup-body">
           <div class="action-item" id="themeActionItem">
-          <div class="action-item" id="themeActionItem">
             <div class="action-info">
               <div class="action-icon">
                 <i class="fas fa-moon"></i>
@@ -215,15 +214,19 @@ class ActionsPopupManager {
 
 // Inicializar quando DOM carregar
 let actionsPopup;
-document.addEventListener('DOMContentLoaded', function() {
-  actionsPopup = new ActionsPopupManager();
-  
-  // Conectar botão de abertura do popup ao header
-  // Este botão será adicionado ao header
-});
+function initActionsPopup() {
+  if (!actionsPopup) actionsPopup = new ActionsPopupManager();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initActionsPopup);
+} else {
+  initActionsPopup();
+}
 
 // Função para abrir popup (pode ser chamada de qualquer lugar)
 function openActionsPopup() {
+  initActionsPopup();
   if (actionsPopup) {
     actionsPopup.openPopup();
   }

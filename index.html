@@ -4,33 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Safe-Bite - O Assistente de Segurança Alimentar</title>
-  <meta name="description" content="Proteja sua saúde com tecnologia inteligente. Análise de alimentos com IA para evitar alergias e riscos alimentares.">
-  <meta name="keywords" content="segurança alimentar, alergias, análise de alimentos, inteligência artificial, saúde, nutrição">
-  <meta name="author" content="Safe-Bite">
-  <meta property="og:title" content="Safe-Bite - O Assistente de Segurança Alimentar">
-  <meta property="og:description" content="Proteja sua saúde com tecnologia inteligente. Análise de alimentos com IA para evitar alergias e riscos alimentares.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="Logos/logo.jpeg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="robots" content="index, follow">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="preload" href="Logos/logo.jpeg" as="image" type="image/jpeg">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="upgrade-popup.css">
-  <link rel="stylesheet" href="actions-popup.css">
   <link rel="stylesheet" href="auth-indicators.css">
   <link rel="stylesheet" href="dark-mode.css">
   <link rel="stylesheet" href="keyboard-shortcuts.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="icon" href="Logos/logo.jpeg" type="image/jpeg">
-  <link rel="apple-touch-icon" href="Logos/logo.jpeg">
-  <meta name="theme-color" content="#2ecc71">
 </head>
 <body>
   
+  <!-- Header -->
   <header class="header">
     <div class="container">
       <div class="header-content">
@@ -41,363 +26,253 @@
         
         <nav class="nav-menu">
           <ul>
-            <li><button class="btn-nav" onclick="scrollToSection('#inicio')">Início</button></li>
-            <li><button class="btn-nav" onclick="scrollToSection('#sobre')">Sobre</button></li>
-            <li><button class="btn-nav" onclick="scrollToSection('#planos')">Planos</button></li>
-            <li><button class="btn-nav" onclick="scrollToSection('#contato')">Contato</button></li>
-            <li><button class="btn-nav btn-nav-primary" onclick="location.href='dashboard.html'" id="dashboardLink"><i class="fas fa-tachometer-alt"></i> Dashboard</button></li>
+            <li><a href="#inicio" class="nav-link">Início</a></li>
+            <li><a href="#sobre" class="nav-link">Sobre</a></li>
+            <li><a href="#contato" class="nav-link">Contato</a></li>
+            <li><a href="#" class="nav-link" id="dashboardLink" onclick="handleDashboardClick(event)"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
           </ul>
         </nav>
         
+        <!-- Controls Container -->
         <div class="header-controls">
+          <!-- Status Indicators -->
           <div class="auth-status-container">
             <span class="auth-status" id="authStatus">
               <span class="auth-loading">
-                <i class="fas fa-spinner fa-spin"></i>
-              </span>
-              <span class="auth-content" style="display: none;">
-                <i class="fas fa-user-circle"></i>
-                <span class="auth-text">Offline</span>
+                <div class="spinner"></div>
+                Verificando...
               </span>
             </span>
-            <div class="plan-status" id="planStatus" style="display: none;">
-              <i class="fas fa-crown"></i>
-              <span class="plan-text">Free</span>
+            <div class="user-info" id="userInfo">
+              <div class="auth-loading">
+                <div class="spinner"></div>
+                Carregando...
+              </div>
+            </div>
+            <div class="plan-status" id="planStatus">
+              <div class="auth-loading">
+                <div class="spinner"></div>
+                Carregando...
+              </div>
             </div>
           </div>
-          
-          <div class="header-actions">
-            <div class="actions-menu-btn">
-              <button id="actionsMenuBtn" onclick="openActionsPopup()" title="Abrir configurações rápidas">
-                <i class="fas fa-sliders-h"></i>
-              </button>
-            </div>
+          <div class="actions-menu-btn">
+            <button id="actionsMenuBtn" aria-label="Configurações rápidas" title="Configurações" onclick="openActionsPopup()">
+              <i class="fas fa-sliders-h"></i>
+            </button>
           </div>
         </div>
         
-        <button class="mobile-menu-toggle" aria-label="Abrir menu" aria-expanded="false">
+        <!-- Menu Mobile -->
+        <div class="mobile-menu-toggle">
           <i class="fas fa-bars"></i>
-        </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <section id="inicio" class="hero" aria-labelledby="hero-title">
+  <!-- Hero Section -->
+  <section id="inicio" class="hero">
     <div class="container">
       <div class="hero-content">
-        <div class="hero-text">
-          <h1 id="hero-title" class="hero-title">
-            <span class="highlight">Proteja sua Saúde</span><br>
-            com Inteligência Artificial
-          </h1>
-          <p class="hero-subtitle">
-            Analise alimentos e evite alergias com nossa tecnologia avançada de IA. 
-            Segurança alimentar na palma da sua mão.
-          </p>
-          <div class="hero-buttons">
-            <button class="btn btn-primary btn-large" onclick="scrollToSection('#planos')">
-              <i class="fas fa-shield-alt"></i>
-              Começar Agora
-            </button>
-            <button class="btn btn-secondary btn-large" onclick="location.href='allergy-scanner.html'">
-              <i class="fas fa-search"></i>
-              Verificar Alergias
-            </button>
-          </div>
-        </div>
-        <div class="hero-image">
-          <div class="hero-image-container">
-            <img src="Logos/logo.jpeg" alt="Safe-Bite Logo" class="hero-logo">
-            <div class="hero-bg-effect"></div>
+        <h1 class="hero-title">
+          Sua segurança alimentar com <span>inteligência artificial</span>
+        </h1>
+        <p class="hero-subtitle">
+          Proteja sua saúde e evite alimentos perigosos com tecnologia inteligente
+        </p>
+        <button class="btn-hero" onclick="handleHeroStartFree()">
+          Começar grátis
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+      <div class="hero-image">
+        <div class="phone-mockup">
+          <div class="screen">
+            <div class="app-interface">
+              <div class="scan-area">
+                <i class="fas fa-camera"></i>
+                <p>Aponte para o rótulo</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Sobre Section -->
   <section id="sobre" class="section">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-info-circle"></i>
-          Sobre o Safe-Bite
-        </h2>
+        <h2>Sobre a Safe-Bite</h2>
         <p class="section-subtitle">
-          Conheça nossa missão e como estamos revolucionando a segurança alimentar
+          Promovemos saúde pública e inclusão através da tecnologia
         </p>
       </div>
       
-      <div class="section-content">
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-brain"></i>
+      <div class="about-content">
+        <div class="about-text">
+          <p>
+            A Safe-Bite é uma startup tecnológica dedicada a revolucionar a segurança alimentar 
+            através da inteligência artificial. Nossa missão é ajudar pessoas com restrições 
+            alimentares a tomar decisões mais seguras e informadas sobre o que consomem.
+          </p>
+          <p>
+            Com tecnologia avançada de reconhecimento de imagem e análise nutricional, 
+            oferecemos uma solução acessível que coloca o poder da informação nas mãos dos consumidores.
+          </p>
+          <div class="stats">
+            <div class="stat">
+              <h3>95%</h3>
+              <p>Precisão na análise</p>
             </div>
-            <div class="feature-content">
-              <h3>IA Avançada</h3>
-              <p>Inteligência artificial treinada para identificar alérgenos e riscos alimentares com precisão.</p>
+            <div class="stat">
+              <h3>10k+</h3>
+              <p>Produtos analisados</p>
             </div>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-bolt"></i>
-            </div>
-            <div class="feature-content">
-              <h3>Análise Instantânea</h3>
-              <p>Resultados em segundos com nossa tecnologia de processamento rápido.</p>
-            </div>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-database"></i>
-            </div>
-            <div class="feature-content">
-              <h3>Base de Dados Completa</h3>
-              <p>Mais de 10.000 alimentos e 500 alérgenos catalogados em nosso sistema.</p>
-            </div>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-mobile-alt"></i>
-            </div>
-            <div class="feature-content">
-              <h3>Acesso Mobile</h3>
-              <p>Use nosso aplicativo para escanear códigos de barras onde estiver.</p>
+            <div class="stat">
+              <h3>24/7</h3>
+              <p>Disponibilidade</p>
             </div>
           </div>
         </div>
-        
-        <div class="about-stats">
-          <div class="stat-item">
-            <div class="stat-number">99.9%</div>
-            <div class="stat-label">Precisão</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">10K+</div>
-            <div class="stat-label">Alimentos</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">500+</div>
-            <div class="stat-label">Alérgenos</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">24/7</div>
-            <div class="stat-label">Disponibilidade</div>
+        <div class="about-image">
+          <div class="illustration">
+            <i class="fas fa-shield-alt"></i>
+            <div class="pulse-ring"></div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Como Funciona Section -->
   <section id="como-funciona" class="section section-alt">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-cogs"></i>
-          Como Funciona
-        </h2>
+        <h2>Como Funciona</h2>
         <p class="section-subtitle">
-          Descubra como nossa tecnologia transforma segurança alimentar
+          Análise inteligente em 3 passos simples
         </p>
       </div>
       
-      <div class="section-content">
-        <div class="how-it-works">
-          <div class="step">
-            <div class="step-number">1</div>
-            <div class="step-content">
-              <h3>Escanear Produto</h3>
-              <p>Use nosso app para escanear o código de barras do alimento.</p>
-            </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-camera"></i>
           </div>
-          
-          <div class="step">
-            <div class="step-number">2</div>
-            <div class="step-content">
-              <h3>IA Analisa</h3>
-              <p>Nossa inteligência artificial analisa ingredientes instantaneamente.</p>
-            </div>
+          <h3>1. Escaneie o rótulo</h3>
+          <p>
+            Use seu celular para capturar a imagem do rótulo do produto. 
+            Nossa tecnologia reconhece automaticamente as informações.
+          </p>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-brain"></i>
           </div>
-          
-          <div class="step">
-            <div class="step-number">3</div>
-            <div class="step-content">
-              <h3>Recebe Alerta</h3>
-              <p>Receba notificação imediata sobre riscos e alergias.</p>
-            </div>
+          <h3>2. IA analisa ingredientes</h3>
+          <p>
+            Nossa inteligência artificial processa os ingredientes, 
+            identificando potenciais riscos e alérgenos.
+          </p>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-exclamation-triangle"></i>
           </div>
-          
-          <div class="step">
-            <div class="step-number">4</div>
-            <div class="step-content">
-              <h3>Decida Seguro</h3>
-              <p>Tome decisões informadas sobre sua alimentação.</p>
-            </div>
-          </div>
+          <h3>3. Receba alertas de risco</h3>
+          <p>
+            Obtenha recomendações personalizadas e alertas sobre 
+            componentes que podem afetar sua saúde.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="modelo-negocio" class="section">
+  <!-- Planos Section -->
+  <!-- 
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-chart-line"></i>
-          Modelo de Negócio
-        </h2>
-        <p class="section-subtitle">
-          Segurança alimentar acessível para todos
-        </p>
-      </div>
-      
-      <div class="section-content">
-        <div class="business-model">
-          <div class="model-card">
-            <div class="model-header">
-              <h3>Free</h3>
-              <div class="model-price">R$ 0<span>/mês</span></div>
-            </div>
-            <div class="model-features">
-              <ul>
-                <li><i class="fas fa-check"></i> 10 escaneamentos por dia</li>
-                <li><i class="fas fa-check"></i> Análise básica</li>
-                <li><i class="fas fa-check"></i> Banco de dados limitado</li>
-                <li><i class="fas fa-times"></i> Sem histórico detalhado</li>
-              </ul>
-            </div>
-            <div class="model-action">
-              <button class="btn btn-outline">Plano Atual</button>
-            </div>
-          </div>
-          
-          <div class="model-card featured">
-            <div class="popular-badge">Mais Popular</div>
-            <div class="model-header">
-              <h3>Premium</h3>
-              <div class="model-price">R$ 19,90<span>/mês</span></div>
-            </div>
-            <div class="model-features">
-              <ul>
-                <li><i class="fas fa-check"></i> Escaneamentos ilimitados</li>
-                <li><i class="fas fa-check"></i> Análise avançada com IA</li>
-                <li><i class="fas fa-check"></i> Banco de dados completo</li>
-                <li><i class="fas fa-check"></i> Histórico completo</li>
-                <li><i class="fas fa-check"></i> Alertas personalizadas</li>
-                <li><i class="fas fa-check"></i> Relatórios detalhados</li>
-                <li><i class="fas fa-check"></i> Suporte 24/7</li>
-              </ul>
-            </div>
-            <div class="model-action">
-              <button class="btn btn-primary" onclick="location.href='signup.html'">Assinar Agora</button>
-            </div>
-          </div>
-          
-          <div class="model-card">
-            <div class="model-header">
-              <h3>Enterprise</h3>
-              <div class="model-price">R$ 49,90<span>/mês</span></div>
-            </div>
-            <div class="model-features">
-              <ul>
-                <li><i class="fas fa-check"></i> Tudo do Premium</li>
-                <li><i class="fas fa-check"></i> API dedicada</li>
-                <li><i class="fas fa-check"></i> Integração empresarial</li>
-                <li><i class="fas fa-check"></i> Relatórios avançados</li>
-                <li><i class="fas fa-check"></i> SLA garantido</li>
-              </ul>
-            </div>
-            <div class="model-action">
-              <button class="btn btn-outline" onclick="location.href='contact.html'">Contato Comercial</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="prototipo" class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-rocket"></i>
-          Protótipo
-        </h2>
-        <p class="section-subtitle">
-          Veja nosso produto em ação
-        </p>
-      </div>
-      
-      <div class="section-content">
-        <div class="prototype-showcase">
-          <div class="prototype-image">
-            <img src="Logos/logo.jpeg" alt="Safe-Bite App Prototype" class="prototype-img">
-            <div class="prototype-overlay">
-              <div class="prototype-badge">
-                <i class="fas fa-mobile-alt"></i>
-                Disponível em Breve
-              </div>
-            </div>
-          </div>
-          
-          <div class="prototype-features">
-            <h3>Recursos em Desenvolvimento</h3>
-            <div class="prototype-list">
-              <div class="prototype-item">
-                <i class="fas fa-camera"></i>
-                <div class="prototype-text">
-                  <h4>Escaneamento QR Code</h4>
-                  <p>Leitura rápida de códigos de produtos</p>
-                </div>
-              </div>
-              
-              <div class="prototype-item">
-                <i class="fas fa-search"></i>
-                <div class="prototype-text">
-                  <h4>Busca Inteligente</h4>
-                  <p>Encontre alimentos por nome ou código</p>
-                </div>
-              </div>
-              
-              <div class="prototype-item">
-                <i class="fas fa-bell"></i>
-                <div class="prototype-text">
-                  <h4>Alertas em Tempo Real</h4>
-                  <p>Notificações instantâneas de riscos</p>
-                </div>
-              </div>
-              
-              <div class="prototype-item">
-                <i class="fas fa-chart-line"></i>
-                <div class="prototype-text">
-                  <h4>Histórico Completo</h4>
-                  <p>Registro detalhado de todas análises</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="planos" class="section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-credit-card"></i>
-          Nossos Planos
-        </h2>
+        <h2>Nossos Planos</h2>
         <p class="section-subtitle">
           Escolha o plano ideal para suas necessidades
         </p>
       </div>
       
-      <div class="section-content">
-        <div class="pricing-cards">
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Gratuito</h3>
+            <div class="price">
+              <span class="currency">R$</span>
+              <span class="amount">0</span>
+              <span class="period">/mês</span>
+            </div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li><i class="fas fa-check"></i> Até 10 scans por mês</li>
+              <li><i class="fas fa-check"></i> Análise básica</li>
+              <li><i class="fas fa-check"></i> Suporte por email</li>
+            </ul>
+          </div>
+          <div class="pricing-action">
+            <button class="btn-pricing" onclick="selectPlan('free')">Começar grátis</button>
+          </div>
+        </div>
+        
+        <div class="pricing-card featured">
+          <div class="pricing-badge">Mais popular</div>
+          <div class="pricing-header">
+            <h3>Profissional</h3>
+            <div class="price">
+              <span class="currency">R$</span>
+              <span class="amount">29</span>
+              <span class="period">/mês</span>
+            </div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li><i class="fas fa-check"></i> Scans ilimitados</li>
+              <li><i class="fas fa-check"></i> Análise avançada</li>
+              <li><i class="fas fa-check"></i> Histórico completo</li>
+              <li><i class="fas fa-check"></i> Suporte prioritário</li>
+            </ul>
+          </div>
+          <div class="pricing-action">
+            <button class="btn-pricing" onclick="selectPlan('professional')">Assinar agora</button>
+          </div>
+        </div>
+        
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Empresarial</h3>
+            <div class="price">
+              <span class="currency">R$</span>
+              <span class="amount">99</span>
+              <span class="period">/mês</span>
+            </div>
+          </div>
+          <div class="pricing-features">
+            <ul>
+              <li><i class="fas fa-check"></i> Tudo do Profissional</li>
+              <li><i class="fas fa-check"></i> Multi-usuários</li>
+              <li><i class="fas fa-check"></i> API access</li>
+              <li><i class="fas fa-check"></i> Relatórios customizados</li>
+            </ul>
+          </div>
+          <div class="pricing-action">
+            <button class="btn-pricing" onclick="selectPlan('enterprise')">Fale conosco</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
           <div class="pricing-card">
             <div class="pricing-header">
               <h3>Free</h3>
@@ -451,7 +326,7 @@
                 <span class="price-amount">R$ 49,90</span>
                 <span class="price-period">/mês</span>
               </div>
-            </div>
+            </div> -->
             <div class="pricing-features">
               <ul>
                 <li><i class="fas fa-check text-success"></i> Tudo do Premium</li>
@@ -627,123 +502,28 @@
   <script src="upgrade-popup.js"></script>
   <script src="contact-system.js"></script>
   <script src="actions-popup.js"></script>
-            <div class="popup-overlay">
-              <div class="popup-content">
-                <div class="popup-header">
-                  <h3>Acesso ao Dashboard</h3>
-                  <button class="popup-close" onclick="closeLoginPopup()">&times;</button>
-                </div>
-                <div class="popup-body">
-                  <p>Para acessar o Dashboard, você precisa estar logado.</p>
-                  <div class="popup-buttons">
-                    <button class="btn-secondary" onclick="closeLoginPopup()">Cancelar</button>
-                    <button class="btn-primary" onclick="goToLogin()">Fazer Login</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-          
-          // Adicionar estilos
-          const style = document.createElement('style');
-          style.textContent = `
-            #loginPopup {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              z-index: 10000;
-              display: block;
-            }
-            
-            #loginPopup .popup-overlay {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.5);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            
-            #loginPopup .popup-content {
-              background: white;
-              border-radius: 15px;
-              padding: 2rem;
-              max-width: 400px;
-              width: 90%;
-              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-              animation: popupSlideIn 0.3s ease;
-            }
-            
-            #loginPopup .popup-header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 1.5rem;
-            }
-            
-            #loginPopup .popup-header h3 {
-              margin: 0;
-              color: #333;
-            }
-            
-            #loginPopup .popup-close {
-              background: none;
-              border: none;
-              font-size: 1.5rem;
-              cursor: pointer;
-              color: #666;
-            }
-            
-            #loginPopup .popup-body p {
-              margin-bottom: 1.5rem;
-              color: #666;
-            }
-            
-            #loginPopup .popup-buttons {
-              display: flex;
-              gap: 1rem;
-              justify-content: flex-end;
-            }
-            
-            @keyframes popupSlideIn {
-              from {
-                opacity: 0;
-                transform: translateY(-20px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-          `;
-          
-          document.head.appendChild(style);
-          document.body.appendChild(loginPopup);
-        }
-      }
-      
-      // Função para fechar popup de login
-      window.closeLoginPopup = function() {
-        const loginPopup = document.getElementById('loginPopup');
-        if (loginPopup) {
-          loginPopup.remove();
-        }
-      };
-      
-      // Função para ir para página de login
-      window.goToLogin = function() {
-        window.location.href = 'login.html';
-      };
-    });
-  </script> -->
   
   <!-- Sistema de Sincronização de Usuário -->
   <script src="user-sync.js"></script>
   <script src="user-sync-integration.js"></script>
+  <script>
+    function handleDashboardClick(e) {
+      e.preventDefault();
+      try {
+        const isLogged = window.authMonitor ? authMonitor.isLoggedIn : !!(localStorage.getItem('nutriScanToken') && localStorage.getItem('nutriScanUser'));
+        if (isLogged) {
+          safeRedirect('dashboard.html');
+        } else {
+          // Salvar intenção e redirecionar para login; após login o sistema volta para index.html
+          sessionStorage.setItem('redirectUrl', 'index.html');
+          safeRedirect('login.html');
+        }
+      } catch (err) {
+        console.error('Erro ao processar acesso ao dashboard:', err);
+        sessionStorage.setItem('redirectUrl', 'index.html');
+        safeRedirect('login.html');
+      }
+    }
+  </script>
 </body>
 </html>

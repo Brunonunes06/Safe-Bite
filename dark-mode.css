@@ -151,6 +151,24 @@ body.dark-mode .modal {
   color: var(--text-primary);
 }
 
+/* Actions popup dark adjustments */
+body.dark-mode .actions-popup-content {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .actions-popup-header {
+  background: linear-gradient(135deg, rgba(78,205,196,0.1), rgba(69,160,73,0.1));
+  color: var(--text-primary);
+}
+
+/* Contact form dark adjustments */
+body.dark-mode .contact-form {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+}
+
 body.dark-mode .modal-overlay {
   background: rgba(0, 0, 0, 0.8);
 }

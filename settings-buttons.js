@@ -123,7 +123,7 @@ class SettingsButtonsManager {
       setTimeout(() => {
         localStorage.removeItem('nutriScanToken');
         localStorage.removeItem('nutriScanUser');
-            safeRedirect('index.html');
+            safeRedirect('index_fixed.html');
       }, 500);
     }
   }

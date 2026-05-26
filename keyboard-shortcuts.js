@@ -26,18 +26,20 @@ class KeyboardShortcutsManager {
   setupDefaultShortcuts() {
     // Navegação
     this.addShortcut('h', 'home', 'Ir para página inicial', () => {
-      window.location.href = 'index.html';
+      window.location.href = 'index_fixed.html';
     });
     
-    this.addShortcut('d', 'dashboard', 'Ir para dashboard', () => {
-      window.location.href = 'dashboard.html';
+    this.addShortcut('d', 'theme-shortcut', 'Alternar tema', () => {
+      if (window.darkModeManager) {
+        darkModeManager.toggleTheme();
+      }
     });
     
     this.addShortcut('s', 'scan', 'Iniciar novo scan', () => {
       if (typeof simulateUploadAndScan === 'function') {
         simulateUploadAndScan();
       } else {
-        window.location.href = 'index.html#como-funciona';
+        window.location.href = 'index_fixed.html#como-funciona';
       }
     });
     
@@ -268,7 +270,7 @@ class KeyboardShortcutsManager {
     const sections = {
       '🧭 Navegação': [
         { keys: 'H', desc: 'Ir para página inicial' },
-        { keys: 'D', desc: 'Ir para dashboard' },
+        { keys: 'D', desc: 'Alternar tema' },
         { keys: '← →', desc: 'Navegar entre páginas' }
       ],
       '📸 Scans': [

@@ -132,7 +132,7 @@ class UpgradePopupManager {
     
     if (token) {
       // Usuário já logado, redirecionar para dashboard
-      safeRedirect('index.html');
+      safeRedirect('index_fixed.html');
     } else {
       // Usuário não logado, mostrar tela de login
       this.showLoginModal();
@@ -429,7 +429,7 @@ class LoginManager {
       document.querySelector('.login-modal-overlay')?.remove();
       
       // Redirecionar
-      safeRedirect('index.html');
+      safeRedirect('index_fixed.html');
       
     } catch (error) {
       console.error('Erro no login Google:', error);
@@ -459,6 +459,15 @@ class LoginManager {
         // Salvar token e usuário
         localStorage.setItem('nutriScanToken', data.token);
         localStorage.setItem('nutriScanUser', JSON.stringify(data.user));
+        localStorage.setItem('lastActivity', Date.now().toString());
+
+          // Notificar userSync/authMonitor
+          try {
+            if (window.userSync && typeof window.userSync.updateUser === 'function') window.userSync.updateUser(data.user);
+            if (window.authMonitor && typeof window.authMonitor.checkAuthStatus === 'function') window.authMonitor.checkAuthStatus();
+          } catch (e) {
+            console.warn('Falha ao notificar userSync/authMonitor após upgrade:', e);
+          }
         
         this.showSuccess('Login realizado com sucesso!');
       } else {
@@ -494,7 +503,7 @@ class LoginManager {
         localStorage.setItem('nutriScanUser', JSON.stringify(data.user));
         
         document.querySelector('.login-modal-overlay')?.remove();
-        safeRedirect('index.html');
+        safeRedirect('index_fixed.html');
       } else {
         throw new Error(data.message || 'Erro no login');
       }

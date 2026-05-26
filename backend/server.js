@@ -77,14 +77,14 @@ app.get('/api/health', (req, res) => {
 const staticPath = path.join(__dirname, '..');
 app.use(express.static(staticPath));
 
-// Rota principal para servir index.html
+// Rota principal para servir index_fixed.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(staticPath, 'index.html'));
+  res.sendFile(path.join(staticPath, 'index_fixed.html'));
 });
 
-// Rota para index.html específico
-app.get('/index.html', (req, res) => {
-  res.sendFile(path.join(staticPath, 'index.html'));
+// Rota para index_fixed.html específico
+app.get('/index_fixed.html', (req, res) => {
+  res.sendFile(path.join(staticPath, 'index_fixed.html'));
 });
 
 // Rota para loading.html
@@ -105,9 +105,9 @@ app.get('*', (req, res, next) => {
     return res.sendFile(filePath);
   }
   
-  // Para rotas não encontradas que não são API, servir index.html
+  // Para rotas não encontradas que não são API, servir index_fixed.html
   if (!req.path.startsWith('/api')) {
-    return res.sendFile(path.join(staticPath, 'index.html'));
+    return res.sendFile(path.join(staticPath, 'index_fixed.html'));
   }
   
   next();

@@ -1278,7 +1278,7 @@
         if (confirm('Tem certeza que deseja sair da sua conta?')) {
           localStorage.removeItem('nutriScanToken');
           localStorage.removeItem('nutriScanUser');
-          safeRedirect('index.html');
+          safeRedirect('index_fixed.html');
         }
       }
 
@@ -1698,7 +1698,7 @@
         // Simulação - em um app real, isso chamaria uma API
         setTimeout(() => {
           localStorage.clear();
-          safeRedirect('index.html');
+          safeRedirect('index_fixed.html');
         }, 2000);
       } else if (confirmation !== null) {
         alert('Texto de confirmação incorreto. Ação cancelada.');

@@ -217,9 +217,18 @@ class UserManager {
 
       localStorage.setItem('nutriScanToken', result.token);
       localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
+        localStorage.setItem('lastActivity', Date.now().toString());
+
+        // Notificar userSync e authMonitor
+        try {
+          if (window.userSync && typeof window.userSync.updateUser === 'function') window.userSync.updateUser(result.user);
+          if (window.authMonitor && typeof window.authMonitor.checkAuthStatus === 'function') window.authMonitor.checkAuthStatus();
+        } catch (e) {
+          console.warn('Falha ao notificar userSync/authMonitor:', e);
+        }
       
       alert(`Login realizado como ${foundUser.name}!`);
-      safeRedirect('index.html');
+      safeRedirect('index_fixed.html');
     } else {
       // Login como usuário demo
       const result = {
@@ -250,7 +259,7 @@ class UserManager {
       localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
       
       alert('Login realizado como Usuário Demo!');
-      safeRedirect('index.html');
+      safeRedirect('index_fixed.html');
     }
   }
 }

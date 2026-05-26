@@ -12,19 +12,34 @@ const API_CONFIG = {
  * Pode ser sobrescrita por módulos específicos se necessário
  */
 function safeRedirect(url) {
-  // Validar URL para evitar redirects maliciosos
+  // Valida e redireciona de forma segura
   if (!url) return;
-  
-  // Se a URL começa com http, validar o domínio
-  if (url.startsWith('http')) {
-    const currentDomain = window.location.hostname;
-    const urlObj = new URL(url);
-    if (urlObj.hostname !== currentDomain) {
-      console.warn('Redirecto bloqueado para domínio externo:', url);
+
+  // Se há um fileChecker com método especializado, delegar a ele (mantém compatibilidade)
+  if (window.fileChecker && typeof window.fileChecker.safeRedirectTo === 'function') {
+    try {
+      window.fileChecker.safeRedirectTo(url);
       return;
+    } catch (e) {
+      console.warn('fileChecker.safeRedirectTo falhou, fallback para window.location:', e);
     }
   }
-  
+
+  // Se a URL começa com http, validar o domínio
+  try {
+    if (url.startsWith('http')) {
+      const currentDomain = window.location.hostname;
+      const urlObj = new URL(url);
+      if (urlObj.hostname !== currentDomain) {
+        console.warn('Redirecionamento bloqueado para domínio externo:', url);
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn('URL inválida passada para safeRedirect:', url, e);
+    return;
+  }
+
   // Redirecionamento seguro
   window.location.href = url;
 }
@@ -258,7 +273,7 @@ const APIUtils = {
   // Redirecionar para login
   redirectToLogin() {
     localStorage.removeItem('nutriScanToken');
-    safeRedirect('index.html');
+    safeRedirect('index_fixed.html');
   },
 
   // Redirecionar para dashboard

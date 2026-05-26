@@ -170,13 +170,22 @@ class SignupSystem {
         // Salvar token e usuário
         localStorage.setItem('nutriScanToken', result.token);
         localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
+        localStorage.setItem('lastActivity', Date.now().toString());
+
+        // Atualizar userSync/authMonitor se disponíveis
+        try {
+          if (window.userSync && typeof window.userSync.updateUser === 'function') window.userSync.updateUser(result.user);
+          if (window.authMonitor && typeof window.authMonitor.checkAuthStatus === 'function') window.authMonitor.checkAuthStatus();
+        } catch (e) {
+          console.warn('userSync/authMonitor não disponíveis após cadastro:', e);
+        }
 
         // Mostrar sucesso
         this.showSuccess('Conta criada com sucesso! Redirecionando...');
 
-        // Redirecionar para index.html
+        // Redirecionar para index_fixed.html
         setTimeout(() => {
-          safeRedirect('index.html');
+          safeRedirect('index_fixed.html');
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro');
@@ -240,10 +249,18 @@ class SignupSystem {
         localStorage.setItem('nutriScanToken', result.token);
         localStorage.setItem('nutriScanUser', JSON.stringify(result.user));
 
+        // Atualizar userSync/authMonitor se disponíveis
+        try {
+          if (window.userSync && typeof window.userSync.updateUser === 'function') window.userSync.updateUser(result.user);
+          if (window.authMonitor && typeof window.authMonitor.checkAuthStatus === 'function') window.authMonitor.checkAuthStatus();
+        } catch (e) {
+          console.warn('userSync/authMonitor não disponíveis após cadastro Google:', e);
+        }
+
         this.showSuccess('Conta criada com Google! Redirecionando...');
 
         setTimeout(() => {
-          safeRedirect('index.html');
+          safeRedirect('index_fixed.html');
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro Google');

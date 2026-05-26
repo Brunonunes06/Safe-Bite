@@ -78,6 +78,26 @@
       align-items: center;
       gap: 0.75rem;
     }
+    .scan-filename {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+
+    .btn-small.btn-edit {
+      background: transparent;
+      border: 1px dashed rgba(0,0,0,0.06);
+      color: #444;
+      padding: 6px;
+      border-radius: 6px;
+      margin-left: 6px;
+      cursor: pointer;
+    }
+    .btn-small.btn-edit i { color: #2c3e50; }
 
     .user-avatar {
       width: 40px;
@@ -574,7 +594,7 @@
   <div class="history-container">
     <!-- Header -->
     <header class="history-header">
-      <a class="history-logo" href="index.html" title="Voltar para Início">
+      <a class="history-logo" href="index_fixed.html" title="Voltar para Início">
         <i class="fas fa-leaf"></i>
         <span>Safe-Bite</span>
       </a>
@@ -1045,17 +1065,38 @@
         const riskIcon = riskClass === 'safe' ? 'check' : 
                         riskClass === 'caution' ? 'exclamation' : 'times';
         const imgSrc = (scan.raw && scan.raw.image) ? scan.raw.image : (scan.image || '');
-
         const imageHTML = imgSrc ? `<img src="${imgSrc}" alt="scan" style="width:80px;height:80px;border-radius:10px;object-fit:cover;"/>` : `<i class="fas fa-${riskIcon}"></i>`;
 
+        // tentar obter nome do arquivo de múltiplas possíveis propriedades
+        let fileName = '';
+        try {
+          fileName = scan.product?.image?.originalName || scan.product?.image?.publicId || scan.raw?.fileName || scan.raw?.filename || scan.filename || '';
+          if (!fileName && scan.product?.image?.url) {
+            const parts = scan.product.image.url.split('/');
+            fileName = parts[parts.length - 1].split('?')[0];
+          }
+        } catch (e) {
+          fileName = '';
+        }
+
+        const fileHTML = fileName ? `<div class="scan-filename" title="Nome do arquivo">${fileName}</div>` : '';
+
         return `
-          <div class="scan-item" onclick="viewScan('${scan._id}')">
+          <div class="scan-item" data-scan-id="${scan._id}" onclick="viewScan('${scan._id}')">
             <div class="scan-image">
               ${imageHTML}
             </div>
             <div class="scan-details">
-              <div class="scan-product">${scan.product.name}</div>
-              <div class="scan-brand">${scan.product.brand}</div>
+              <div class="scan-product">
+                <span class="scan-product-name" id="productName-${scan._id}">${scan.product?.name || scan.product || 'Imagem analisada'}</span>
+                <div class="inline-edit" id="inlineEdit-${scan._id}" style="display:none; margin-top:6px;">
+                  <input type="text" id="inlineInput-${scan._id}" value="${(scan.product?.name || scan.product || 'Imagem analisada').replace(/\"/g,'&quot;')}" style="padding:6px 8px;border-radius:6px;border:1px solid var(--medium-gray);width:220px;" />
+                  <button class="btn-small" onclick="event.stopPropagation(); saveInlineEdit('${scan._id}')" title="Salvar" style="margin-left:6px;background:var(--primary-green);color:white;border:none;">OK</button>
+                  <button class="btn-small" onclick="event.stopPropagation(); cancelInlineEdit('${scan._id}')" title="Cancelar" style="margin-left:6px;background:transparent;border:1px solid var(--medium-gray);">Cancelar</button>
+                </div>
+              </div>
+              ${fileHTML}
+              <div class="scan-brand">${scan.product?.brand || ''}</div>
               <div class="scan-meta">
                 <div class="scan-date">
                   <i class="fas fa-calendar"></i>
@@ -1074,6 +1115,9 @@
               </span>
               <button class="btn-small btn-view" onclick="event.stopPropagation(); viewScan('${scan._id}')">
                 <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn-small btn-edit" title="Renomear" onclick="event.stopPropagation(); startInlineEdit('${scan._id}')">
+                <i class="fas fa-pencil-alt"></i>
               </button>
               <button class="btn-small btn-delete" onclick="event.stopPropagation(); deleteScan('${scan._id}')">
                 <i class="fas fa-trash"></i>
@@ -1230,6 +1274,62 @@
         }
       }
 
+      async renameScan(scanId, newName) {
+        try {
+          // localizar scan localmente
+          const scan = this.scans.find(s => String(s._id || s.id) === String(scanId));
+          const currentName = scan?.product?.name || scan?.productName || scan?.product || '';
+          if (!newName) {
+            // fallback para prompt (compatibilidade)
+            const entered = prompt('Digite o novo nome do produto:', currentName);
+            if (!entered || entered.trim() === '' || entered === currentName) return;
+            newName = entered;
+          }
+
+          // tentar atualizar no servidor
+          let updated = false;
+          try {
+            await api.patch(`/scans/${scanId}`, { product: { name: newName } });
+            updated = true;
+          } catch (err) {
+            console.warn('Falha ao atualizar no servidor (offline?):', err);
+          }
+
+          // atualizar localmente (fallback)
+          try {
+            // nutriScanScans
+            const simple = JSON.parse(localStorage.getItem('nutriScanScans') || '[]');
+            const updatedSimple = simple.map(s => {
+              if (String(s.id) === String(scanId) || String(s._id) === String(scanId)) {
+                if (s.product) s.product.name = newName;
+                else s.productName = newName;
+              }
+              return s;
+            });
+            localStorage.setItem('nutriScanScans', JSON.stringify(updatedSimple));
+
+            // allergyAnalysisHistory
+            const history = JSON.parse(localStorage.getItem('allergyAnalysisHistory') || '[]');
+            const updatedHistory = history.map(h => {
+              if (String(h.id) === String(scanId) || String(h._id) === String(scanId)) {
+                if (h.product) h.product.name = newName;
+                else h.productName = newName;
+              }
+              return h;
+            });
+            localStorage.setItem('allergyAnalysisHistory', JSON.stringify(updatedHistory));
+          } catch (e) {
+            console.warn('Falha ao atualizar armazenamento local:', e);
+          }
+
+          this.showSuccess('Nome do produto atualizado.');
+          await this.loadHistory();
+        } catch (error) {
+          console.error('Erro ao renomear scan:', error);
+          this.showError('Erro ao renomear. Tente novamente.');
+        }
+      }
+
       changePage(page) {
         if (page < 1 || page > this.totalPages) return;
         
@@ -1348,6 +1448,79 @@
 
     function exportHistory() {
       window.historyInstance.exportHistory();
+    }
+
+    function editScanName(scanId) {
+      // Mantido por compatibilidade: iniciar edição inline
+      startInlineEdit(scanId);
+    }
+
+    // Inline edit helpers
+    function startInlineEdit(scanId) {
+      const productSpan = document.getElementById(`productName-${scanId}`);
+      const inline = document.getElementById(`inlineEdit-${scanId}`);
+      const input = document.getElementById(`inlineInput-${scanId}`);
+      if (!productSpan || !inline || !input) return;
+
+      // esconder spans e mostrar input
+      productSpan.style.display = 'none';
+      inline.style.display = 'block';
+      input.focus();
+
+      // capturar Enter/Escape
+      const keyHandler = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveInlineEdit(scanId);
+        } else if (e.key === 'Escape') {
+          cancelInlineEdit(scanId);
+        }
+      };
+
+      input.addEventListener('keydown', keyHandler);
+      // armazenar para remoção posterior
+      inline._keyHandler = keyHandler;
+    }
+
+    async function saveInlineEdit(scanId) {
+      const productSpan = document.getElementById(`productName-${scanId}`);
+      const inline = document.getElementById(`inlineEdit-${scanId}`);
+      const input = document.getElementById(`inlineInput-${scanId}`);
+      if (!productSpan || !inline || !input) return;
+
+      const newName = input.value && input.value.trim();
+      if (!newName) {
+        cancelInlineEdit(scanId);
+        return;
+      }
+
+      try {
+        await window.historyInstance.renameScan(scanId, newName);
+        // atualizar UI localmente imediatamente
+        productSpan.textContent = newName;
+        productSpan.style.display = '';
+        inline.style.display = 'none';
+      } catch (e) {
+        console.error('Falha ao salvar nome inline:', e);
+        window.historyInstance.showError('Erro ao salvar o novo nome.');
+      } finally {
+        // remover listener
+        if (inline._keyHandler) input.removeEventListener('keydown', inline._keyHandler);
+        delete inline._keyHandler;
+      }
+    }
+
+    function cancelInlineEdit(scanId) {
+      const productSpan = document.getElementById(`productName-${scanId}`);
+      const inline = document.getElementById(`inlineEdit-${scanId}`);
+      const input = document.getElementById(`inlineInput-${scanId}`);
+      if (!productSpan || !inline || !input) return;
+
+      // restaurar valor original do span
+      productSpan.style.display = '';
+      inline.style.display = 'none';
+      if (inline._keyHandler) input.removeEventListener('keydown', inline._keyHandler);
+      delete inline._keyHandler;
     }
 
     // Initialize history when DOM is loaded

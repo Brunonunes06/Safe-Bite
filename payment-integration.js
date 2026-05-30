@@ -39,7 +39,7 @@ class PaymentIntegration {
   async checkServerHealth() {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch('http://localhost:5000/api/health', {
         signal: controller.signal,
@@ -49,7 +49,11 @@ class PaymentIntegration {
       clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {
-      console.warn('Servidor indisponível:', error.message);
+      if (error.name === 'AbortError') {
+        console.warn('Servidor de pagamento não respondeu (timeout)');
+      } else {
+        console.warn('Servidor de pagamento indisponível');
+      }
       return false;
     }
   }

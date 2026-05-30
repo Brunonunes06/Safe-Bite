@@ -39,19 +39,8 @@ class PaymentMockService {
     const pixId = `pix_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const pixCode = this.generatePixCode();
     
-    // Gerar QR Code real
-    let qrCode;
-    try {
-      if (typeof qrCodeGenerator !== 'undefined' && qrCodeGenerator.isLibraryLoaded()) {
-        qrCode = await qrCodeGenerator.generatePixQRCode(pixCode);
-      } else {
-        // Fallback: usar QR Code simples
-        qrCode = await this.generatePixQRCodeAlternative(pixCode);
-      }
-    } catch (error) {
-      console.warn('Erro ao gerar QR Code, usando fallback:', error);
-      qrCode = this.generateQRCodeBase64Fallback();
-    }
+    // Usar image.png como QR Code estático
+    const qrCode = 'imagem.png';
     
     const pixData = {
       success: true,
@@ -208,7 +197,7 @@ class PaymentMockService {
 
   generateQRCodeBase64Fallback() {
     // Retorna um PNG simples em base64 (fallback)
-    return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    return 'https://media.discordapp.net/attachments/1393084275993346170/1510374121760886955/image.png?ex=6a1c9504&is=6a1b4384&hm=7f013aee65e8fbd9783a2737f4a4570cb3786c462c0df628630885f117a6a9db&=&format=webp&quality=lossless';
   }
 
   async generatePixQRCodeAlternative(pixCode) {
@@ -234,7 +223,12 @@ class PaymentMockService {
     const transactionId = `MP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     const amount = '0000000000990'; // R$ 9,90 em formato PIX
     
-    return `${pixKey}${transactionId}5204000053039865406${amount}5802BR5913SAFE-BITE6009SAOPAULO62070503***63041D3D`;
+    return `00020126360014br.gov.bcb.pix0114+554499736812952040000530398654040.015802BR5924Bruno Perandre Nunes Dos6009Sao Paulo62240520daqr3396920148150281630418CA`;
+  }
+
+  generateQRCodeBase64Fallback() {
+    // Usa a imagem image.png como QR Code do PIX
+    return 'image.png';
   }
 
   generateBarcodeNumber() {

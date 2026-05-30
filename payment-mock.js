@@ -40,7 +40,7 @@ class PaymentMockService {
     const pixCode = this.generatePixCode();
     
     // Usar image.png como QR Code estático
-    const qrCode = 'imagem.png';
+    const qrCode = 'qr-code-pix.png';
     
     const pixData = {
       success: true,
@@ -223,7 +223,7 @@ class PaymentMockService {
     const transactionId = `MP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     const amount = '0000000000990'; // R$ 9,90 em formato PIX
     
-    return `00020126360014br.gov.bcb.pix0114+554499736812952040000530398654040.015802BR5924Bruno Perandre Nunes Dos6009Sao Paulo62240520daqr3396920148150281630418CA`;
+    return `00020126360014br.gov.bcb.pix0114+55449973681295204000053039865802BR5924Bruno Perandre Nunes Dos6009Sao Paulo62240520daqr3396920148147653630435B7`;
   }
 
   generateQRCodeBase64Fallback() {

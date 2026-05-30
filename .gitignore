@@ -8,5 +8,7 @@ yarn-error.log*
 .idea/
 build/
 .vercel
-*.env
 .env
+.env.local
+.env.production
+*.env

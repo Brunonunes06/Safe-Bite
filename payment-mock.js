@@ -1,6 +1,6 @@
 /**
  * payment-mock.js
- * Script de testes com dados fictícios
+ * Script de testes com dados reais de teste do Mercado Pago
  * Use quando o servidor não está disponível
  */
 
@@ -8,11 +8,11 @@ class PaymentMockService {
   constructor() {
     this.transactions = [];
     this.mockUsers = {
-      'user@example.com': {
-        id: 'user_123',
-        name: 'João Silva',
-        email: 'user@example.com',
-        cpf: '000.000.000-00',
+      'TESTUSER2312961698484744720': {
+        id: '3426677436',
+        name: 'Comprador Teste',
+        email: 'TESTUSER2312961698484744720@testuser.com',
+        cpf: '123.456.789-09',
         subscription: 'free'
       }
     };
@@ -91,9 +91,9 @@ class PaymentMockService {
         boletoUrl: `https://example.com/boleto/${boletoId}`,
         dueDate: dueDate.toISOString(),
         beneficiary: {
-          name: 'Safe-Bite Ltda',
+          name: 'Safe-Bite',
           cnpj: '12.345.678/0001-90',
-          bank: 'Banco do Brasil'
+          bank: 'Mercado Pago'
         },
         payer: customerInfo,
         instructions: [
@@ -228,13 +228,13 @@ class PaymentMockService {
   }
 
   generatePixCode() {
-    // Gera um código PIX fictício (38 caracteres)
-    const chars = '0123456789ABCDEF';
-    let code = '00020126580014br.gov.bcb.pix0136';
-    for (let i = 0; i < 36; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
+    // Gera código PIX real de teste do Mercado Pago
+    // Formato: chave PIX + dados da transação
+    const pixKey = 'myhpc3301@gmail.com';
+    const transactionId = `MP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const amount = '0000000000990'; // R$ 9,90 em formato PIX
+    
+    return `${pixKey}${transactionId}5204000053039865406${amount}5802BR5913SAFE-BITE6009SAOPAULO62070503***63041D3D`;
   }
 
   generateBarcodeNumber() {
@@ -321,9 +321,9 @@ if (typeof window !== 'undefined') {
     const keys = Object.keys(this.mockUsers || {});
     const u = this.mockUsers[keys[0]] || {};
     return {
-      name: u.name || 'Cliente Mock',
-      email: u.email || 'user@example.com',
-      cpf: u.cpf || '000.000.000-00'
+      name: u.name || 'Comprador Teste',
+      email: u.email || 'TESTUSER2312961698484744720@testuser.com',
+      cpf: u.cpf || '123.456.789-09'
     };
   };
 

@@ -1,34 +1,51 @@
+// Sistema de Dark Mode
+// Safe-Bite Theme Manager
+
 class DarkModeManager {
   constructor() {
     this.isDarkMode = false;
     this.userPreference = null;
     this.systemPreference = null;
-    this.init();
+    // this.init();
   }
 
   init() {
     console.log('🌙 Iniciando sistema de dark mode');
+    
+    // Carregar preferências salvas
     this.loadPreferences();
+    
+    // Detectar preferência do sistema
     this.detectSystemPreference();
+    
+    // Aplicar tema inicial
     this.applyTheme(this.getEffectiveTheme());
+    
+    // Configurar listeners
     this.setupEventListeners();
-    this.addThemeToggle();
+    
+    // Adicionar toggle de tema
+    // this.addThemeToggle();
   }
 
+  // Carregar preferências do usuário
   loadPreferences() {
     this.userPreference = localStorage.getItem('darkModePreference');
   }
 
+  // Salvar preferência do usuário
   saveUserPreference(preference) {
     this.userPreference = preference;
     localStorage.setItem('darkModePreference', preference);
   }
 
+  // Detectar preferência do sistema
   detectSystemPreference() {
     if (window.matchMedia) {
       const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
       this.systemPreference = darkModeQuery.matches ? 'dark' : 'light';
       
+      // Ouvir mudanças na preferência do sistema
       darkModeQuery.addEventListener('change', (e) => {
         this.systemPreference = e.matches ? 'dark' : 'light';
         if (this.userPreference === null) {
@@ -38,20 +55,35 @@ class DarkModeManager {
     }
   }
 
+  // Obter tema efetivo
   getEffectiveTheme() {
+    // Prioridade: preferência do usuário > preferência do sistema > light
     return this.userPreference || this.systemPreference || 'light';
   }
 
+  // Aplicar tema
   applyTheme(theme) {
     this.isDarkMode = theme === 'dark';
+    
+    // Atualizar CSS variables
     this.updateCSSVariables(theme);
+    
+    // Atualizar atributos HTML
     document.documentElement.setAttribute('data-theme', theme);
+    
+    // Atualizar classes
     document.body.classList.toggle('dark-mode', this.isDarkMode);
+    
+    // Atualizar toggle
     this.updateThemeToggle();
+    
+    // Disparar evento de mudança de tema
     this.dispatchThemeChange(theme);
+    
     console.log(`🎨 Tema aplicado: ${theme}`);
   }
 
+  // Atualizar variáveis CSS
   updateCSSVariables(theme) {
     const root = document.documentElement;
     
@@ -88,11 +120,14 @@ class DarkModeManager {
     }
   }
 
+  // Configurar listeners de eventos
   setupEventListeners() {
+    // Listener de mudança de tema customizado
     document.addEventListener('themechange', (e) => {
       this.applyTheme(e.detail.theme);
     });
     
+    // Atalho de teclado para alternar tema (Ctrl/Cmd + Shift + D)
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
         e.preventDefault();
@@ -103,6 +138,30 @@ class DarkModeManager {
     console.log('⌨️ Atalhos de tema configurados');
   }
 
+  // Adicionar botão de toggle
+  // addThemeToggle() {
+  //   const toggle = document.createElement('div');
+  //   toggle.className = 'theme-toggle';
+  //   toggle.innerHTML = `
+  //     <button class="theme-toggle-btn" id="themeToggleBtn" title="Alternar tema (Ctrl+Shift+D)">
+  //       <i class="fas fa-${this.isDarkMode ? 'sun' : 'moon'}"></i>
+  //     </button>
+  //   `;
+    
+  //   // Adicionar ao header
+  //   const header = document.querySelector('.header-content');
+  //   if (header) {
+  //     header.appendChild(toggle);
+  //   }
+    
+  //   // Configurar evento de clique
+  //   const toggleBtn = document.getElementById('themeToggleBtn');
+  //   if (toggleBtn) {
+  //     toggleBtn.addEventListener('click', () => this.toggleTheme());
+  //   }
+  // }
+
+  // Atualizar botão de toggle
   updateThemeToggle() {
     const toggleBtn = document.getElementById('themeToggleBtn');
     if (toggleBtn) {
@@ -116,12 +175,14 @@ class DarkModeManager {
     }
   }
 
+  // Alternar tema
   toggleTheme() {
     const newTheme = this.isDarkMode ? 'light' : 'dark';
     this.saveUserPreference(newTheme);
     this.applyTheme(newTheme);
   }
 
+  // Disparar evento de mudança de tema
   dispatchThemeChange(theme) {
     const event = new CustomEvent('themechange', {
       detail: { theme, isDarkMode: theme === 'dark' }
@@ -129,6 +190,7 @@ class DarkModeManager {
     document.dispatchEvent(event);
   }
 
+  // Obter status atual
   getStatus() {
     return {
       isDarkMode: this.isDarkMode,
@@ -138,6 +200,7 @@ class DarkModeManager {
     };
   }
 
+  // Definir tema manualmente
   setTheme(theme) {
     if (theme === 'dark' || theme === 'light') {
       this.saveUserPreference(theme);
@@ -145,23 +208,32 @@ class DarkModeManager {
     }
   }
 
+  // Resetar para preferência do sistema
   resetToSystemPreference() {
     this.userPreference = null;
     localStorage.removeItem('darkModePreference');
     this.applyTheme(this.getEffectiveTheme());
   }
 
+  // Destruir
   destroy() {
+    // Remover listeners se necessário
     console.log('🗑️ Sistema de dark mode desativado');
   }
 }
 
+// Criar instância global
 let darkModeManager;
 
+// Inicializar quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
   darkModeManager = new DarkModeManager();
+  
+  // Tornar globalmente acessível
   window.darkModeManager = darkModeManager;
+  
   console.log('✅ Sistema de dark mode carregado');
 });
 
+// Exportar para uso global
 window.DarkModeManager = DarkModeManager;

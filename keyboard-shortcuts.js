@@ -6,7 +6,7 @@ class KeyboardShortcutsManager {
     this.shortcuts = new Map();
     this.isEnabled = true;
     this.helpModal = null;
-    this.init();
+    // this.init();
   }
 
   init() {
@@ -19,7 +19,7 @@ class KeyboardShortcutsManager {
     this.setupEventListeners();
     
     // Adicionar botão de ajuda
-    this.addHelpButton();
+    // this.addHelpButton();
   }
 
   // Configurar atalhos padrão

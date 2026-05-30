@@ -2,47 +2,18 @@
 // Simulação de integração com provedores brasileiros
 
 const crypto = require('crypto');
-let QRCode;
-try {
-  QRCode = require('qrcode');
-} catch (err) {
-  // `qrcode` pode não estar instalado no ambiente local; manter fallback
-  QRCode = null;
-}
 
 class BrazilianPaymentService {
   constructor() {
-    // API keys e chaves configuráveis via .env
-    this.apiKey = process.env.BRAZILIAN_PAYMENT_API_KEY || process.env.PAYMENT_ACCESS_TOKEN || 'test_key';
-    this.accessToken = process.env.PAYMENT_ACCESS_TOKEN || process.env.BRAZILIAN_PAYMENT_API_KEY || null; // manter em segredo
-    this.publicKey = process.env.PAYMENT_PUBLIC_KEY || null; // chave pública que pode ser exposta ao cliente
+    this.apiKey = process.env.BRAZILIAN_PAYMENT_API_KEY || 'test_key';
     this.baseUrl = process.env.BRAZILIAN_PAYMENT_URL || 'https://api.payment-brazil.com';
-    // Mercado Pago integration (optional)
-    this.mercadoAccessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN || null;
-    this.mercadoPublicKey = process.env.MERCADO_PAGO_PUBLIC_KEY || process.env.MP_PUBLIC_KEY || null;
-    this.useMercadoPago = !!this.mercadoAccessToken;
-    // Contas de teste (forneça em backend/.env ou em variáveis de ambiente)
-    this.testAccounts = {
-      vendor: {
-        userId: process.env.TEST_VENDOR_USER_ID || null,
-        username: process.env.TEST_VENDOR_USERNAME || null,
-        password: process.env.TEST_VENDOR_PASSWORD || null,
-        verificationCode: process.env.TEST_VENDOR_CODE || null
-      },
-      buyer: {
-        userId: process.env.TEST_BUYER_USER_ID || null,
-        username: process.env.TEST_BUYER_USERNAME || null,
-        password: process.env.TEST_BUYER_PASSWORD || null,
-        verificationCode: process.env.TEST_BUYER_CODE || null
-      }
-    };
   }
 
   // Gerar PIX Copia e Cola
-  async generatePix(amount, description, customerInfo) {
+  generatePix(amount, description, customerInfo) {
     const pixKey = process.env.PIX_KEY || 'myhpc3301@gmail.com';
-    const merchantName = 'Nutri-Scan';
-    const merchantCity = 'Paranavaí - PR';
+    const merchantName = 'Bruno Perandré';
+    const merchantCity = 'Paranavai';
     
     // Formatar valor para o padrão BCB
     const amountFormatted = amount.toFixed(2).replace('.', '');
@@ -60,28 +31,14 @@ class BrazilianPaymentService {
       description
     });
 
-    // Gerar QR Code (async) — se `qrcode` estiver disponível, use-o.
-    const qrCodeData = await this.generateQRCodeDataURL(payload);
-    // Texto "copia e cola" para o usuário (em muitos apps é o próprio BR Code)
-    const copyPaste = this.createCopyPaste(payload);
-
     return {
       type: 'pix',
       pixCode: payload,
-      qrCode: qrCodeData,
-      copyPaste,
-      publicKey: this.publicKey || null,
+      qrCode: this.generateQRCodeDataURL(payload),
       amount,
       expiresAt: new Date(Date.now() + 3600000), // 1 hora
       txid
     };
-  }
-
-  // Gerar texto "copia e cola" a partir do payload EMV
-  createCopyPaste(emvPayload) {
-    // Para agora retornamos o próprio EMV string como 'copia e cola'.
-    // Se desejar um formato mais amigável, podemos formatar com quebras/labels.
-    return String(emvPayload || '');
   }
 
   // Gerar Boleto
@@ -118,159 +75,19 @@ class BrazilianPaymentService {
   }
 
   // Gerar QR Code para PIX
-  async generateQRCodeDataURL(payload) {
-    if (QRCode && typeof QRCode.toDataURL === 'function') {
-      try {
-        return await QRCode.toDataURL(payload);
-      } catch (err) {
-        console.error('Erro ao gerar QR Code com qrcode:', err);
-        // fallback para placeholder
-      }
-    }
-
-    // Fallback: placeholder data URI
-    return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
+  generateQRCodeDataURL(payload) {
+    // Simulação - em produção usaria biblioteca como qrcode
+    const qrCodeData = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
+    
+    return qrCodeData;
   }
 
-  // Gerar pagamento PIX via Mercado Pago (quando disponível)
-  async generateMercadoPagoPix(amount, description = 'Pagamento PIX', payer = {}) {
-    if (!this.useMercadoPago) {
-      throw new Error('Mercado Pago não configurado (MERCADO_PAGO_ACCESS_TOKEN ausente)');
-    }
-
-    // montar payload esperado pela API de pagamentos do Mercado Pago
-    const body = {
-      transaction_amount: Number(amount),
-      payment_method_id: 'pix',
-      description: description,
-      external_reference: this.generateTxid(),
-      payer: {
-        email: (payer && payer.email) || payer.email || 'payer@example.com'
-      }
-    };
-
-    // Tentar usar global fetch (Node 18+) ou fallback para node-fetch
-    let fetchFn = null;
-    try {
-      fetchFn = global.fetch || (await import('node-fetch')).default;
-    } catch (e) {
-      // ignore — se não houver fetch, falharemos abaixo
-    }
-
-    if (!fetchFn) {
-      throw new Error('fetch não disponível no ambiente. Instale node-fetch ou use Node 18+.');
-    }
-
-    const res = await fetchFn('https://api.mercadopago.com/v1/payments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.mercadoAccessToken}`
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`Mercado Pago API error: ${res.status} ${txt}`);
-    }
-
-    const data = await res.json();
-
-    // tentar obter QR code — Mercado Pago pode retornar em point_of_interaction
-    let qrString = null;
-    let qrBase64 = null;
-    try {
-      qrString = data?.point_of_interaction?.transaction_data?.qr_code;
-      qrBase64 = data?.point_of_interaction?.transaction_data?.qr_code_base64;
-    } catch (e) {
-      // ignore
-    }
-
-    let qrDataUrl = null;
-    if (qrBase64) {
-      qrDataUrl = `data:image/png;base64,${qrBase64}`;
-    } else if (qrString) {
-      // se retornar string (BR Code), gerar dataURL usando qrcode lib quando possível
-      try {
-        qrDataUrl = await this.generateQRCodeDataURL(qrString);
-      } catch (e) {
-        qrDataUrl = null;
-      }
-    }
-
-    return {
-      provider: 'mercadopago',
-      raw: data,
-      qr: {
-        code: qrString,
-        image: qrDataUrl
-      }
-    };
-  }
-
-  // Criar payload PIX em formato EMV (BR Code) — compatível com apps bancários
+  // Criar payload PIX (versão simplificada)
   createPixPayload(data) {
     const { txid, pixKey, amount, merchantName, merchantCity, description } = data;
-
-    const build = (id, value) => {
-      const v = String(value || '');
-      const l = v.length.toString().padStart(2, '0');
-      return `${id}${l}${v}`;
-    };
-
-    // 00 - Payload Format Indicator
-    let payload = '';
-    payload += build('00', '01');
-
-    // 01 - Point of Initiation Method (12 = dynamic, 11 = static). Usamos 12 para testes dinâmicos
-    payload += build('01', '12');
-
-    // 26 - Merchant Account Information (BR.GOV.BCB.PIX + chave)
-    // Subfields: 00 = GUI, 01 = chave (ou alternativa)
-    const gui = 'BR.GOV.BCB.PIX';
-    const mai = `00${gui.length.toString().padStart(2, '0')}${gui}01${pixKey.length.toString().padStart(2, '0')}${pixKey}`;
-    payload += build('26', mai);
-
-    // 52 - Merchant Category Code (0000 = unspecified)
-    payload += build('52', '0000');
-
-    // 53 - Transaction Currency (986 = BRL)
-    payload += build('53', '986');
-
-    // 54 - Transaction Amount (opcional)
-    if (amount !== undefined && amount !== null) {
-      // formatar com ponto decimal, sem milhar
-      const amt = Number(amount).toFixed(2);
-      payload += build('54', amt);
-    }
-
-    // 58 - Country Code
-    payload += build('58', 'BR');
-
-    // 59 - Merchant Name (até 25 chars)
-    payload += build('59', (merchantName || 'Nutri-Scan').substring(0, 25));
-
-    // 60 - Merchant City (até 15 chars)
-    payload += build('60', (merchantCity || 'Sao Paulo').substring(0, 15));
-
-    // 62 - Additional Data Field Template (txid)
-    if (txid) {
-      const txField = build('05', txid);
-      payload += build('62', txField);
-    }
-
-    // 64/63 - CRC (tag 63 with length 04)
-    const payloadForCrc = payload + '6304';
-    const crc = this.calculateCRC(payloadForCrc);
-    payload += build('63', crc);
-
-    return payload;
-  }
-
-  // Retorna as contas de teste carregadas do .env (se houver)
-  getTestAccounts() {
-    return this.testAccounts;
+    
+    // Payload PIX simplificado para demonstração
+    return `0002010102123456789012BR.GOV.BRB.BRCODEPIXPIX${pixKey}5204000053039865404${amount}5802BR5913${merchantName}6009${merchantCity}62070503***6304${this.calculateCRC(txid + pixKey + amount + merchantName + merchantCity)}`;
   }
 
   // Gerar TXID único
@@ -319,21 +136,8 @@ class BrazilianPaymentService {
   }
 
   // Calcular CRC (simplificado)
-  // Calcular CRC16-CCITT (polinômio 0x1021, valor inicial 0xFFFF)
   calculateCRC(data) {
-    const buf = Buffer.from(data, 'utf8');
-    let crc = 0xffff;
-    for (let offset = 0; offset < buf.length; offset++) {
-      crc ^= (buf[offset] << 8);
-      for (let i = 0; i < 8; i++) {
-        if ((crc & 0x8000) !== 0) {
-          crc = ((crc << 1) ^ 0x1021) & 0xffff;
-        } else {
-          crc = (crc << 1) & 0xffff;
-        }
-      }
-    }
-    return crc.toString(16).toUpperCase().padStart(4, '0');
+    return 'A1B2'; // Simulação - em produção usaria algoritmo CRC16
   }
 
   // Simular verificação de pagamento
@@ -356,7 +160,7 @@ class BrazilianPaymentService {
     
     let paymentData;
     if (paymentMethod === 'pix') {
-      paymentData = await this.generatePix(plan.price, `Assinatura ${plan.name}`, customerInfo);
+      paymentData = this.generatePix(plan.price, `Assinatura ${plan.name}`, customerInfo);
     } else if (paymentMethod === 'boleto') {
       const dueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 dias
       paymentData = this.generateBoleto(plan.price, customerInfo, dueDate);

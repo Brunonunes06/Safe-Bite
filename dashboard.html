@@ -1493,7 +1493,7 @@
       }
 
       startPeriodicUpdates() {
-        // Sincronizar com servidor a cada 30 segundos
+        // Sincronizar com servidor a cada 30 segundos (apenas se backend estiver disponível)
         this.syncInterval = setInterval(() => {
           this.syncWithServer();
         }, 30000);
@@ -1501,28 +1501,40 @@
 
       async syncWithServer() {
         try {
+          // Tentar sincronizar com servidor, mas não falhar se indisponível
           const response = await fetch('/api/dashboard/stats', {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('nutriScanToken')}`,
+              'Authorization': `Bearer ${localStorage.getItem('nutriScanToken') || ''}`,
               'Content-Type': 'application/json'
-            }
+            },
+            timeout: 5000 // Timeout de 5 segundos
           });
           
           if (response.ok) {
             const data = await response.json();
+            console.log('✅ Dados sincronizados do servidor');
             this.updateFromServer(data);
+          } else {
+            console.log(`⚠️ Sincronização falhou (${response.status}), usando dados locais`);
           }
         } catch (error) {
-          console.log('🔄 Sync failed, using local data');
+          // Erro esperado se servidor/API não estiver disponível
+          console.log('ℹ️ API indisponível - usando dados locais do dashboard');
+          // Continuar usando dados locais - não é um erro crítico
         }
       }
 
       updateFromServer(data) {
-        // Atualizar dados do servidor
-        if (data.stats) {
-          this.stats = { ...this.stats, ...data.stats };
-          this.updateUI();
+        // Atualizar dados do servidor apenas se disponíveis
+        try {
+          if (data && data.stats) {
+            this.stats = { ...this.stats, ...data.stats };
+            this.updateUI();
+            console.log('✅ UI atualizada com dados do servidor');
+          }
+        } catch (error) {
+          console.warn('⚠️ Erro ao atualizar dados do servidor:', error);
         }
       }
 
@@ -2186,6 +2198,149 @@
       };
       return texts[status] || 'Desconhecido';
     }
+
+    // ===== FUNÇÃO GLOBAL: ZERAR TUDO DO DASHBOARD =====
+    /**
+     * Função para zerar completamente todo o dashboard
+     * Limpa localStorage, reseta dados, e recarrega a página
+     * Uso: window.zeroDashboard() ou zeroDashboard()
+     */
+    window.zeroDashboard = function() {
+      const confirmation = confirm(
+        '⚠️ ATENÇÃO!\n\n' +
+        'Isso vai DELETAR TODOS os dados do dashboard:\n' +
+        '• Histórico de scans\n' +
+        '• Análises de alergias\n' +
+        '• Configurações do plano\n' +
+        '• Dados do usuário local\n\n' +
+        'Essa ação é irreversível!\n\n' +
+        'Deseja continuar?'
+      );
+
+      if (!confirmation) {
+        console.log('❌ Operação de zero cancelada pelo usuário');
+        return false;
+      }
+
+      try {
+        console.log('🧹 Iniciando limpeza completa do dashboard...');
+        
+        // Limpar todos os dados do localStorage
+        console.log('  → Limpando scans...');
+        localStorage.setItem('nutriScanScans', JSON.stringify([]));
+        
+        console.log('  → Limpando histórico de análises...');
+        localStorage.setItem('allergyAnalysisHistory', JSON.stringify([]));
+        
+        console.log('  → Ressetando plano para gratuito...');
+        localStorage.setItem('nutriScanPlan', JSON.stringify({ 
+          plan: 'free', 
+          date: new Date().toISOString() 
+        }));
+        
+        console.log('  → Resetando dados do usuário...');
+        localStorage.setItem('nutriScanUser', JSON.stringify({ 
+          name: 'Usuário Teste', 
+          subscription: { 
+            plan: 'free', 
+            scansLimit: 10, 
+            scansUsed: 0 
+          } 
+        }));
+        
+        console.log('  → Limpando cache local...');
+        if (window.dashboardController) {
+          window.dashboardController.scans = [];
+          window.dashboardController.stats = {
+            totalScans: 0,
+            safeProducts: 0,
+            warningsFound: 0,
+            planUsage: 0,
+            planLimit: 10
+          };
+        }
+        
+        console.log('✅ Limpeza concluída com sucesso!');
+        console.log('🔄 Recarregando a página em 2 segundos...');
+        
+        showNotification('✅ Todos os dados foram zerados com sucesso!', 'success');
+        
+        // Recarregar página após 2 segundos
+        setTimeout(() => {
+          location.reload();
+        }, 2000);
+        
+        return true;
+      } catch (error) {
+        console.error('❌ ERRO ao zerar dados:', error);
+        alert('Erro ao tentar zerar os dados. Verifique o console para detalhes.');
+        return false;
+      }
+    };
+
+    // ===== ATALHO DE TECLADO PARA ZERAR TUDO =====
+    /**
+     * Atalhos disponíveis:
+     * Ctrl+Shift+Delete = Zerar tudo do dashboard
+     * Ctrl+Shift+Backspace = Alternativa para zerar tudo
+     */
+    document.addEventListener('keydown', function(event) {
+      // Ctrl+Shift+Delete (Windows/Linux) ou Cmd+Shift+Delete (Mac)
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'Delete') {
+        event.preventDefault();
+        console.log('🔑 Atalho Ctrl+Shift+Delete detectado');
+        window.zeroDashboard();
+      }
+      
+      // Ctrl+Shift+Backspace como alternativa
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'Backspace') {
+        event.preventDefault();
+        console.log('🔑 Atalho Ctrl+Shift+Backspace detectado');
+        window.zeroDashboard();
+      }
+    });
+
+    // ===== COMANDO CONSOLE AMIGÁVEL =====
+    /**
+     * Comandos de console disponíveis:
+     * zero() - Zera tudo do dashboard
+     * clearDash() - Alias para zero()
+     * help() - Mostra ajuda
+     */
+    window.zero = window.zeroDashboard;
+    window.clearDash = window.zeroDashboard;
+    
+    window.dashboardHelp = function() {
+      const help = `
+╔══════════════════════════════════════════════════════════╗
+║           COMANDOS DISPONÍVEIS DO DASHBOARD              ║
+╠══════════════════════════════════════════════════════════╣
+║                                                          ║
+║  🧹 ZERAR TUDO:                                          ║
+║     zero()                                               ║
+║     clearDash()                                          ║
+║     zeroDashboard()                                      ║
+║                                                          ║
+║  ⌨️  ATALHOS DE TECLADO:                                ║
+║     Ctrl+Shift+Delete    → Zera tudo                    ║
+║     Ctrl+Shift+Backspace → Zera tudo (alternativa)     ║
+║                                                          ║
+║  📊 OUTRAS FUNÇÕES:                                     ║
+║     help()               → Mostra esta mensagem         ║
+║                                                          ║
+╠══════════════════════════════════════════════════════════╣
+║  ⚠️  AVISO: A operação de zero é IRREVERSÍVEL!          ║
+║     Todos os dados serão deletados permanentemente.    ║
+╚══════════════════════════════════════════════════════════╝
+      `;
+      console.log(help);
+    };
+    
+    window.help = window.dashboardHelp;
+
+    // Exibir mensagem de boas-vindas no console
+    console.log('%c🎉 Safe-Bite Dashboard Carregado', 'font-size: 20px; color: #2ecc71; font-weight: bold;');
+    console.log('%cDigite help() para ver comandos disponíveis', 'font-size: 12px; color: #7f8c8d;');
   </script>
 </body>
 </html>

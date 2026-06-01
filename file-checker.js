@@ -51,10 +51,9 @@ class FileChecker {
   }
 
   setupGlobalRedirect() {
-    // Sobrescrever window.location.href para verificar arquivo antes de redirecionar
-    const originalLocation = window.location;
-    const originalHref = window.location.href;
-
+    // Criar função segura de redirecionamento sem tentar redefinir window.location
+    // que é um objeto built-in do navegador
+    
     window.safeRedirect = (url) => {
       // Se for URL relativa, verificar se o arquivo existe
       if (url.startsWith('./') || url.endsWith('.html')) {
@@ -77,23 +76,32 @@ class FileChecker {
       window.location.href = url;
     };
 
-    // Interceptar redirecionamentos diretos
-    let currentHref = window.location.href;
-    Object.defineProperty(window.location, 'href', {
-      get: () => currentHref,
-      set: (value) => {
-        const url = new URL(value, window.location.origin);
-        const fileName = url.pathname.split('/').pop();
+    // Interceptar cliques em links para validar antes de redirecionar
+    document.addEventListener('click', (event) => {
+      const target = event.target.closest('a[href]');
+      if (target) {
+        const href = target.getAttribute('href');
         
-        if (fileName.endsWith('.html') && !this.availableFiles.has(fileName)) {
-          console.error(`❌ Redirecionamento bloqueado - arquivo não encontrado: ${fileName}`);
-          return;
+        // Validar redirecionamentos para .html
+        if (href && (href.endsWith('.html') || href.startsWith('./'))) {
+          const fileName = href.split('/').pop();
+          
+          if (fileName.endsWith('.html') && !this.availableFiles.has(fileName)) {
+            event.preventDefault();
+            console.error(`❌ Link bloqueado - arquivo não encontrado: ${fileName}`);
+            console.log(`📂 Arquivos disponíveis:`, Array.from(this.availableFiles));
+            
+            // Redirecionar para página segura
+            if (this.availableFiles.has('index.html')) {
+              console.log('🔄 Redirecionando para index.html como fallback');
+              window.location.href = 'index.html';
+            }
+          }
         }
-        
-        currentHref = value;
-        window.location.assign(value);
       }
-    });
+    }, true);
+
+    console.log('✅ Sistema de redirecionamento seguro ativado');
   }
 
   // Verificar se arquivo específico existe

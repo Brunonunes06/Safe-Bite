@@ -273,7 +273,7 @@ const APIUtils = {
   // Redirecionar para login
   redirectToLogin() {
     localStorage.removeItem('nutriScanToken');
-    safeRedirect('index_fixed.html');
+    safeRedirect('index.html');
   },
 
   // Redirecionar para dashboard

@@ -183,9 +183,9 @@ class SignupSystem {
         // Mostrar sucesso
         this.showSuccess('Conta criada com sucesso! Redirecionando...');
 
-        // Redirecionar para index_fixed.html
+        // Redirecionar para index.html
         setTimeout(() => {
-          safeRedirect('index_fixed.html');
+          safeRedirect('index.html');
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro');
@@ -260,7 +260,7 @@ class SignupSystem {
         this.showSuccess('Conta criada com Google! Redirecionando...');
 
         setTimeout(() => {
-          safeRedirect('index_fixed.html');
+          safeRedirect('index.html');
         }, 2000);
       } else {
         throw new Error(result.message || 'Erro no cadastro Google');

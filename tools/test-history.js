@@ -15,9 +15,9 @@ const puppeteer = require('puppeteer');
     const finalUrl = page.url();
     console.log('FINAL_URL:', finalUrl);
 
-    // Check if redirected to index_fixed.html
-    if (finalUrl.endsWith('/index_fixed.html') || finalUrl.endsWith('/')) {
-      console.error('TEST RESULT: Redirected to index_fixed.html (FAIL)');
+    // Check if redirected to index.html
+    if (finalUrl.endsWith('/index.html') || finalUrl.endsWith('/')) {
+      console.error('TEST RESULT: Redirected to index.html (FAIL)');
       process.exitCode = 2;
     } else if (finalUrl.includes('history.html')) {
       console.log('TEST RESULT: Stayed on history.html (PASS)');

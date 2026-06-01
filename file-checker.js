@@ -10,7 +10,7 @@ class FileChecker {
   init() {
     // Lista de arquivos que devem existir
     this.requiredFiles = [
-      'index_fixed.html',
+      'index.html',
       'login.html', 
       'signup.html',
       'dashboard.html',
@@ -65,9 +65,9 @@ class FileChecker {
           console.log(`📂 Arquivos disponíveis:`, Array.from(this.availableFiles));
           
           // Redirecionar para página segura
-          if (this.availableFiles.has('index_fixed.html')) {
-            console.log('🔄 Redirecionando para index_fixed.html');
-            window.location.href = 'index_fixed.html';
+          if (this.availableFiles.has('index.html')) {
+            console.log('🔄 Redirecionando para index.html');
+            window.location.href = 'index.html';
             return;
           }
         }
@@ -112,8 +112,8 @@ class FileChecker {
       window.location.href = page;
     } else {
       console.error(`❌ Página ${page} não está disponível`);
-      if (this.availableFiles.has('index_fixed.html')) {
-        window.location.href = 'index_fixed.html';
+      if (this.availableFiles.has('index.html')) {
+        window.location.href = 'index.html';
       }
     }
   }
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.safeDashboard = () => window.safeRedirect('dashboard.html');
   }
   if (!window.safeIndex) {
-    window.safeIndex = () => window.safeRedirect('index_fixed.html');
+    window.safeIndex = () => window.safeRedirect('index.html');
   }
   
   console.log('🛡️ FileChecker inicializado');

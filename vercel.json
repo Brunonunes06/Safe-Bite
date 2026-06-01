@@ -4,7 +4,7 @@
   "routes": [
     {
       "src": "/",
-      "dest": "/index_fixed.html"
+      "dest": "/index.html"
     },
     {
       "src": "/dashboard",
@@ -44,7 +44,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/index_fixed.html"
+      "dest": "/index.html"
     }
   ]
 }

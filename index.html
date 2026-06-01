@@ -19,30 +19,26 @@
   <header class="header">
     <div class="container">
       <div class="header-content">
+        <!-- Logo -->
         <div class="logo">
           <i class="fas fa-leaf"></i>
           <span>Safe-Bite</span>
         </div>
         
+        <!-- Navigation Menu -->
         <nav class="nav-menu">
           <ul>
             <li><a href="#inicio" class="nav-link">Início</a></li>
             <li><a href="#sobre" class="nav-link">Sobre</a></li>
             <li><a href="#contato" class="nav-link">Contato</a></li>
-            <li><a href="dashboard.html" class="nav-link" id="dashboardLink"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="dashboard.html" class="nav-link" id="dashboardLink" style="color: rgb(231, 76, 60);"><i class="fas fa-lock"></i> Dashboard</a></li>
           </ul>
         </nav>
         
         <!-- Controls Container -->
         <div class="header-controls">
-          <!-- Status Indicators -->
           <div class="auth-status-container">
-            <span class="auth-status" id="authStatus">
-              <span class="auth-loading">
-                <div class="spinner"></div>
-                Verificando...
-              </span>
-            </span>
+            <span class="auth-status offline" id="authStatus">Desconectado</span>
             <div class="user-info" id="userInfo">
               <div class="login-prompt" style="cursor: pointer;">
                 <i class="fas fa-user-slash"></i>
@@ -52,7 +48,7 @@
           </div>
         </div>
         
-        <!-- Menu Mobile -->
+        <!-- Mobile Menu Toggle -->
         <div class="mobile-menu-toggle">
           <i class="fas fa-bars"></i>
         </div>

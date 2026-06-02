@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -13,40 +14,95 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .plans-container{max-width:1100px;margin:6rem auto;padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
-    .plan-card{background:white;border-radius:12px;padding:1.5rem;border:1px solid var(--medium-gray);box-shadow:var(--shadow-sm)}
-    .plan-header{display:flex;justify-content:space-between;align-items:center}
-    .plan-price{font-size:1.6rem;font-weight:700;color:var(--primary-green)}
-    .plan-features{margin:1rem 0 1.25rem;padding-left:1rem}
-    .plan-features li{margin:0.5rem 0}
-    .btn-choose{padding:0.8rem 1.25rem;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-    .btn-primary{background:var(--primary-green);color:white}
-    .badge-popular{background:var(--gradient-primary);color:white;padding:0.35rem 0.6rem;border-radius:999px;font-weight:700}
-    @media(max-width:800px){.plans-container{grid-template-columns:1fr}}
+    .plans-container {
+      max-width: 1100px;
+      margin: 6rem auto;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem
+    }
+
+    .plan-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid var(--medium-gray);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .plan-price {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary-green)
+    }
+
+    .plan-features {
+      margin: 1rem 0 1.25rem;
+      padding-left: 1rem
+    }
+
+    .plan-features li {
+      margin: 0.5rem 0
+    }
+
+    .btn-choose {
+      padding: 0.8rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700
+    }
+
+    .btn-primary {
+      background: var(--primary-green);
+      color: white
+    }
+
+    .badge-popular {
+      background: var(--gradient-primary);
+      color: white;
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 700
+    }
+
+    @media(max-width:800px) {
+      .plans-container {
+        grid-template-columns: 1fr
+      }
+    }
   </style>
 </head>
+
 <body>
   <main class="plans-container">
     <title>Planos - Safe-Bite</title>
     <link rel="icon" href="Logos/logo.jpeg" type="image/jpeg">
-      <div class="plan-header">
-        <div>
-          <h2>Começar grátis</h2>
-          <div class="plan-price">Até 10 scans / mês</div>
-        </div>
-        <div>
-          <span class="badge-popular">Mais Popular</span>
-        </div>
+    <div class="plan-header">
+      <div>
+        <h2>Começar grátis</h2>
+        <div class="plan-price">Até 10 scans / mês</div>
       </div>
+      <div>
+        <span class="badge-popular">Mais Popular</span>
+      </div>
+    </div>
 
-      <ul class="plan-features">
-        <li>Análises básicas</li>
-        <li>1 perfil de usuário</li>
-        <li>Histórico ilimitado</li>
-        <li>Alertas personalizados</li>
-      </ul>
+    <ul class="plan-features">
+      <li>Análises básicas</li>
+      <li>1 perfil de usuário</li>
+      <li>Histórico ilimitado</li>
+      <li>Alertas personalizados</li>
+    </ul>
 
-      <button class="btn-choose btn-primary" data-plan="free">Selecionar Grátis</button>
+    <button class="btn-choose btn-primary" data-plan="free">Selecionar Grátis</button>
     </section>
 
     <section class="plan-card" id="plan-premium">
@@ -116,4 +172,5 @@
     }
   </script>
 </body>
+
 </html>

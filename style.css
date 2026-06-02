@@ -1117,6 +1117,7 @@ body {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
+  color: gray;
   border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
   transform: translateY(-1px);

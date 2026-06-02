@@ -223,7 +223,8 @@ class PaymentMockService {
     const transactionId = `MP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     const amount = '0000000000990'; // R$ 9,90 em formato PIX
     
-    return `00020126360014br.gov.bcb.pix0114+55449973681295204000053039865802BR5924Bruno Perandre Nunes Dos6009Sao Paulo62240520daqr3396920148147653630435B7`;
+    // VALOR DO PIX
+    return `00020126360014br.gov.bcb.pix0114+554499736812952040000530398654049.905802BR5924Bruno Perandre Nunes Dos6009Sao Paulo62240520daqr339692014808645263042248`;
   }
 
   generateQRCodeBase64Fallback() {

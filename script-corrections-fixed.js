@@ -76,14 +76,60 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Menu Mobile
+  // ===== MENU MOBILE RESPONSIVO ===== 
+  // Funciona em Desktop, Tablet e Mobile
   const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
   const navMenu = document.querySelector('.nav-menu');
   
   if (mobileMenuToggle && navMenu) {
-    mobileMenuToggle.addEventListener('click', function() {
+    // Toggle do menu ao clicar no hamburger
+    mobileMenuToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
       navMenu.classList.toggle('active');
       mobileMenuToggle.classList.toggle('active');
+    });
+    
+    // Fechar menu ao clicar em um link
+    const navLinks = navMenu.querySelectorAll('.nav-link, .nav-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', function() {
+        navMenu.classList.remove('active');
+        mobileMenuToggle.classList.remove('active');
+      });
+    });
+    
+    // Fechar menu ao clicar fora dele
+    document.addEventListener('click', function(e) {
+      if (!mobileMenuToggle.contains(e.target) && !navMenu.contains(e.target)) {
+        if (navMenu.classList.contains('active')) {
+          navMenu.classList.remove('active');
+          mobileMenuToggle.classList.remove('active');
+        }
+      }
+    });
+    
+    // Fechar menu ao redimensionar a janela para desktop
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 900) {
+        // Se voltou ao tamanho desktop, fechar o menu mobile
+        if (navMenu.classList.contains('active')) {
+          navMenu.classList.remove('active');
+          mobileMenuToggle.classList.remove('active');
+        }
+        // Mostrar menu normalmente em desktop
+        navMenu.style.display = 'flex';
+      } else {
+        // Em tablet/mobile, deixar o CSS controlar
+        navMenu.style.display = '';
+      }
+    });
+
+    // Suporte a tecla ESC para fechar menu
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+        navMenu.classList.remove('active');
+        mobileMenuToggle.classList.remove('active');
+      }
     });
   }
 

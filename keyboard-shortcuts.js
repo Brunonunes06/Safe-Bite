@@ -26,7 +26,7 @@ class KeyboardShortcutsManager {
   setupDefaultShortcuts() {
     // Navegação
     this.addShortcut('h', 'home', 'Ir para página inicial', () => {
-      window.location.href = 'index_fixed.html';
+      window.location.href = 'index.html';
     });
     
     this.addShortcut('d', 'theme-shortcut', 'Alternar tema', () => {
@@ -39,7 +39,7 @@ class KeyboardShortcutsManager {
       if (typeof simulateUploadAndScan === 'function') {
         simulateUploadAndScan();
       } else {
-        window.location.href = 'index_fixed.html#como-funciona';
+        window.location.href = 'index.html#como-funciona';
       }
     });
     

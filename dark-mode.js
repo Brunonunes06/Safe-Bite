@@ -129,7 +129,7 @@ class DarkModeManager {
     
     // Atalho de teclado para alternar tema (Ctrl/Cmd + Shift + D)
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+      if (e.shiftKey && e.key === 'D') {
         e.preventDefault();
         this.toggleTheme();
       }

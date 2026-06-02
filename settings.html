@@ -154,6 +154,26 @@
       border-bottom: none;
     }
 
+    .setting-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .setting-item.disabled:hover {
+      background-color: transparent;
+      transform: none;
+    }
+
+    .setting-item.disabled .setting-label i {
+      color: var(--medium-gray);
+    }
+
+    .setting-item.disabled .btn-setting {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .setting-label {
       display: flex;
       align-items: center;
@@ -1278,7 +1298,7 @@
         if (confirm('Tem certeza que deseja sair da sua conta?')) {
           localStorage.removeItem('nutriScanToken');
           localStorage.removeItem('nutriScanUser');
-          safeRedirect('index_fixed.html');
+          safeRedirect('index.html');
         }
       }
 
@@ -1698,7 +1718,7 @@
         // Simulação - em um app real, isso chamaria uma API
         setTimeout(() => {
           localStorage.clear();
-          safeRedirect('index_fixed.html');
+          safeRedirect('index.html');
         }, 2000);
       } else if (confirmation !== null) {
         alert('Texto de confirmação incorreto. Ação cancelada.');

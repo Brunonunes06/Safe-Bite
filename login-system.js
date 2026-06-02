@@ -52,7 +52,7 @@ class LoginSystem {
     if (token && user) {
       // Usuário já está logado, redirecionar para dashboard
       if (window.location.pathname.includes('login.html') || 
-          window.location.pathname.includes('index_fixed.html')) {
+          window.location.pathname.includes('index.html')) {
         safeRedirect('dashboard.html');
       }
     }
@@ -400,8 +400,8 @@ class LoginSystem {
       return savedUrl;
     }
 
-    // Sempre redirecionar para index_fixed.html após login
-    return 'index_fixed.html';
+    // Sempre redirecionar para index.html após login
+    return 'index.html';
   }
 
   logout() {

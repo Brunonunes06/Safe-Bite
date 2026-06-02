@@ -1472,10 +1472,18 @@ body {
 
 @media (max-width: 768px) {
   .auth-status-container {
-    flex-direction: column;
+    /* flex-direction: column;
     gap: 0.5rem;
     margin-left: 0;
-    margin-top: 1rem;
+    margin-top: 1rem; */
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    list-style: none;
+    padding: 1rem 0;
+    margin: 0;
+    width: 100%;
+    align-content: center;
   }
 }
 
@@ -1553,6 +1561,10 @@ body {
     padding: 1rem 0;
     margin: 0;
     width: 100%;
+    align-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
   }
   
   .nav-menu.active ul li {

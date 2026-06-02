@@ -60,6 +60,56 @@ class SignupSystem {
     }
   }
 
+  // Limpar TODOS os dados do usuário (para logout ou troca de usuário)
+  clearAllUserData() {
+    console.log('🗑️ Limpando todos os dados do usuário anterior...');
+    
+    // Dados de autenticação
+    localStorage.removeItem('nutriScanToken');
+    localStorage.removeItem('nutriScanUser');
+    localStorage.removeItem('nutriScanRemember');
+    localStorage.removeItem('lastActivity');
+    
+    // Dados de scans e histórico
+    localStorage.removeItem('nutriScanScans');
+    localStorage.removeItem('allergyAnalysisHistory');
+    localStorage.removeItem('pendingScans');
+    
+    // Dados de plano
+    localStorage.removeItem('nutriScanPlan');
+    
+    // Dados do dashboard
+    localStorage.removeItem('dashboardStats');
+    localStorage.removeItem('dashboardScans');
+    
+    // Dados sincronizados
+    localStorage.removeItem('syncedUser');
+    
+    // Limpar qualquer outro dado específico do usuário
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      // Remover qualquer chave que pareça ser específica do usuário
+      if (key && (
+        key.includes('scan') || 
+        key.includes('allergy') || 
+        key.includes('product') || 
+        key.includes('analysis') ||
+        key.includes('history')
+      )) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    // Remover as chaves identificadas
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+      console.log(`  ✓ Removido: ${key}`);
+    });
+    
+    console.log('✅ Todos os dados do usuário foram limpos!');
+  }
+
   async handleSignup(event) {
     event.preventDefault();
     
@@ -84,6 +134,9 @@ class SignupSystem {
     this.hideMessages();
 
     try {
+      // ✅ LIMPAR DADOS DO USUÁRIO ANTERIOR ANTES DO NOVO CADASTRO
+      this.clearAllUserData();
+      
       // Tentar verificar email e fazer cadastro, mas usar modo simulado se falhar
       let result;
       try {
@@ -203,6 +256,9 @@ class SignupSystem {
     this.hideMessages();
 
     try {
+      // ✅ LIMPAR DADOS DO USUÁRIO ANTERIOR ANTES DO NOVO CADASTRO COM GOOGLE
+      this.clearAllUserData();
+      
       // Simular cadastro com Google
       const googleUser = await this.simulateGoogleSignup();
       

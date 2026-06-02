@@ -850,10 +850,15 @@
       }
 
       setupEventListeners() {
-        // Upgrade button
-        document.getElementById('upgradeButton').addEventListener('click', () => {
+        // Finalize button (movido do upgradeButton)
+        document.getElementById('finalizeBtn').addEventListener('click', () => {
           this.showPaymentForm();
         });
+
+        // Upgrade button (removido - funcionalidade movida para finalizeBtn)
+        // document.getElementById('upgradeButton').addEventListener('click', () => {
+        //   this.showPaymentForm();
+        // });
 
         // Payment methods
         // legacy payment-method elements
